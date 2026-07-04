@@ -22,6 +22,6 @@ jobs:
       with:
         nuget-api-key: ${{ secrets.NuGetAPIKey }}
     - name: Restore NuGet Packages
-      run: nuget restore TwinsaityEditor/TwinsanityEditor.sln
+      run: nuget restore TwinsanityEditor/TwinsanityEditor.sln
     - name: Build
-      run: msbuild TwinsaityEditor/TwinsanityEditor.sln /p:Configuration=Release
+      run: msbuild TwinsanityEditor/TwinsanityEditor.sln /p:Configuration=Release

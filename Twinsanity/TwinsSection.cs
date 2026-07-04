@@ -804,5 +804,20 @@ namespace Twinsanity
             section.size = section.GetSize();
             return section;
         }
+
+        public static TwinsSection CreateCodeDemoSection()
+        {
+            TwinsSection section = new TwinsSection() { ID = 10, Magic = magic, size = 12 };
+            section.Type = SectionType.Graphics;
+            section.CreateSection(SectionType.Object, 0);
+            section.CreateSection(SectionType.Script, 1);
+            section.CreateSection(SectionType.Animation, 2);
+            section.CreateSection(SectionType.OGI, 3);
+            section.CreateSection(SectionType.CustomAgent, 4);
+            section.CreateSection(SectionType.Unknown, 5);
+            section.CreateSection(SectionType.SE, 6);
+            section.size = section.GetSize();
+            return section;
+        }
     }
 }

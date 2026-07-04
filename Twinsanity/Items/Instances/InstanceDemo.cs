@@ -19,6 +19,8 @@ namespace Twinsanity
         public int SomeNum2 { get; set; } = 10;
         public int SomeNum3 { get; set; } = 10;
         public ushort ObjectID { get; set; } = 1;
+        public short RefList { get; set; } = -1;
+        public short ScriptID { get; set; } = -1;
         public uint AfterOID { get; set; }
         //public uint PHeader { get; set; }
         public uint Flags { get; set; } = 0x6;

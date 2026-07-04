@@ -503,6 +503,20 @@ namespace Twinsanity
             }
         }
 
+        public void MergeDemo(TwinsFile package)
+        {
+            var importObjects = package.GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
+            var existingObjects = GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
+            foreach (GameObjectDemo importObject in importObjects.Records)
+            {
+                if (existingObjects.HasItem(importObject.ID))
+                {
+                    continue;
+                }
+                importObject.FillPackage(package, this);
+            }
+        }
+
         public void FillExportPackageStructure(ConsoleType console = ConsoleType.PS2)
         {
             Magic = magic;
@@ -511,6 +525,18 @@ namespace Twinsanity
             RecordIDs.Add(graphicsSection.ID, Records.Count);
             Records.Add(graphicsSection);
             var codeSection = CreateCodeSection();
+            RecordIDs.Add(codeSection.ID, Records.Count);
+            Records.Add(codeSection);
+        }
+
+        public void FillExportPackageDemoStructure(ConsoleType console = ConsoleType.PS2)
+        {
+            Magic = magic;
+            Console = console;
+            var graphicsSection = CreateGraphicsSection();
+            RecordIDs.Add(graphicsSection.ID, Records.Count);
+            Records.Add(graphicsSection);
+            var codeSection = CreateCodeDemoSection();
             RecordIDs.Add(codeSection.ID, Records.Count);
             Records.Add(codeSection);
         }

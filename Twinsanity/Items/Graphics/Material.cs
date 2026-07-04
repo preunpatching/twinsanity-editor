@@ -25,7 +25,7 @@ namespace Twinsanity
 
         public override void Load(BinaryReader reader, int size)
         {
-            bool isMB = Parent.Parent.Type == SectionType.GraphicsMB;
+            bool isMB = false; //Parent.Parent.Type == SectionType.GraphicsMB;
             Header = reader.ReadUInt64();
             Unknown = reader.ReadInt32();
             var nameLen = reader.ReadInt32();
