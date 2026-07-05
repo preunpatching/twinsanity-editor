@@ -59,18 +59,21 @@ namespace Twinsanity
         private static byte[] LineToPCM(byte[] input, ref double s0, ref double s1)
         {
             if (input.Length != 16)
+            {
                 throw new ArgumentException("input");
+            }
+
             byte[] o = new byte[28 * 2];
             int factor = input[0] & 0xF;
             int predict = (input[0] >> 4) & 0xF;
             for (int i = 0; i < 14; i++)
             {
-                int adl = input[i+2] & 0xF;
-                int adh = (input[i+2] & 0xF0) >> 4;
+                int adl = input[i + 2] & 0xF;
+                int adh = (input[i + 2] & 0xF0) >> 4;
                 short l = SampleToPCM(adl, factor, predict, ref s0, ref s1);
                 short h = SampleToPCM(adh, factor, predict, ref s0, ref s1);
-                BitConv.ToInt16(o, i * 4 + 0, l);
-                BitConv.ToInt16(o, i * 4 + 2, h);
+                BitConv.ToInt16(o, (i * 4) + 0, l);
+                BitConv.ToInt16(o, (i * 4) + 2, h);
             }
             return o;
         }
@@ -78,18 +81,26 @@ namespace Twinsanity
         public static byte[] ToPCMMono(byte[] data, int size)
         {
             if ((size % 16) != 0)
+            {
                 throw new ArgumentException("Sample size is not a multiple of 16.");
+            }
+
             double s0 = 0, s1 = 0;
             List<byte> pcm_data = new List<byte>();
-            for (int i = 0; i < size; i+=16)
+            for (int i = 0; i < size; i += 16)
             {
                 byte[] line = new byte[16];
                 Array.Copy(data, i, line, 0, 16);
                 if (line[1] == 7)
+                {
                     break;
+                }
+
                 pcm_data.AddRange(LineToPCM(line, ref s0, ref s1));
                 if (((SampleLineFlags)line[1] & SampleLineFlags.LoopEnd) != 0)
+                {
                     break;
+                }
             }
             return pcm_data.ToArray();
         }
@@ -97,11 +108,20 @@ namespace Twinsanity
         public static byte[] ToPCMStereo(byte[] data, int size, int interleave)
         {
             if ((size % 32) != 0)
+            {
                 throw new ArgumentException("Stereo sample size is not a multiple of 32.");
+            }
+
             if ((interleave % 16) != 0)
+            {
                 throw new ArgumentException("Stereo interleave is not a multiple of 16.");
+            }
+
             if (interleave <= 0)
+            {
                 throw new ArgumentOutOfRangeException("interleave");
+            }
+
             size /= 32;
             interleave /= 16;
             double s0_l = 0, s1_l = 0;
@@ -111,24 +131,32 @@ namespace Twinsanity
             for (int i = 0; i < size; ++i)
             {
                 if ((i % interleave) == 0)
+                {
                     ++interleave_adv;
+                }
+
                 byte[] line_l = new byte[16];
                 byte[] line_r = new byte[16];
-                Array.Copy(data, (i + interleave * (interleave_adv-1)) * 16, line_l, 0, 16);
-                Array.Copy(data, (i + interleave * interleave_adv) * 16, line_r, 0, 16);
+                Array.Copy(data, (i + (interleave * (interleave_adv - 1))) * 16, line_l, 0, 16);
+                Array.Copy(data, (i + (interleave * interleave_adv)) * 16, line_r, 0, 16);
                 if (line_l[1] == 7 || line_r[1] == 7)
+                {
                     break;
-                var l = LineToPCM(line_l, ref s0_l, ref s1_l);
-                var r = LineToPCM(line_r, ref s0_r, ref s1_r);
+                }
+
+                byte[] l = LineToPCM(line_l, ref s0_l, ref s1_l);
+                byte[] r = LineToPCM(line_r, ref s0_r, ref s1_r);
                 for (int j = 0; j < 28; ++j)
                 {
-                    pcm_data.Add(l[0 + j * 2]);
-                    pcm_data.Add(l[1 + j * 2]);
-                    pcm_data.Add(r[0 + j * 2]);
-                    pcm_data.Add(r[1 + j * 2]);
+                    pcm_data.Add(l[0 + (j * 2)]);
+                    pcm_data.Add(l[1 + (j * 2)]);
+                    pcm_data.Add(r[0 + (j * 2)]);
+                    pcm_data.Add(r[1 + (j * 2)]);
                 }
                 if (line_l[1] == 1 || line_r[1] == 1)
+                {
                     break;
+                }
             }
             return pcm_data.ToArray();
         }
@@ -145,14 +173,20 @@ namespace Twinsanity
             _s_1 = _s_2 = 0.0;
             while (sample_size > 0)
             {
-                var size = (sample_size >= BUFFER_SIZE) ? BUFFER_SIZE : sample_size;
+                int size = (sample_size >= BUFFER_SIZE) ? BUFFER_SIZE : sample_size;
                 for (i = 0; i < size; ++i, off += 2)
+                {
                     wave[i] = BitConverter.ToInt16(data, off);
+                }
+
                 i = size / 28;
                 if ((size % 28) != 0)
                 {
                     for (int j = size % 28; j < 28; ++j)
-                        wave[28 * i + j] = 0;
+                    {
+                        wave[(28 * i) + j] = 0;
+                    }
+
                     ++i;
                 }
                 for (int j = 0; j < i; ++j)
@@ -171,7 +205,10 @@ namespace Twinsanity
             vag.Add((byte)((predict << 4) | factor));
             vag.Add(7);
             for (i = 0; i < 14; ++i)
+            {
                 vag.Add(0);
+            }
+
             return vag.ToArray();
         }
 
@@ -184,20 +221,26 @@ namespace Twinsanity
         public static byte[] FromPCMStereo(byte[] data, int interleave)
         {
             if ((interleave % 16) != 0)
+            {
                 throw new ArgumentException("Interleave must be a multiple of 16.");
+            }
+
             byte[] silence = new byte[interleave];
-            for (int i = 0; i < interleave*2; ++i)
+            for (int i = 0; i < interleave * 2; ++i)
+            {
                 silence[i] = 0;
+            }
+
             int sample_size = data.Length / 4;
-            byte[] data_l = new byte[sample_size*2];
-            byte[] data_r = new byte[sample_size*2];
+            byte[] data_l = new byte[sample_size * 2];
+            byte[] data_r = new byte[sample_size * 2];
             List<byte> vag = new List<byte>();
             for (int i = 0; i < sample_size; ++i)
             {
-                data_l[i+0] = data[i * 4 + 0];
-                data_l[i+1] = data[i * 4 + 1];
-                data_r[i+0] = data[i * 4 + 2];
-                data_r[i+1] = data[i * 4 + 3];
+                data_l[i + 0] = data[(i * 4) + 0];
+                data_l[i + 1] = data[(i * 4) + 1];
+                data_r[i + 0] = data[(i * 4) + 2];
+                data_r[i + 1] = data[(i * 4) + 3];
             }
             data_l = FromPCMMono(data_l);
             data_r = FromPCMMono(data_r);
@@ -205,14 +248,14 @@ namespace Twinsanity
             {
                 vag.AddRange(silence);
             }
-            var vag_data = vag.ToArray();
-            var ch_size = data_l.Length;
+            byte[] vag_data = vag.ToArray();
+            int ch_size = data_l.Length;
             int off = 0;
             while (ch_size > 0)
             {
-                var size = (ch_size >= interleave) ? interleave : ch_size;
-                Array.Copy(data_l, off, vag_data, off*2, size);
-                Array.Copy(data_r, off + interleave, vag_data, off * 2 + interleave, size);
+                int size = (ch_size >= interleave) ? interleave : ch_size;
+                Array.Copy(data_l, off, vag_data, off * 2, size);
+                Array.Copy(data_r, off + interleave, vag_data, (off * 2) + interleave, size);
                 off += interleave;
                 ch_size -= interleave;
             }
@@ -224,7 +267,10 @@ namespace Twinsanity
             double[] max = new double[5];
             double[][] buffer = new double[28][];
             for (int i = 0; i < 28; ++i)
+            {
                 buffer[i] = new double[5];
+            }
+
             double s_0, s_1 = 0.0, s_2 = 0.0, min = 1e10;
             for (int i = 0; i < 5; ++i)
             {
@@ -235,10 +281,15 @@ namespace Twinsanity
                 {
                     s_0 = samples[j + sample_off];
                     if (s_0 > 30719.0)
+                    {
                         s_0 = 30719.0;
+                    }
                     else if (s_0 < -30719.0)
+                    {
                         s_0 = -30719.0;
-                    double ds = s_0 + s_1 * f[i][0] + s_2 * f[i][1];
+                    }
+
+                    double ds = s_0 + (s_1 * f[i][0]) + (s_2 * f[i][1]);
                     buffer[j][i] = ds;
                     if (Math.Abs(ds) > max[i])
                     {
@@ -268,7 +319,7 @@ namespace Twinsanity
             factor = 0;
             while (factor < 12)
             {
-                if ((mask & (min2 + (mask>>3))) != 0)
+                if ((mask & (min2 + (mask >> 3))) != 0)
                 {
                     break;
                 }
@@ -283,13 +334,18 @@ namespace Twinsanity
 
             for (int i = 0; i < 28; ++i)
             {
-                double s_0 = d_samples[i] + s_1 * f[predict][0] + s_2 * f[predict][1];
+                double s_0 = d_samples[i] + (s_1 * f[predict][0]) + (s_2 * f[predict][1]);
                 double ds = s_0 * (1 << factor);
                 int di = (int)(((int)ds + 0x800) & 0xfffff000);
                 if (di > short.MaxValue)
+                {
                     di = short.MaxValue;
+                }
                 else if (di < short.MinValue)
+                {
                     di = short.MinValue;
+                }
+
                 v_samples[i] = (short)di;
                 di >>= factor;
                 s_2 = s_1;

@@ -61,7 +61,7 @@ namespace TwinsanityEditor
 
         private void draw_func(int func, PrimitiveType prim, BufferPointerFlags flags)
         {
-            
+
             GL.BindBuffer(BufferTarget.ArrayBuffer, ID);
             if (Texture != -1 && Textured)
             {
@@ -101,11 +101,20 @@ namespace TwinsanityEditor
             }
             GL.Flush();
             if ((flags & BufferPointerFlags.Normal) != 0)
+            {
                 GL.DisableClientState(ArrayCap.NormalArray);
+            }
+
             if ((flags & BufferPointerFlags.TexCoord) != 0)
+            {
                 GL.DisableClientState(ArrayCap.TextureCoordArray);
+            }
+
             if ((flags & BufferPointerFlags.Color) != 0)
+            {
                 GL.DisableClientState(ArrayCap.ColorArray);
+            }
+
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             if (Texture != -1 && Textured)
             {

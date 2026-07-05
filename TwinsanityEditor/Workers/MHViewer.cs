@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Media;
 using System.Windows.Forms;
-using TwinsanityEditor.Properties;
 using Twinsanity;
+using TwinsanityEditor.Properties;
 
 namespace TwinsanityEditor
 {
@@ -14,17 +14,17 @@ namespace TwinsanityEditor
         private const uint msvp_key = 0x7056534D; //"MSVp" as a little endian value
         private readonly string[] type_names = { "mono MSVp", "stereo", "null" };
 
-        private string fileName;
+        private readonly string fileName;
         private string mb_name;
         private int interleave;
-        private List<Track> tracks;
+        private readonly List<Track> tracks;
 
-        private SoundPlayer player;
+        private readonly SoundPlayer player;
         private byte[] sndData;
         private Track curTrack;
         private string curName;
 
-        private Timer seekTimer;
+        private readonly Timer seekTimer;
         private Stopwatch seekWatch;
 
         public MHViewer()
@@ -57,9 +57,14 @@ namespace TwinsanityEditor
                 {
                     double length = 0;
                     if (curTrack.Type == 0)
+                    {
                         length = (curTrack.Size - 0x30) / 0x10 * 28 / (double)curTrack.SampleRate;
+                    }
                     else if (curTrack.Type == 1)
+                    {
                         length = curTrack.Size / 0x20 * 28 / (double)curTrack.SampleRate;
+                    }
+
                     double current = seekWatch.ElapsedMilliseconds / 1000.0;
                     if (current > length)
                     {
@@ -68,7 +73,10 @@ namespace TwinsanityEditor
                         current = 0;
                     }
                     else
+                    {
                         label7.Text = string.Format("Now Playing: {0}\n{1}:{2:00} / {3}:{4:00}", curName, Math.Floor(current / 60), (int)(((current / 60.0) - Math.Floor(current / 60.0)) * 60), Math.Floor(length / 60), (int)(((length / 60.0) - Math.Floor(length / 60.0)) * 60));
+                    }
+
                     label7.Invalidate();
                     trackBar1.Value = (int)(current * 1000);
                     trackBar1.Maximum = (int)(length * 1000);
@@ -76,7 +84,9 @@ namespace TwinsanityEditor
                 Show();
             }
             else
+            {
                 Close();
+            }
         }
 
         private void PopulateList()
@@ -98,7 +108,7 @@ namespace TwinsanityEditor
                 });
             }
             mh.Close();
-            mb_name = fileName.Substring(0, fileName.LastIndexOf('.')+1) + "MB";
+            mb_name = fileName.Substring(0, fileName.LastIndexOf('.') + 1) + "MB";
             BinaryReader mb = new BinaryReader(new FileStream(mb_name, FileMode.Open));
             for (int i = 0; i < tracks.Count; ++i)
             {
@@ -114,25 +124,28 @@ namespace TwinsanityEditor
                         throw new Exception("Type 0 audio stream is in invalid format.");
                     }
                     else if (BitConv.FlipBytes(BitConverter.ToInt32(header, 16)) != tracks[i].SampleRate)
+                    {
                         tracks[i].SampleRate = BitConv.FlipBytes(BitConverter.ToInt32(header, 16));
+                    }
+
                     char[] name = new char[0x10];
                     Array.Copy(header, 0x20, name, 0, 0x10);
                     tracks[i].Name = new string(name);
                     if (tracks[i].Name.IndexOf('\0') > 0)
                     {
                         tracks[i].Name = tracks[i].Name.Substring(0, tracks[i].Name.IndexOf('\0'));
-                        listBox1.Items.Add($"{tracks[i].Name} (Track {i})");
+                        _ = listBox1.Items.Add($"{tracks[i].Name} (Track {i})");
                     }
                     else
                     {
                         tracks[i].Name = string.Empty;
-                        listBox1.Items.Add($"Track {i}");
+                        _ = listBox1.Items.Add($"Track {i}");
                     }
                 }
-                else if (tracks[i].Type == 2)
-                    listBox1.Items.Add($"Track {i} (null track)");
                 else
-                    listBox1.Items.Add($"Track {i}");
+                {
+                    _ = tracks[i].Type == 2 ? listBox1.Items.Add($"Track {i} (null track)") : listBox1.Items.Add($"Track {i}");
+                }
             }
             mb.Close();
             label1.Text = $"Track count: {tracks.Count}";
@@ -174,7 +187,11 @@ namespace TwinsanityEditor
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (tracks[listBox1.SelectedIndex].Type == 2) return;
+            if (tracks[listBox1.SelectedIndex].Type == 2)
+            {
+                return;
+            }
+
             player.Stop();
             player.Stream = null;
             button3.Enabled = trackBar1.Enabled = false;
@@ -202,9 +219,11 @@ namespace TwinsanityEditor
         private void button1_Click(object sender, EventArgs e)
         {
             Track selTrack = tracks[listBox1.SelectedIndex];
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "WAV|*.wav";
-            sfd.FileName = selTrack.Type != 0 ? $"{listBox1.SelectedIndex}" : $"{listBox1.SelectedIndex} - {selTrack.Name}";
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "WAV|*.wav",
+                FileName = selTrack.Type != 0 ? $"{listBox1.SelectedIndex}" : $"{listBox1.SelectedIndex} - {selTrack.Name}"
+            };
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 BinaryWriter writer = new BinaryWriter(new FileStream(sfd.FileName, FileMode.Create, FileAccess.Write));
@@ -219,8 +238,10 @@ namespace TwinsanityEditor
 
         private void addTrackToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "WAV files|*.wav";
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Filter = "WAV files|*.wav"
+            };
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 BinaryReader reader = new BinaryReader(new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read));
@@ -230,7 +251,10 @@ namespace TwinsanityEditor
                     || new string(reader.ReadChars(4)) != "fmt "
                     || reader.ReadInt32() != 16
                     || reader.ReadInt16() != 1)
+                {
                     return;
+                }
+
                 ushort channels = reader.ReadUInt16();
                 int samplerate = reader.ReadInt32();
                 if (channels > 2 ||
@@ -238,11 +262,17 @@ namespace TwinsanityEditor
                     reader.ReadInt16() != channels * 2 ||
                     reader.ReadInt16() != 16 ||
                     new string(reader.ReadChars(4)) != "data")
+                {
                     return;
+                }
+
                 BinaryWriter mb = new BinaryWriter(new FileStream(mb_name, FileMode.Append, FileAccess.Write));
                 long mb_start_seek = mb.BaseStream.Position;
                 if (mb_start_seek > uint.MaxValue)
+                {
                     return;
+                }
+
                 int readsize = reader.ReadInt32();
                 byte[] vag_data;
                 if (channels == 1)
@@ -260,9 +290,13 @@ namespace TwinsanityEditor
                     for (int i = 0; i < 16; ++i)
                     {
                         if (i < fname_no_ext.Length)
+                        {
                             mb.Write(fname_no_ext[i]);
+                        }
                         else
+                        {
                             mb.Write(0);
+                        }
                     }
                     mb.Write(vag_data);
                 }

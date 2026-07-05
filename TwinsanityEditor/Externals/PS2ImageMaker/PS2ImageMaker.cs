@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TwinsanityEditor.Externals.PS2ImageMaker
 {
-    class PS2ImageMaker
+    internal class PS2ImageMaker
     {
         public static Progress StartPacking(string twinsPath, string imagePathName)
         {
-            var ptr = start_packing(twinsPath, imagePathName);
-            ProgressC progress = new ProgressC();
-            progress = (ProgressC)Marshal.PtrToStructure(ptr, typeof(ProgressC));
+            IntPtr ptr = start_packing(twinsPath, imagePathName);
+            _ = new ProgressC();
+            ProgressC progress = (ProgressC)Marshal.PtrToStructure(ptr, typeof(ProgressC));
             Progress prog = new Progress
             {
                 Finished = progress.finished != 0,
@@ -28,9 +24,9 @@ namespace TwinsanityEditor.Externals.PS2ImageMaker
 
         public static Progress PollProgress()
         {
-            var ptr = poll_progress();
-            ProgressC progress = new ProgressC();
-            progress = (ProgressC)Marshal.PtrToStructure(ptr, typeof(ProgressC));
+            IntPtr ptr = poll_progress();
+            _ = new ProgressC();
+            ProgressC progress = (ProgressC)Marshal.PtrToStructure(ptr, typeof(ProgressC));
             Progress prog = new Progress
             {
                 Finished = progress.finished != 0,
@@ -53,7 +49,8 @@ namespace TwinsanityEditor.Externals.PS2ImageMaker
             FINISHED,
         }
 
-        public class Progress {
+        public class Progress
+        {
             public string File;
             public ProgressState ProgressS;
             public float ProgressPercentage;
@@ -63,7 +60,7 @@ namespace TwinsanityEditor.Externals.PS2ImageMaker
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-        struct ProgressC
+        private struct ProgressC
         {
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
             public string file_name;

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Twinsanity.Items
 {
@@ -13,10 +9,10 @@ namespace Twinsanity.Items
 
         public void Load(BinaryReader reader, int size)
         {
-            var startPos = reader.BaseStream.Position;
+            long startPos = reader.BaseStream.Position;
             while (reader.BaseStream.Position < startPos + size)
             {
-                var ptc = new TwinsPTC();
+                TwinsPTC ptc = new TwinsPTC();
                 ptc.Load(reader, 0);
                 PTCs.Add(ptc);
             }
@@ -24,7 +20,7 @@ namespace Twinsanity.Items
 
         public void Save(BinaryWriter writer)
         {
-            foreach (var ptc in PTCs)
+            foreach (TwinsPTC ptc in PTCs)
             {
                 ptc.Save(writer);
             }

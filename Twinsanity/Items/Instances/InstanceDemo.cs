@@ -44,17 +44,26 @@ namespace Twinsanity
             writer.Write(InstanceIDs.Count);
             writer.Write(SomeNum1);
             for (int i = 0; i < InstanceIDs.Count; ++i)
+            {
                 writer.Write(InstanceIDs[i]);
+            }
+
             writer.Write(PositionIDs.Count);
             writer.Write(PositionIDs.Count);
             writer.Write(SomeNum2);
             for (int i = 0; i < PositionIDs.Count; ++i)
+            {
                 writer.Write(PositionIDs[i]);
+            }
+
             writer.Write(PathIDs.Count);
             writer.Write(PathIDs.Count);
             writer.Write(SomeNum3);
             for (int i = 0; i < PathIDs.Count; ++i)
+            {
                 writer.Write(PathIDs[i]);
+            }
+
             writer.Write(ObjectID);
             writer.Write(AfterOID);
             //PHeader = (uint)((byte)UnkI321.Count
@@ -68,13 +77,21 @@ namespace Twinsanity
             writer.Write((byte)0);
 
             writer.Write(Flags);
-            
+
             for (int i = 0; i < UnkI321.Count; ++i)
+            {
                 writer.Write(UnkI321[i]);
+            }
+
             for (int i = 0; i < UnkI322.Count; ++i)
+            {
                 writer.Write(UnkI322[i]);
+            }
+
             for (int i = 0; i < UnkI323.Count; ++i)
+            {
                 writer.Write(UnkI323[i]);
+            }
         }
 
         public override void Load(BinaryReader reader, int size)
@@ -86,50 +103,66 @@ namespace Twinsanity
             COMRotY = reader.ReadUInt16();
             RotZ = reader.ReadUInt16();
             COMRotZ = reader.ReadUInt16();
-
-            var n = reader.ReadInt32();
-            n = reader.ReadInt32();
+            _ = reader.ReadInt32();
+            int n = reader.ReadInt32();
             SomeNum1 = reader.ReadInt32();
             InstanceIDs.Clear();
             for (int i = 0; i < n; ++i)
+            {
                 InstanceIDs.Add(reader.ReadUInt16());
-            n = reader.ReadInt32();
+            }
+
+            _ = reader.ReadInt32();
             n = reader.ReadInt32();
             SomeNum2 = reader.ReadInt32();
             PositionIDs.Clear();
             for (int i = 0; i < n; ++i)
+            {
                 PositionIDs.Add(reader.ReadUInt16());
-            n = reader.ReadInt32();
+            }
+
+            _ = reader.ReadInt32();
             n = reader.ReadInt32();
             SomeNum3 = reader.ReadInt32();
             PathIDs.Clear();
             for (int i = 0; i < n; ++i)
+            {
                 PathIDs.Add(reader.ReadUInt16());
+            }
+
             ObjectID = reader.ReadUInt16();
             AfterOID = reader.ReadUInt32();
             //PHeader = reader.ReadUInt32();
 
             //reader.BaseStream.Position -= 4;
-            var Count_Flags = reader.ReadByte();
-            var Count_Floats = reader.ReadByte();
-            var Count_Ints = reader.ReadByte();
-            reader.ReadByte();
+            byte Count_Flags = reader.ReadByte();
+            byte Count_Floats = reader.ReadByte();
+            byte Count_Ints = reader.ReadByte();
+            _ = reader.ReadByte();
 
             Flags = reader.ReadUInt32();
             UnkI321.Clear();
             for (int i = 0; i < Count_Flags; ++i)
+            {
                 UnkI321.Add(reader.ReadUInt32());
+            }
+
             UnkI322.Clear();
             for (int i = 0; i < Count_Floats; ++i)
+            {
                 UnkI322.Add(reader.ReadSingle());
+            }
+
             UnkI323.Clear();
             for (int i = 0; i < Count_Ints; ++i)
+            {
                 UnkI323.Add(reader.ReadUInt32());
+            }
         }
 
         protected override int GetSize()
         {
-            return 78 + (InstanceIDs.Count + PositionIDs.Count + PathIDs.Count) * 2 + (UnkI321.Count + UnkI322.Count + UnkI323.Count) * 4;
+            return 78 + ((InstanceIDs.Count + PositionIDs.Count + PathIDs.Count) * 2) + ((UnkI321.Count + UnkI322.Count + UnkI323.Count) * 4);
         }
     }
 }

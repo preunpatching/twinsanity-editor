@@ -43,17 +43,26 @@ namespace Twinsanity
             writer.Write(InstanceIDs.Count);
             writer.Write(SomeNum1);
             for (int i = 0; i < InstanceIDs.Count; ++i)
+            {
                 writer.Write(InstanceIDs[i]);
+            }
+
             writer.Write(PositionIDs.Count);
             writer.Write(PositionIDs.Count);
             writer.Write(SomeNum2);
             for (int i = 0; i < PositionIDs.Count; ++i)
+            {
                 writer.Write(PositionIDs[i]);
+            }
+
             writer.Write(PathIDs.Count);
             writer.Write(PathIDs.Count);
             writer.Write(SomeNum3);
             for (int i = 0; i < PathIDs.Count; ++i)
+            {
                 writer.Write(PathIDs[i]);
+            }
+
             writer.Write(ObjectID);
             writer.Write(RefList);
             writer.Write(ScriptID);
@@ -64,13 +73,21 @@ namespace Twinsanity
             writer.Write(Flags);
             writer.Write(UnkI321.Count);
             for (int i = 0; i < UnkI321.Count; ++i)
+            {
                 writer.Write(UnkI321[i]);
+            }
+
             writer.Write(UnkI322.Count);
             for (int i = 0; i < UnkI322.Count; ++i)
+            {
                 writer.Write(UnkI322[i]);
+            }
+
             writer.Write(UnkI323.Count);
             for (int i = 0; i < UnkI323.Count; ++i)
+            {
                 writer.Write(UnkI323[i]);
+            }
         }
 
         public override void Load(BinaryReader reader, int size)
@@ -91,21 +108,30 @@ namespace Twinsanity
             RotZ = reader.ReadUInt16();
             COMRotZ = reader.ReadUInt16();
 
-            n = reader.ReadInt32();
+            _ = reader.ReadInt32();
             n = reader.ReadInt32();
             SomeNum1 = reader.ReadInt32();
             for (int i = 0; i < n; ++i)
+            {
                 InstanceIDs.Add(reader.ReadUInt16());
-            n = reader.ReadInt32();
+            }
+
+            _ = reader.ReadInt32();
             n = reader.ReadInt32();
             SomeNum2 = reader.ReadInt32();
             for (int i = 0; i < n; ++i)
+            {
                 PositionIDs.Add(reader.ReadUInt16());
-            n = reader.ReadInt32();
+            }
+
+            _ = reader.ReadInt32();
             n = reader.ReadInt32();
             SomeNum3 = reader.ReadInt32();
             for (int i = 0; i < n; ++i)
+            {
                 PathIDs.Add(reader.ReadUInt16());
+            }
+
             ObjectID = reader.ReadUInt16();
             RefList = reader.ReadInt16();
             ScriptID = reader.ReadInt16();
@@ -113,18 +139,26 @@ namespace Twinsanity
             Flags = reader.ReadUInt32();
             n = reader.ReadInt32();
             for (int i = 0; i < n; ++i)
+            {
                 UnkI321.Add(reader.ReadUInt32());
+            }
+
             n = reader.ReadInt32();
             for (int i = 0; i < n; ++i)
+            {
                 UnkI322.Add(reader.ReadSingle());
+            }
+
             n = reader.ReadInt32();
             for (int i = 0; i < n; ++i)
+            {
                 UnkI323.Add(reader.ReadUInt32());
+            }
         }
 
         protected override int GetSize()
         {
-            return 90 + (InstanceIDs.Count + PositionIDs.Count + PathIDs.Count) * 2 + (UnkI321.Count + UnkI322.Count + UnkI323.Count) * 4;
+            return 90 + ((InstanceIDs.Count + PositionIDs.Count + PathIDs.Count) * 2) + ((UnkI321.Count + UnkI322.Count + UnkI323.Count) * 4);
         }
     }
 }

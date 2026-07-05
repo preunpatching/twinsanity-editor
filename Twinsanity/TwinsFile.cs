@@ -20,12 +20,12 @@ namespace Twinsanity
             FileName = fileName;
 
             byte[] buffer;
-            using (var br = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read, 0x10000, FileOptions.SequentialScan))
+            using (FileStream br = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read, 0x10000, FileOptions.SequentialScan))
             {
                 buffer = new byte[br.Length];
-                br.Read(buffer, 0, buffer.Length);
+                _ = br.Read(buffer, 0, buffer.Length);
             }
-            using (var memoryStream = new MemoryStream(buffer))
+            using (MemoryStream memoryStream = new MemoryStream(buffer))
             {
                 using (BinaryReader reader = new BinaryReader(memoryStream))
                 {
@@ -42,13 +42,20 @@ namespace Twinsanity
         public void LoadFileStream(BinaryReader reader, string path, FileType type)
         {
             if (!File.Exists(path))
+            {
                 return;
+            }
+
             Records = new List<TwinsItem>();
             RecordIDs = new Dictionary<uint, int>();
-            var file = new FileStream(path, FileMode.Open, FileAccess.Read);
+            FileStream file = new FileStream(path, FileMode.Open, FileAccess.Read);
             Type = type;
             Console = ConsoleType.PS2;
-            if (type == FileType.RMX || type == FileType.SMX) Console = ConsoleType.XBOX;
+            if (type == FileType.RMX || type == FileType.SMX)
+            {
+                Console = ConsoleType.XBOX;
+            }
+
             if (type == FileType.Frontend)
             {
                 TwinsSection sec = new TwinsSection
@@ -56,7 +63,7 @@ namespace Twinsanity
                     ID = 3,
                     Type = SectionType.SE,
                 };
-                var sk = reader.BaseStream.Position;
+                long sk = reader.BaseStream.Position;
                 sec.Load(reader, (int)file.Length);
                 reader.BaseStream.Position = sk;
                 RecordIDs.Add(3, Records.Count);
@@ -65,10 +72,13 @@ namespace Twinsanity
                 return;
             }
             if ((Magic = reader.ReadUInt32()) != magic)
+            {
                 throw new Exception("LoadFile: Magic number is wrong.");
+            }
+
             FileName = path;
-            int count = 0;
             bool miniFix = false;
+            int count;
             if (type == FileType.MonkeyBallRM || type == FileType.MonkeyBallSM)
             {
                 count = reader.ReadInt16();
@@ -86,7 +96,8 @@ namespace Twinsanity
             {
                 count = reader.ReadInt32();
             }
-            var sec_size = reader.ReadUInt32();
+
+            _ = reader.ReadUInt32();
 
             List<TwinsSubInfo> SubItems = new List<TwinsSubInfo>();
             for (int i = 0; i < count; i++)
@@ -111,16 +122,12 @@ namespace Twinsanity
                 MemoryStream subMem = null;
                 if (miniFix)
                 {
-                    int ItemSize = 0;
-                    if (i != count - 1)
-                        ItemSize = (int)(SubItems[i + 1].Off - SubItems[i].Off);
-                    else
-                        ItemSize = (int)(reader.BaseStream.Length - SubItems[i].Off);
+                    int ItemSize = i != count - 1 ? (int)(SubItems[i + 1].Off - SubItems[i].Off) : (int)(reader.BaseStream.Length - SubItems[i].Off);
                     if (SubItems[i].Size != ItemSize)
                     {
                         try
                         {
-                            reader.ReadBytes(4); // PACK
+                            _ = reader.ReadBytes(4); // PACK
                             byte[] outData = InteropUCL.DecompressNRV2B(reader.ReadBytes(ItemSize - 4));
                             subMem = new MemoryStream(outData);
                             secReader = new BinaryReader(subMem);
@@ -154,25 +161,19 @@ namespace Twinsanity
                                     {
                                         TwinsSection sec = new TwinsSection() { ID = s_id, Parent = this };
                                         if (s_id <= 7)
-                                            if (type == FileType.DemoRM2)
-                                                sec.Type = SectionType.InstanceDemo;
-                                            else
-                                                sec.Type = SectionType.Instance;
+                                        {
+                                            sec.Type = type == FileType.DemoRM2 ? SectionType.InstanceDemo : SectionType.Instance;
+                                        }
                                         else if (s_id == 10)
-                                            if (type == FileType.DemoRM2)
-                                                sec.Type = SectionType.CodeDemo;
-                                            else if (type == FileType.RMX)
-                                                sec.Type = SectionType.CodeX;
-                                            else
-                                                sec.Type = SectionType.Code;
+                                        {
+                                            sec.Type = type == FileType.DemoRM2 ? SectionType.CodeDemo : type == FileType.RMX ? SectionType.CodeX : SectionType.Code;
+                                        }
                                         else if (s_id == 11)
-                                            if (type == FileType.RMX)
-                                                sec.Type = SectionType.GraphicsX;
-                                            else if (type == FileType.DemoRM2)
-                                                sec.Type = SectionType.GraphicsD;
-                                            else
-                                                sec.Type = SectionType.Graphics;
-                                        var sk = reader.BaseStream.Position;
+                                        {
+                                            sec.Type = type == FileType.RMX ? SectionType.GraphicsX : type == FileType.DemoRM2 ? SectionType.GraphicsD : SectionType.Graphics;
+                                        }
+
+                                        long sk = reader.BaseStream.Position;
                                         reader.BaseStream.Position = s_off;
                                         sec.Level = 1;
                                         sec.Load(reader, s_size);
@@ -184,7 +185,7 @@ namespace Twinsanity
                                 case 9:
                                     {
                                         ColData rec = new ColData() { ID = s_id, Parent = this };
-                                        var sk = reader.BaseStream.Position;
+                                        long sk = reader.BaseStream.Position;
                                         reader.BaseStream.Position = s_off;
                                         rec.Load(reader, s_size);
                                         reader.BaseStream.Position = sk;
@@ -195,7 +196,7 @@ namespace Twinsanity
                                 case 8:
                                     {
                                         ParticleData rec = new ParticleData() { ID = s_id, Parent = this };
-                                        var sk = reader.BaseStream.Position;
+                                        long sk = reader.BaseStream.Position;
                                         reader.BaseStream.Position = s_off;
                                         rec.Load(reader, s_size);
                                         reader.BaseStream.Position = sk;
@@ -206,7 +207,7 @@ namespace Twinsanity
                                 default:
                                     {
                                         TwinsItem rec = new TwinsItem { ID = s_id, Parent = this };
-                                        var sk = reader.BaseStream.Position;
+                                        long sk = reader.BaseStream.Position;
                                         reader.BaseStream.Position = s_off;
                                         rec.Load(reader, s_size);
                                         reader.BaseStream.Position = sk;
@@ -227,9 +228,15 @@ namespace Twinsanity
                                     {
                                         SectionType targetType = SectionType.Graphics;
                                         if (type == FileType.SMX)
+                                        {
                                             targetType = SectionType.GraphicsX;
+                                        }
+
                                         if (type == FileType.DemoSM2)
+                                        {
                                             targetType = SectionType.GraphicsD;
+                                        }
+
                                         TwinsSection sec = new TwinsSection
                                         {
                                             ID = s_id,
@@ -237,7 +244,7 @@ namespace Twinsanity
                                             Level = 1,
                                             Parent = this
                                         };
-                                        var sk = reader.BaseStream.Position;
+                                        long sk = reader.BaseStream.Position;
                                         reader.BaseStream.Position = s_off;
                                         sec.Load(reader, s_size);
                                         reader.BaseStream.Position = sk;
@@ -248,7 +255,7 @@ namespace Twinsanity
                                 case 5:
                                     {
                                         ChunkLinks rec = new ChunkLinks { ID = s_id, Parent = this };
-                                        var sk = reader.BaseStream.Position;
+                                        long sk = reader.BaseStream.Position;
                                         reader.BaseStream.Position = s_off;
                                         rec.Load(reader, s_size);
                                         reader.BaseStream.Position = sk;
@@ -259,7 +266,7 @@ namespace Twinsanity
                                 case 0:
                                     {
                                         SceneryData rec = new SceneryData { ID = s_id, Parent = this };
-                                        var sk = reader.BaseStream.Position;
+                                        long sk = reader.BaseStream.Position;
                                         reader.BaseStream.Position = s_off;
                                         rec.Load(reader, s_size);
                                         reader.BaseStream.Position = sk;
@@ -270,7 +277,7 @@ namespace Twinsanity
                                 case 4:
                                     {
                                         DynamicSceneryData rec = new DynamicSceneryData { ID = s_id, Parent = this };
-                                        var sk = reader.BaseStream.Position;
+                                        long sk = reader.BaseStream.Position;
                                         reader.BaseStream.Position = s_off;
                                         rec.Load(reader, s_size);
                                         reader.BaseStream.Position = sk;
@@ -281,7 +288,7 @@ namespace Twinsanity
                                 default:
                                     {
                                         TwinsItem rec = new TwinsItem { ID = s_id, Parent = this };
-                                        var sk = reader.BaseStream.Position;
+                                        long sk = reader.BaseStream.Position;
                                         reader.BaseStream.Position = s_off;
                                         rec.Load(reader, s_size);
                                         reader.BaseStream.Position = sk;
@@ -307,20 +314,13 @@ namespace Twinsanity
                                 case 11:
                                 case 12:
                                     {
-                                        TwinsSection sec = new TwinsSection() { ID = s_id, Parent = this };
-                                        if (s_id == 12)
+                                        TwinsSection sec = new TwinsSection
                                         {
-                                            sec.Type = SectionType.GraphicsMB;
-                                        }
-                                        else if (s_id == 11)
-                                        {
-                                            sec.Type = SectionType.CodeMB;
-                                        }
-                                        else
-                                        {
-                                            sec.Type = SectionType.InstanceMB;
-                                        }
-                                        var sk = reader.BaseStream.Position;
+                                            ID = s_id,
+                                            Parent = this,
+                                            Type = s_id == 12 ? SectionType.GraphicsMB : s_id == 11 ? SectionType.CodeMB : SectionType.InstanceMB
+                                        };
+                                        long sk = reader.BaseStream.Position;
                                         reader.BaseStream.Position = s_off;
                                         sec.Level = 1;
                                         sec.Load(reader, s_size, miniFix);
@@ -332,7 +332,7 @@ namespace Twinsanity
                                 case 9:
                                     {
                                         ParticleData rec = new ParticleData() { ID = s_id, Parent = this };
-                                        var sk = secReader.BaseStream.Position;
+                                        long sk = secReader.BaseStream.Position;
                                         secReader.BaseStream.Position = s_off;
                                         rec.Load(secReader, s_size, true);
                                         secReader.BaseStream.Position = sk;
@@ -345,7 +345,7 @@ namespace Twinsanity
                                         if (!miniFix)
                                         {
                                             ColData rec = new ColData() { ID = s_id, Parent = this };
-                                            var sk = secReader.BaseStream.Position;
+                                            long sk = secReader.BaseStream.Position;
                                             secReader.BaseStream.Position = s_off;
                                             rec.Load(secReader, s_size);
                                             secReader.BaseStream.Position = sk;
@@ -355,7 +355,7 @@ namespace Twinsanity
                                         else
                                         {
                                             ColDataMB rec = new ColDataMB() { ID = s_id, Parent = this };
-                                            var sk = secReader.BaseStream.Position;
+                                            long sk = secReader.BaseStream.Position;
                                             secReader.BaseStream.Position = s_off;
                                             rec.Load(secReader, s_size);
                                             secReader.BaseStream.Position = sk;
@@ -367,7 +367,7 @@ namespace Twinsanity
                                 default:
                                     {
                                         TwinsItem rec = new TwinsItem { ID = s_id, Parent = this };
-                                        var sk = secReader.BaseStream.Position;
+                                        long sk = secReader.BaseStream.Position;
                                         secReader.BaseStream.Position = s_off;
                                         rec.Load(secReader, s_size);
                                         secReader.BaseStream.Position = sk;
@@ -385,7 +385,7 @@ namespace Twinsanity
                                 default:
                                     {
                                         TwinsItem rec = new TwinsItem { ID = s_id, Parent = this };
-                                        var sk = secReader.BaseStream.Position;
+                                        long sk = secReader.BaseStream.Position;
                                         secReader.BaseStream.Position = s_off;
                                         rec.Load(secReader, s_size);
                                         secReader.BaseStream.Position = sk;
@@ -398,7 +398,7 @@ namespace Twinsanity
                                         if (miniFix)
                                         {
                                             SceneryData rec = new SceneryData { ID = s_id, IsMonkeyBall = true, Parent = this };
-                                            var sk = secReader.BaseStream.Position;
+                                            long sk = secReader.BaseStream.Position;
                                             secReader.BaseStream.Position = s_off;
                                             rec.Load(secReader, s_size);
                                             secReader.BaseStream.Position = sk;
@@ -409,7 +409,7 @@ namespace Twinsanity
                                         else
                                         {
                                             TwinsItem rec = new TwinsItem { ID = s_id, Parent = this };
-                                            var sk = secReader.BaseStream.Position;
+                                            long sk = secReader.BaseStream.Position;
                                             secReader.BaseStream.Position = s_off;
                                             rec.Load(secReader, s_size);
                                             secReader.BaseStream.Position = sk;
@@ -428,7 +428,7 @@ namespace Twinsanity
                                             Level = 1,
                                             Parent = this
                                         };
-                                        var sk = secReader.BaseStream.Position;
+                                        long sk = secReader.BaseStream.Position;
                                         secReader.BaseStream.Position = s_off;
                                         sec.Load(secReader, s_size);
                                         secReader.BaseStream.Position = sk;
@@ -439,7 +439,7 @@ namespace Twinsanity
                                 case 5:
                                     {
                                         DynamicSceneryDataMB rec = new DynamicSceneryDataMB { ID = s_id, Parent = this };
-                                        var sk = secReader.BaseStream.Position;
+                                        long sk = secReader.BaseStream.Position;
                                         secReader.BaseStream.Position = s_off;
                                         rec.Load(secReader, s_size);
                                         secReader.BaseStream.Position = sk;
@@ -458,7 +458,7 @@ namespace Twinsanity
                                             Level = 1,
                                             Parent = this
                                         };
-                                        var sk = reader.BaseStream.Position;
+                                        long sk = reader.BaseStream.Position;
                                         reader.BaseStream.Position = s_off;
                                         sec.Load(reader, s_size, miniFix);
                                         reader.BaseStream.Position = sk;
@@ -469,7 +469,7 @@ namespace Twinsanity
                                 case 6:
                                     {
                                         ChunkLinks rec = new ChunkLinks { ID = s_id, Parent = this };
-                                        var sk = secReader.BaseStream.Position;
+                                        long sk = secReader.BaseStream.Position;
                                         secReader.BaseStream.Position = s_off;
                                         rec.Load(secReader, s_size);
                                         secReader.BaseStream.Position = sk;
@@ -482,17 +482,14 @@ namespace Twinsanity
                         break;
                 }
 
-                if (subMem != null)
-                {
-                    subMem.Close();
-                }
+                subMem?.Close();
             }
         }
 
         public void Merge(TwinsFile package)
         {
-            var importObjects = package.GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
-            var existingObjects = GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
+            TwinsSection importObjects = package.GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
+            TwinsSection existingObjects = GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
             foreach (GameObject importObject in importObjects.Records)
             {
                 if (existingObjects.HasItem(importObject.ID))
@@ -503,10 +500,24 @@ namespace Twinsanity
             }
         }
 
+        public void MergeXbox(TwinsFile package)
+        {
+            TwinsSection importObjects = package.GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
+            TwinsSection existingObjects = GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
+            foreach (GameObject importObject in importObjects.Records)
+            {
+                if (existingObjects.HasItem(importObject.ID))
+                {
+                    continue;
+                }
+                importObject.FillPackageXbox(package, this);
+            }
+        }
+
         public void MergeDemo(TwinsFile package)
         {
-            var importObjects = package.GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
-            var existingObjects = GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
+            TwinsSection importObjects = package.GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
+            TwinsSection existingObjects = GetItem<TwinsSection>(10).GetItem<TwinsSection>(0);
             foreach (GameObjectDemo importObject in importObjects.Records)
             {
                 if (existingObjects.HasItem(importObject.ID))
@@ -521,10 +532,22 @@ namespace Twinsanity
         {
             Magic = magic;
             Console = console;
-            var graphicsSection = CreateGraphicsSection();
+            TwinsSection graphicsSection = CreateGraphicsSection();
             RecordIDs.Add(graphicsSection.ID, Records.Count);
             Records.Add(graphicsSection);
-            var codeSection = CreateCodeSection();
+            TwinsSection codeSection = CreateCodeSection();
+            RecordIDs.Add(codeSection.ID, Records.Count);
+            Records.Add(codeSection);
+        }
+
+        public void FillExportPackageXboxStructure(ConsoleType console = ConsoleType.XBOX)
+        {
+            Magic = magic;
+            Console = console;
+            TwinsSection graphicsSection = CreateGraphicsXSection();
+            RecordIDs.Add(graphicsSection.ID, Records.Count);
+            Records.Add(graphicsSection);
+            TwinsSection codeSection = CreateCodeXSection();
             RecordIDs.Add(codeSection.ID, Records.Count);
             Records.Add(codeSection);
         }
@@ -533,10 +556,10 @@ namespace Twinsanity
         {
             Magic = magic;
             Console = console;
-            var graphicsSection = CreateGraphicsSection();
+            TwinsSection graphicsSection = CreateGraphicsSection();
             RecordIDs.Add(graphicsSection.ID, Records.Count);
             Records.Add(graphicsSection);
-            var codeSection = CreateCodeDemoSection();
+            TwinsSection codeSection = CreateCodeDemoSection();
             RecordIDs.Add(codeSection.ID, Records.Count);
             Records.Add(codeSection);
         }
@@ -553,8 +576,8 @@ namespace Twinsanity
             writer.Write(Records.Count);
             writer.Write(ContentSize);
 
-            var sec_off = Records.Count * 12 + 12;
-            foreach (var i in Records)
+            int sec_off = (Records.Count * 12) + 12;
+            foreach (TwinsItem i in Records)
             {
                 writer.Write(sec_off);
                 writer.Write(i.Size);
@@ -562,25 +585,28 @@ namespace Twinsanity
                 sec_off += i.Size;
             }
 
-            foreach (var i in Records)
+            foreach (TwinsItem i in Records)
             {
                 i.Save(writer);
             }
 
             writer.Close();
         }
-        
+
         private int GetContentSize()
         {
             int c_size = 0;
-            foreach (var i in Records)
+            foreach (TwinsItem i in Records)
+            {
                 c_size += i.Size;
+            }
+
             return c_size;
         }
 
         protected override int GetSize()
         {
-            return ContentSize + Records.Count * 12 + 12;
+            return ContentSize + (Records.Count * 12) + 12;
         }
 
         //NOTE: Do NOT use "First"

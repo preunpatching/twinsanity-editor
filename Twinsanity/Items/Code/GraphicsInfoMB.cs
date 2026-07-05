@@ -1,8 +1,7 @@
 ﻿using System;
-using System.IO;
-using System.Drawing;
-using System.Text;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 
 namespace Twinsanity
 {
@@ -20,11 +19,10 @@ namespace Twinsanity
         public override void Load(BinaryReader reader, int size)
         {
             long pre_pos = reader.BaseStream.Position;
-
-            uint Version = reader.ReadUInt32();
+            _ = reader.ReadUInt32();
             if (Parent.Type == SectionType.GraphicsInfoP)
             {
-                uint PHG_Size = reader.ReadUInt32(); // Size of PHG file at the end, PSP ONLY
+                _ = reader.ReadUInt32(); // Size of PHG file at the end, PSP ONLY
             }
             base.Load(reader, size);
 
@@ -87,7 +85,7 @@ namespace Twinsanity
             long StartPos = reader.BaseStream.Position;
 
             FileSize = reader.ReadUInt32();
-            uint Zero = reader.ReadUInt32();
+            _ = reader.ReadUInt32();
 
             uint TextureCount = reader.ReadUInt32();
             long TexOffset1 = StartPos + reader.ReadUInt32();
@@ -452,7 +450,7 @@ namespace Twinsanity
                 long BlendSkinOffset = StartPos + reader.ReadUInt32();
 
                 reader.BaseStream.Position = NameOffset;
-                LayerName = new string(reader.ReadChars((int)0xC));
+                LayerName = new string(reader.ReadChars(0xC));
 
                 if (RigidModelOffset != 0)
                 {
@@ -466,12 +464,11 @@ namespace Twinsanity
                     {
                         if (Offsets[d] != 0)
                         {
-                            long NextJointOffset = 0;
                             for (int j = d; j < JointCount; j++)
                             {
                                 if (Offsets[j] != 0 && Offsets[j] > Offsets[d])
                                 {
-                                    NextJointOffset = Offsets[j];
+                                    _ = Offsets[j];
                                     break;
                                 }
                             }
@@ -517,9 +514,11 @@ namespace Twinsanity
                                         if (ThirdOffsets[1] != 0)
                                         {
                                             reader.BaseStream.Position = ThirdOffsets[1];
-                                            RigidModel Model = new RigidModel();
-                                            //Model.Read(reader, NextOffset, NextJointOffset, SkinOffset, BlendSkinOffset);
-                                            Model.Joint = d;
+                                            RigidModel Model = new RigidModel
+                                            {
+                                                //Model.Read(reader, NextOffset, NextJointOffset, SkinOffset, BlendSkinOffset);
+                                                Joint = d
+                                            };
                                             RigidModels.Add(Model);
                                         }
 
@@ -534,9 +533,9 @@ namespace Twinsanity
                 if (SkinOffset != 0)
                 {
                     reader.BaseStream.Position = SkinOffset;
-                    byte[] Flags = reader.ReadBytes(4);
-                    Flags = reader.ReadBytes(4);
-                    reader.ReadUInt32();
+                    _ = reader.ReadBytes(4);
+                    _ = reader.ReadBytes(4);
+                    _ = reader.ReadUInt32();
                     long MainOffset = StartPos + reader.ReadUInt32();
                     float[] SecFloats = new float[19];
                     for (int i = 0; i < SecFloats.Length; i++)
@@ -581,9 +580,9 @@ namespace Twinsanity
                 if (BlendSkinOffset != 0)
                 {
                     reader.BaseStream.Position = BlendSkinOffset;
-                    byte[] Flags = reader.ReadBytes(4);
-                    reader.ReadUInt32();
-                    reader.ReadUInt32();
+                    _ = reader.ReadBytes(4);
+                    _ = reader.ReadUInt32();
+                    _ = reader.ReadUInt32();
                     long MainOffset = StartPos + reader.ReadUInt32();
                     float[] SecFloats = new float[19];
                     for (int i = 0; i < SecFloats.Length; i++)
@@ -638,7 +637,7 @@ namespace Twinsanity
                 GroupCount = 0;
                 Header = reader.ReadBytes(0x34);
                 // todo: figure out group count and how to navigate through them, this just loads the first vertex group
-                byte[] DataHeader = new byte[4];
+                _ = new byte[4];
                 bool LastData = false;
                 bool LastGroup = false;
                 while (!LastGroup)
@@ -650,8 +649,6 @@ namespace Twinsanity
                     }
                     if (reader.BaseStream.Position >= reader.BaseStream.Length - 8)
                     {
-                        LastData = true;
-                        LastGroup = true;
                         break;
                     }
 
@@ -659,29 +656,21 @@ namespace Twinsanity
                     if (NextModelOffset != 0 && NextModelOffset - reader.BaseStream.Position < 0x1C + 0x11)
                     {
                         // data ends and model ends before next model
-                        LastData = true;
-                        LastGroup = true;
                         break;
                     }
                     if (NextJointOffset != 0 && NextJointOffset - reader.BaseStream.Position < 0x1C + 0x11)
                     {
                         // ditto for next joint
-                        LastData = true;
-                        LastGroup = true;
                         break;
                     }
                     if (SkinOffset != 0 && SkinOffset - reader.BaseStream.Position < 0x1C + 0x11)
                     {
                         // ditto for offset
-                        LastData = true;
-                        LastGroup = true;
                         break;
                     }
                     if (BlendSkinOffset != 0 && BlendSkinOffset - reader.BaseStream.Position < 0x1C + 0x11)
                     {
                         // ditto for offset
-                        LastData = true;
-                        LastGroup = true;
                         break;
                     }
 
@@ -690,7 +679,7 @@ namespace Twinsanity
                     {
                         reader.BaseStream.Position -= 4;
                     }
-                    DataHeader = reader.ReadBytes(4);
+                    byte[] DataHeader = reader.ReadBytes(4);
                     if (DataHeader[1] == 0xC0)
                     {
                         // next group after this data
@@ -699,8 +688,6 @@ namespace Twinsanity
                     }
                     else if (DataHeader[1] == 0x00)
                     {
-                        LastData = true;
-                        LastGroup = true;
                         break;
                     }
                     byte Count = DataHeader[2];
@@ -714,8 +701,8 @@ namespace Twinsanity
                                 // usually just one byte of stuff
                                 for (int i = 0; i < Count; i++)
                                 {
-                                    reader.ReadUInt32();
-                                    reader.ReadUInt32();
+                                    _ = reader.ReadUInt32();
+                                    _ = reader.ReadUInt32();
                                 }
                             }
                             break;
@@ -735,15 +722,15 @@ namespace Twinsanity
                                 for (int i = 0; i < Count; i++)
                                 {
 
-                                    byte R, G, B, A;
-                                    R = reader.ReadByte();
-                                    G = reader.ReadByte();
-                                    B = reader.ReadByte();
+                                    byte A;
+                                    _ = reader.ReadByte();
+                                    _ = reader.ReadByte();
+                                    _ = reader.ReadByte();
                                     A = reader.ReadByte();
-                                    A = (byte)(A << 1);
+                                    _ = (byte)(A << 1);
                                     //Colors.Add(Color.FromArgb(A, R, G, B));
                                     Colors.Add(Color.FromArgb(255, 128, 128, 128));
-                                    reader.ReadUInt32();
+                                    _ = reader.ReadUInt32();
                                 }
                             }
                             break;
@@ -752,12 +739,12 @@ namespace Twinsanity
                                 // The last type (6) in model.read?
                                 for (int i = 0; i < Count; i++)
                                 {
-                                    byte R, G, B, A;
-                                    R = reader.ReadByte();
-                                    G = reader.ReadByte();
-                                    B = reader.ReadByte();
+                                    byte A;
+                                    _ = reader.ReadByte();
+                                    _ = reader.ReadByte();
+                                    _ = reader.ReadByte();
                                     A = reader.ReadByte();
-                                    A = (byte)(A << 1);
+                                    _ = (byte)(A << 1);
                                     //Colors.Add(Color.FromArgb(255, 128, 128, 128));
                                 }
                             }
@@ -793,11 +780,10 @@ namespace Twinsanity
                     UnkStruct.Add(reader.ReadBytes(0x0C));
                     HeaderVar = reader.ReadUInt32();
                 }
-                reader.ReadBytes(0x0C);
+                _ = reader.ReadBytes(0x0C);
                 reader.BaseStream.Position += 0x34;
 
                 bool LastGroup = false;
-                bool LastData = false;
                 uint Buffer;
                 while (!LastGroup)
                 {
@@ -873,11 +859,10 @@ namespace Twinsanity
                     UnkStruct.Add(reader.ReadBytes(0x0C));
                     HeaderVar = reader.ReadUInt32();
                 }
-                reader.ReadBytes(0x0C);
+                _ = reader.ReadBytes(0x0C);
                 reader.BaseStream.Position += 0x30;
 
                 bool LastGroup = false;
-                bool LastData = false;
                 uint Buffer;
                 while (!LastGroup)
                 {
@@ -972,7 +957,7 @@ namespace Twinsanity
                         ply.WriteLine("property list uchar int vertex_indices");
                     }
                     ply.WriteLine("end_header");
-                    foreach (var s in Layers[0].RigidModels) //vertices
+                    foreach (RigidModel s in Layers[0].RigidModels) //vertices
                     {
                         for (int i = 0; i < s.Vertices.Count; ++i)
                         {
@@ -991,7 +976,7 @@ namespace Twinsanity
                             ply.WriteLine(Line);
                         }
                     }
-                    foreach (var s in Layers[0].Skins)
+                    foreach (Skin s in Layers[0].Skins)
                     {
                         for (int i = 0; i < s.Vertices.Count; i++)
                         {
@@ -1005,7 +990,7 @@ namespace Twinsanity
                         }
                     }
                     vertexcount = 0;
-                    foreach (var s in Layers[0].RigidModels) //polys
+                    foreach (RigidModel s in Layers[0].RigidModels) //polys
                     {
                         for (int i = 0; i < s.Vertices.Count - 2; ++i)
                         {
@@ -1014,12 +999,12 @@ namespace Twinsanity
                         }
                         vertexcount += s.Vertices.Count;
                     }
-                    foreach (var s in Layers[0].Skins)
+                    foreach (Skin s in Layers[0].Skins)
                     {
                         for (int i = 0; i < s.Vertices.Count - 3; ++i)
                         {
                             ply.WriteLine("4 {0} {1} {2} {3}", vertexcount + i, vertexcount + i + 1, vertexcount + i + 2, vertexcount + i + 3);
-                            i = i + 3;
+                            i += 3;
                         }
                         vertexcount += s.Vertices.Count;
                     }

@@ -9,8 +9,7 @@ namespace Twinsanity
     {
         protected virtual int GetSize()
         {
-            if (Data == null) return -1;
-            else return Data.Length;
+            return Data == null ? -1 : Data.Length;
         }
 
         public virtual void Save(BinaryWriter writer)
@@ -25,7 +24,7 @@ namespace Twinsanity
 
         public byte[] Data { get; set; }
         public uint ID { get; set; }
-        public int Size { get => GetSize(); }
+        public int Size => GetSize();
         public TwinsSection Parent { get; set; }
         public SectionType ParentType { get; set; }
     }

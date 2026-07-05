@@ -1,9 +1,6 @@
 ﻿using OpenTK;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Twinsanity;
 
 namespace TwinsanityEditor.Controllers
@@ -11,7 +8,7 @@ namespace TwinsanityEditor.Controllers
     public class AnimationController : ItemController
     {
         public new Animation Data { get; set; }
-        
+
         public AnimationController(MainForm topform, Animation item) : base(topform, item)
         {
             Data = item;
@@ -20,20 +17,20 @@ namespace TwinsanityEditor.Controllers
 
         public float[] GetFacialAnimationTransform(int curFrame, int nextFrame, float frameDisplacement)
         {
-            var jointSetting = Data.FacialJointsSettings[0];
-            var shapesAmount = ((jointSetting.Flags >> 0x8) & 0xf);
-            var shapeWeights = new float[shapesAmount];
-            var transformIndex = jointSetting.TransformationIndex;
-            var currentFrameTransformIndex = jointSetting.AnimatedTransformIndex;
-            var nextFrameTransformIndex = jointSetting.AnimatedTransformIndex;
-            var transformChoice = jointSetting.TransformationChoice;
+            Animation.JointSettings jointSetting = Data.FacialJointsSettings[0];
+            int shapesAmount = (jointSetting.Flags >> 0x8) & 0xf;
+            float[] shapeWeights = new float[shapesAmount];
+            ushort transformIndex = jointSetting.TransformationIndex;
+            ushort currentFrameTransformIndex = jointSetting.AnimatedTransformIndex;
+            ushort nextFrameTransformIndex = jointSetting.AnimatedTransformIndex;
+            ushort transformChoice = jointSetting.TransformationChoice;
 
             for (int i = 0; i < shapeWeights.Length; i++)
             {
                 if ((transformChoice & 0x1) == 0)
                 {
-                    var f1 = Data.FacialAnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
-                    var f2 = Data.FacialAnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
+                    float f1 = Data.FacialAnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
+                    float f2 = Data.FacialAnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
                     shapeWeights[i] = VectorFuncs.Lerp(f1, f2, frameDisplacement);
                 }
                 else
@@ -48,39 +45,37 @@ namespace TwinsanityEditor.Controllers
 
         public Tuple<Matrix4, Quaternion, bool> GetMainAnimationTransform(int jointIndex, int curFrame, int nextFrame, float frameDisplacement)
         {
-            Vector4 currentFrameTranslation = new Vector4();
-            currentFrameTranslation.W = 1.0f;
-            Vector4 nextFrameTranslation = new Vector4();
-            nextFrameTranslation.W = 1.0f;
-            Vector4 scale = new Vector4();
-            scale.W = 1.0f;
-            var jointSetting = Data.JointsSettings[jointIndex];
-            var useAddRot = (jointSetting.Flags >> 0xC & 0x1) != 0;
-            var transformIndex = jointSetting.TransformationIndex;
+            Vector4 currentFrameTranslation = new Vector4
+            {
+                W = 1.0f
+            };
+            Vector4 nextFrameTranslation = new Vector4
+            {
+                W = 1.0f
+            };
+            Vector4 scale = new Vector4
+            {
+                W = 1.0f
+            };
+            Animation.JointSettings jointSetting = Data.JointsSettings[jointIndex];
+            bool useAddRot = ((jointSetting.Flags >> 0xC) & 0x1) != 0;
+            ushort transformIndex = jointSetting.TransformationIndex;
             int currentFrameTransformIndex = jointSetting.AnimatedTransformIndex;
-            var nextFrameTransformIndex = jointSetting.AnimatedTransformIndex;
-            var transformChoice = jointSetting.TransformationChoice;
-            var translateXChoice = (transformChoice & 0x1) == 0;
-            var translateYChoice = (transformChoice & 0x2) == 0;
-            var translateZChoice = (transformChoice & 0x4) == 0;
-            var rotXChoice = (transformChoice & 0x8) == 0;
-            var rotYChoice = (transformChoice & 0x10) == 0;
-            var rotZChoice = (transformChoice & 0x20) == 0;
-            var scaleXChoice = (transformChoice & 0x40) == 0;
-            var scaleYChoice = (transformChoice & 0x80) == 0;
-            var scaleZChoice = (transformChoice & 0x100) == 0;
-
-            var endRotX1 = 0.0f;
-            var endRotY1 = 0.0f;
-            var endRotZ1 = 0.0f;
-            var endRotX2 = 0.0f;
-            var endRotY2 = 0.0f;
-            var endRotZ2 = 0.0f;
-
+            ushort nextFrameTransformIndex = jointSetting.AnimatedTransformIndex;
+            ushort transformChoice = jointSetting.TransformationChoice;
+            bool translateXChoice = (transformChoice & 0x1) == 0;
+            bool translateYChoice = (transformChoice & 0x2) == 0;
+            bool translateZChoice = (transformChoice & 0x4) == 0;
+            bool rotXChoice = (transformChoice & 0x8) == 0;
+            bool rotYChoice = (transformChoice & 0x10) == 0;
+            bool rotZChoice = (transformChoice & 0x20) == 0;
+            bool scaleXChoice = (transformChoice & 0x40) == 0;
+            bool scaleYChoice = (transformChoice & 0x80) == 0;
+            bool scaleZChoice = (transformChoice & 0x100) == 0;
             if (translateXChoice)
             {
-                var x1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
-                var x2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
+                float x1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
+                float x2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
                 currentFrameTranslation.X = x1;
                 nextFrameTranslation.X = x2;
             }
@@ -92,8 +87,8 @@ namespace TwinsanityEditor.Controllers
 
             if (translateYChoice)
             {
-                var y1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
-                var y2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
+                float y1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
+                float y2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
                 currentFrameTranslation.Y = y1;
                 nextFrameTranslation.Y = y2;
             }
@@ -105,8 +100,8 @@ namespace TwinsanityEditor.Controllers
 
             if (translateZChoice)
             {
-                var z1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
-                var z2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
+                float z1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
+                float z2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
                 currentFrameTranslation.Z = z1;
                 nextFrameTranslation.Z = z2;
             }
@@ -116,11 +111,14 @@ namespace TwinsanityEditor.Controllers
                 nextFrameTranslation.Z = Data.StaticTransforms[transformIndex++].Value;
             }
 
+
+            float endRotX1;
+            float endRotX2;
             if (rotXChoice)
             {
-                var rot1 = Data.AnimatedTransforms[curFrame].GetPureOffset(currentFrameTransformIndex++) * 16;
-                var rot2 = Data.AnimatedTransforms[nextFrame].GetPureOffset(nextFrameTransformIndex++) * 16;
-                var diff = rot1 - rot2;
+                int rot1 = Data.AnimatedTransforms[curFrame].GetPureOffset(currentFrameTransformIndex++) * 16;
+                int rot2 = Data.AnimatedTransforms[nextFrame].GetPureOffset(nextFrameTransformIndex++) * 16;
+                int diff = rot1 - rot2;
                 if (diff < -0x8000)
                 {
                     rot1 += 0x10000;
@@ -129,23 +127,25 @@ namespace TwinsanityEditor.Controllers
                 {
                     rot1 -= 0x10000;
                 }
-                var rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
-                var rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                float rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                float rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
                 endRotX1 = rot1Rad;
                 endRotX2 = rot2Rad;
             }
             else
             {
-                var rot = Data.StaticTransforms[transformIndex++].GetRot(false);
+                float rot = Data.StaticTransforms[transformIndex++].GetRot(false);
                 endRotX1 = rot;
                 endRotX2 = rot;
             }
 
+            float endRotY1;
+            float endRotY2;
             if (rotYChoice)
             {
-                var rot1 = Data.AnimatedTransforms[curFrame].GetPureOffset(currentFrameTransformIndex++) * 16;
-                var rot2 = Data.AnimatedTransforms[nextFrame].GetPureOffset(nextFrameTransformIndex++) * 16;
-                var diff = rot1 - rot2;
+                int rot1 = Data.AnimatedTransforms[curFrame].GetPureOffset(currentFrameTransformIndex++) * 16;
+                int rot2 = Data.AnimatedTransforms[nextFrame].GetPureOffset(nextFrameTransformIndex++) * 16;
+                int diff = rot1 - rot2;
                 if (diff < -0x8000)
                 {
                     rot1 += 0x10000;
@@ -154,23 +154,25 @@ namespace TwinsanityEditor.Controllers
                 {
                     rot1 -= 0x10000;
                 }
-                var rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
-                var rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                float rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                float rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
                 endRotY1 = rot1Rad;
                 endRotY2 = rot2Rad;
             }
             else
             {
-                var rot = Data.StaticTransforms[transformIndex++].GetRot(false);
+                float rot = Data.StaticTransforms[transformIndex++].GetRot(false);
                 endRotY1 = rot;
                 endRotY2 = rot;
             }
 
+            float endRotZ1;
+            float endRotZ2;
             if (rotZChoice)
             {
-                var rot1 = Data.AnimatedTransforms[curFrame].GetPureOffset(currentFrameTransformIndex++) * 16;
-                var rot2 = Data.AnimatedTransforms[nextFrame].GetPureOffset(nextFrameTransformIndex++) * 16;
-                var diff = rot1 - rot2;
+                int rot1 = Data.AnimatedTransforms[curFrame].GetPureOffset(currentFrameTransformIndex++) * 16;
+                int rot2 = Data.AnimatedTransforms[nextFrame].GetPureOffset(nextFrameTransformIndex++) * 16;
+                int diff = rot1 - rot2;
                 if (diff < -0x8000)
                 {
                     rot1 += 0x10000;
@@ -179,22 +181,22 @@ namespace TwinsanityEditor.Controllers
                 {
                     rot1 -= 0x10000;
                 }
-                var rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
-                var rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                float rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                float rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
                 endRotZ1 = rot1Rad;
                 endRotZ2 = rot2Rad;
             }
             else
             {
-                var rot = Data.StaticTransforms[transformIndex++].GetRot(false);
+                float rot = Data.StaticTransforms[transformIndex++].GetRot(false);
                 endRotZ1 = rot;
                 endRotZ2 = rot;
             }
 
             if (scaleXChoice)
             {
-                var x1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
-                var x2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
+                float x1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
+                float x2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
                 scale.X = VectorFuncs.Lerp(x1, x2, frameDisplacement);
             }
             else
@@ -204,8 +206,8 @@ namespace TwinsanityEditor.Controllers
 
             if (scaleYChoice)
             {
-                var y1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
-                var y2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
+                float y1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
+                float y2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
                 scale.Y = VectorFuncs.Lerp(y1, y2, frameDisplacement);
             }
             else
@@ -215,8 +217,8 @@ namespace TwinsanityEditor.Controllers
 
             if (scaleZChoice)
             {
-                var z1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
-                var z2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
+                float z1 = Data.AnimatedTransforms[curFrame].GetOffset(currentFrameTransformIndex++);
+                float z2 = Data.AnimatedTransforms[nextFrame].GetOffset(nextFrameTransformIndex++);
                 scale.Z = VectorFuncs.Lerp(z1, z2, frameDisplacement);
             }
             else
@@ -224,22 +226,22 @@ namespace TwinsanityEditor.Controllers
                 scale.Z = Data.StaticTransforms[transformIndex++].Value;
             }
 
-            var resultTranslation = Vector4.Lerp(currentFrameTranslation, nextFrameTranslation, frameDisplacement);
+            Vector4 resultTranslation = Vector4.Lerp(currentFrameTranslation, nextFrameTranslation, frameDisplacement);
             resultTranslation.X = -resultTranslation.X;
 
-            var rotX = Matrix3.CreateRotationX(endRotX1);
-            var rotY = Matrix3.CreateRotationY(endRotY1);
-            var rotZ = Matrix3.CreateRotationZ(endRotZ1);
-            var endRot = rotX * rotY * rotZ;
-            var rotX2 = Matrix3.CreateRotationX(endRotX2);
-            var rotY2 = Matrix3.CreateRotationY(endRotY2);
-            var rotZ2 = Matrix3.CreateRotationZ(endRotZ2);
-            var endRot2 = rotX2 * rotY2 * rotZ2;
-            var quat1 = Quaternion.FromMatrix(endRot);
-            var quat2 = Quaternion.FromMatrix(endRot2);
-            var lerpedQuat = Quaternion.Slerp(quat1, quat2, frameDisplacement);
+            Matrix3 rotX = Matrix3.CreateRotationX(endRotX1);
+            Matrix3 rotY = Matrix3.CreateRotationY(endRotY1);
+            Matrix3 rotZ = Matrix3.CreateRotationZ(endRotZ1);
+            Matrix3 endRot = rotX * rotY * rotZ;
+            Matrix3 rotX2 = Matrix3.CreateRotationX(endRotX2);
+            Matrix3 rotY2 = Matrix3.CreateRotationY(endRotY2);
+            Matrix3 rotZ2 = Matrix3.CreateRotationZ(endRotZ2);
+            Matrix3 endRot2 = rotX2 * rotY2 * rotZ2;
+            Quaternion quat1 = Quaternion.FromMatrix(endRot);
+            Quaternion quat2 = Quaternion.FromMatrix(endRot2);
+            Quaternion lerpedQuat = Quaternion.Slerp(quat1, quat2, frameDisplacement);
 
-            var transformMatrix = Matrix4.Zero;
+            Matrix4 transformMatrix = Matrix4.Zero;
             transformMatrix.Row0 = resultTranslation;
             transformMatrix.Row1 = scale;
             return new Tuple<Matrix4, Quaternion, bool>(transformMatrix, lerpedQuat, useAddRot);
@@ -252,9 +254,9 @@ namespace TwinsanityEditor.Controllers
 
         protected override void GenText()
         {
-            var hasAnimData = (Data.Bitfield & 0x1) == 1 ? "yes" : "no";
-            var hasFacialAnimationData = (Data.Bitfield & 0x2) == 1 ? "yes" : "no";
-            var animationFps = (Data.Bitfield >> 0x12) & 0x1F;
+            string hasAnimData = (Data.Bitfield & 0x1) == 1 ? "yes" : "no";
+            string hasFacialAnimationData = (Data.Bitfield & 0x2) == 1 ? "yes" : "no";
+            uint animationFps = (Data.Bitfield >> 0x12) & 0x1F;
             List<string> text = new List<string>
             {
                 $"ID: {Data.ID}",

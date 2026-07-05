@@ -1,6 +1,5 @@
 ﻿using OpenTK;
 using System.Collections.Generic;
-using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -34,10 +33,12 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            List<string> Text = new List<string>();
-            Text.Add(string.Format("ID: {0:X8}", Data.ID));
-            Text.Add($"Size: {Data.Size}");
-            Text.Add($"SubMesh Count: {Data.SubModels.Count}");
+            List<string> Text = new List<string>
+            {
+                string.Format("ID: {0:X8}", Data.ID),
+                $"Size: {Data.Size}",
+                $"SubMesh Count: {Data.SubModels.Count}"
+            };
             for (int i = 0; i < Data.SubModels.Count; i++)
             {
                 Text.Add($"SubMesh {i}: Vertex Count {Data.SubModels[i].VData.Count} Groups {Data.SubModels[i].GroupList.Count}");
@@ -56,7 +57,7 @@ namespace TwinsanityEditor
             Vertices.Clear();
             Indices.Clear();
 
-            foreach (var s in Data.SubModels)
+            foreach (ModelX.SubModel s in Data.SubModels)
             {
                 List<Vertex> vtx = new List<Vertex>();
                 List<uint> idx = new List<uint>();
@@ -75,7 +76,7 @@ namespace TwinsanityEditor
                         int v2 = off + i - 1 - (i & 1);
                         int v3 = off + i;
                         Vector3 normal = VectorFuncs.CalcNormal(vtx[v1].Pos, vtx[v2].Pos, vtx[v3].Pos);
-                        var v = vtx[v1];
+                        Vertex v = vtx[v1];
                         v.Nor += normal;
                         vtx[v1] = v;
                         v = vtx[v2];

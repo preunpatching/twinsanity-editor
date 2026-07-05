@@ -1,18 +1,18 @@
 ﻿using System;
-using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using Twinsanity;
 
 namespace TwinsanityEditor
 {
     public partial class TriggerEditor : Form
     {
-        private SectionController controller;
+        private readonly SectionController controller;
         private Trigger trigger;
 
         private FileController File { get; set; }
-        private TwinsFile FileData { get => File.Data; }
-        private Controller CurCont { get => (Controller)controller.Node.Nodes[controller.Data.RecordIDs[trigger.ID]].Tag; }
+        private TwinsFile FileData => File.Data;
+        private Controller CurCont => (Controller)controller.Node.Nodes[controller.Data.RecordIDs[trigger.ID]].Tag;
 
         private bool ignore_value_change;
 
@@ -36,13 +36,16 @@ namespace TwinsanityEditor
             listBox1.Items.Clear();
             foreach (Trigger i in controller.Data.Records)
             {
-                listBox1.Items.Add($"ID {i.ID}");
+                _ = listBox1.Items.Add($"ID {i.ID}");
             }
         }
 
         private void listBox1_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            if (listBox1.SelectedIndex == -1) return;
+            if (listBox1.SelectedIndex == -1)
+            {
+                return;
+            }
 
             this.SuspendDrawing();
 
@@ -106,7 +109,7 @@ namespace TwinsanityEditor
             checkBox12.Checked = TrigMask[7];
             checkBox13.Checked = TrigMask[8];
 
-            var lines = new string[trigger.Instances.Count];
+            string[] lines = new string[trigger.Instances.Count];
             for (int i = 0; i < trigger.Instances.Count; ++i)
             {
                 lines[i] = trigger.Instances[i].ToString();
@@ -128,27 +131,36 @@ namespace TwinsanityEditor
 
         private void addToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
-            if (controller.Data.RecordIDs.Count >= ushort.MaxValue) return;
+            if (controller.Data.RecordIDs.Count >= ushort.MaxValue)
+            {
+                return;
+            }
+
             uint id;
             for (id = 0; id < uint.MaxValue; ++id)
             {
                 if (!controller.Data.ContainsItem(id))
+                {
                     break;
+                }
             }
             Trigger new_trigger = new Trigger { ID = id, Enabled = 1, Header = 50, SomeFloat = 0.1f, SectionHead = 10, Instances = new List<ushort>(), Coords = new Pos[] { new Pos(0, 0, 0, 1), new Pos(0, 0, 0, 1), new Pos(1, 1, 1, 1) } };
             controller.Data.AddItem(id, new_trigger);
             ((MainForm)Tag).GenTreeNode(new_trigger, controller);
             trigger = new_trigger;
-            listBox1.Items.Add($"ID {trigger.ID}");
+            _ = listBox1.Items.Add($"ID {trigger.ID}");
             controller.UpdateTextBox();
             CurCont.UpdateText();
         }
 
         private void removeToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
-            var sel_i = listBox1.SelectedIndex;
+            int sel_i = listBox1.SelectedIndex;
             if (sel_i == -1)
+            {
                 return;
+            }
+
             controller.RemoveItem(trigger.ID);
             listBox1.BeginUpdate();
             listBox1.Items.RemoveAt(sel_i);
@@ -162,17 +174,28 @@ namespace TwinsanityEditor
                     ((Controller)controller.Node.Nodes[i].Tag).UpdateText();
                 }
             }
-            if (sel_i >= listBox1.Items.Count) sel_i = listBox1.Items.Count - 1;
+            if (sel_i >= listBox1.Items.Count)
+            {
+                sel_i = listBox1.Items.Count - 1;
+            }
+
             listBox1.SelectedIndex = sel_i;
             listBox1.EndUpdate();
             if (listBox1.Items.Count == 0)
+            {
                 splitContainer1.Panel2.Enabled = false;
+            }
+
             controller.UpdateTextBox();
         }
 
         private void numericUpDown1_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             trigger.Header = (uint)numericUpDown1.Value;
 
@@ -197,7 +220,11 @@ namespace TwinsanityEditor
 
         private void numericUpDown2_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Enabled = (uint)numericUpDown2.Value;
 
             bool[] TrigMask = trigger.Mask;
@@ -215,56 +242,86 @@ namespace TwinsanityEditor
 
         private void numericUpDown3_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.SomeFloat = (float)numericUpDown3.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown4_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.SectionHead = (uint)numericUpDown4.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown6_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Arg1 = (ushort)numericUpDown6.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown7_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Arg2 = (ushort)numericUpDown7.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown8_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Arg3 = (ushort)numericUpDown8.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown9_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Arg4 = (ushort)numericUpDown9.Value;
             CurCont.UpdateTextBox();
         }
 
         private void textBox1_TextChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Instances.Clear();
             for (int i = 0; i < textBox1.Lines.Length; ++i)
             {
                 if (ushort.TryParse(textBox1.Lines[i], out ushort v))
                 {
                     if (File.GetInstanceID(controller.Data.Parent.ID, v) != null)
+                    {
                         trigger.Instances.Add(v);
+                    }
                 }
             }
             controller.UpdateTextBox();
@@ -273,84 +330,132 @@ namespace TwinsanityEditor
 
         private void numericUpDown10_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[1].X = (float)numericUpDown10.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown11_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[1].Y = (float)numericUpDown11.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown12_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[1].Z = (float)numericUpDown12.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown13_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[1].W = (float)numericUpDown13.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown14_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[2].X = (float)numericUpDown14.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown15_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[2].Y = (float)numericUpDown15.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown16_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[2].Z = (float)numericUpDown16.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown17_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[2].W = (float)numericUpDown17.Value;
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown18_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[0].X = (float)((float)numericUpDown18.Value * Math.Sin((float)numericUpDown21.Value * 2));
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown19_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[0].Y = (float)((float)numericUpDown19.Value * Math.Sin((float)numericUpDown21.Value * 2));
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown20_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[0].Z = (float)((float)numericUpDown20.Value * Math.Sin((float)numericUpDown21.Value * 2));
             CurCont.UpdateTextBox();
         }
 
         private void numericUpDown21_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Coords[0].W = (float)Math.Cos((float)numericUpDown21.Value / 2);
             trigger.Coords[0].X = (float)((float)numericUpDown18.Value * Math.Sin((float)numericUpDown21.Value * 2));
             trigger.Coords[0].Y = (float)((float)numericUpDown19.Value * Math.Sin((float)numericUpDown21.Value * 2));
@@ -360,7 +465,11 @@ namespace TwinsanityEditor
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Arg1_Used = checkBox1.Checked;
             numericUpDown6.Enabled = trigger.Arg1_Used;
             numericUpDown1.Value = trigger.Header;
@@ -369,7 +478,11 @@ namespace TwinsanityEditor
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Arg2_Used = checkBox2.Checked;
             numericUpDown7.Enabled = trigger.Arg2_Used;
             numericUpDown1.Value = trigger.Header;
@@ -378,7 +491,11 @@ namespace TwinsanityEditor
 
         private void checkBox3_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Arg3_Used = checkBox3.Checked;
             numericUpDown8.Enabled = trigger.Arg3_Used;
             numericUpDown1.Value = trigger.Header;
@@ -387,7 +504,11 @@ namespace TwinsanityEditor
 
         private void checkBox4_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             trigger.Arg4_Used = checkBox4.Checked;
             numericUpDown9.Enabled = trigger.Arg4_Used;
             numericUpDown1.Value = trigger.Header;
@@ -413,70 +534,110 @@ namespace TwinsanityEditor
 
         private void checkBox5_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             UpdateTrigMask();
             CurCont.UpdateTextBox();
         }
 
         private void checkBox6_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             UpdateTrigMask();
             CurCont.UpdateTextBox();
         }
 
         private void checkBox7_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             UpdateTrigMask();
             CurCont.UpdateTextBox();
         }
 
         private void checkBox8_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             UpdateTrigMask();
             CurCont.UpdateTextBox();
         }
 
         private void checkBox9_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             UpdateTrigMask();
             CurCont.UpdateTextBox();
         }
 
         private void checkBox10_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             UpdateTrigMask();
             CurCont.UpdateTextBox();
         }
 
         private void checkBox11_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             UpdateTrigMask();
             CurCont.UpdateTextBox();
         }
 
         private void checkBox12_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             UpdateTrigMask();
             CurCont.UpdateTextBox();
         }
 
         private void checkBox13_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             UpdateTrigMask();
             CurCont.UpdateTextBox();
         }
 
         private void checkBoxFlag0_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             trigger.UnkFlag0 = checkBoxFlag0.Checked;
             numericUpDown1.Value = trigger.Header;
@@ -486,7 +647,11 @@ namespace TwinsanityEditor
 
         private void checkBoxFlag1_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             trigger.UnkFlag1 = checkBoxFlag1.Checked;
             numericUpDown1.Value = trigger.Header;
@@ -496,7 +661,11 @@ namespace TwinsanityEditor
 
         private void checkBoxFlag2_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             trigger.UnkFlag2 = checkBoxFlag2.Checked;
             numericUpDown1.Value = trigger.Header;
@@ -506,7 +675,11 @@ namespace TwinsanityEditor
 
         private void checkBoxFlag3_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             trigger.UnkFlag3 = checkBoxFlag3.Checked;
             numericUpDown1.Value = trigger.Header;
@@ -516,7 +689,11 @@ namespace TwinsanityEditor
 
         private void checkBoxFlag4_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             trigger.UnkFlag4 = checkBoxFlag4.Checked;
             numericUpDown1.Value = trigger.Header;
@@ -526,7 +703,11 @@ namespace TwinsanityEditor
 
         private void checkBoxFlag5_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             trigger.UnkFlag5 = checkBoxFlag5.Checked;
             numericUpDown1.Value = trigger.Header;
@@ -536,7 +717,11 @@ namespace TwinsanityEditor
 
         private void checkBoxFlag6_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             trigger.UnkFlag6 = checkBoxFlag6.Checked;
             numericUpDown1.Value = trigger.Header;

@@ -19,7 +19,7 @@ namespace Twinsanity
 
         protected override int GetSize()
         {
-            return isEmpty ? 0 : (20 + Triggers.Count * 32 + Groups.Count * 8 + Tris.Count * 8 + Vertices.Count * 16);
+            return isEmpty ? 0 : (20 + (Triggers.Count * 32) + (Groups.Count * 8) + (Tris.Count * 8) + (Vertices.Count * 16));
         }
 
         /// <summary>
@@ -27,7 +27,11 @@ namespace Twinsanity
         /// </summary>
         public override void Save(BinaryWriter writer)
         {
-            if (isEmpty) return;
+            if (isEmpty)
+            {
+                return;
+            }
+
             if (someNumber > 0)
             {
                 writer.Write(someNumber);
@@ -115,8 +119,8 @@ namespace Twinsanity
                 ColTri tri = new ColTri();
                 ulong legacy = reader.ReadUInt64();
                 tri.Vert1 = (int)(legacy & mask);
-                tri.Vert2 = (int)((legacy >> 18 * 1) & mask);
-                tri.Vert3 = (int)((legacy >> 18 * 2) & mask);
+                tri.Vert2 = (int)((legacy >> (18 * 1)) & mask);
+                tri.Vert3 = (int)((legacy >> (18 * 2)) & mask);
                 tri.Surface = (int)(legacy >> (18 * 3));
                 Tris.Add(tri);
             }

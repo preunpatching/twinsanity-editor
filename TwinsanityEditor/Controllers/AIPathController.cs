@@ -6,7 +6,7 @@ namespace TwinsanityEditor
     {
         public new AIPath Data { get; set; }
 
-        public AIPathController(MainForm topform, AIPath item) : base (topform, item)
+        public AIPathController(MainForm topform, AIPath item) : base(topform, item)
         {
             Data = item;
             AddMenu("Open editor", Menu_OpenEditor);

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System;
 
 namespace Twinsanity
 {
@@ -34,7 +33,7 @@ namespace Twinsanity
             long start_pos = reader.BaseStream.Position;
 
             Header1 = reader.ReadUInt32();
-            uint ModelCount = reader.ReadUInt32();
+            _ = reader.ReadUInt32();
             Models = new List<DynamicSceneryModel>();
 
             reader.BaseStream.Position = start_pos;

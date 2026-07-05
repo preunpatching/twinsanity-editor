@@ -3,7 +3,6 @@ using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using Twinsanity;
 
@@ -11,10 +10,10 @@ namespace TwinsanityEditor
 {
     public partial class SMViewer : ThreeDViewer
     {
-        private FileController file;
-        private ChunkLinks links;
-        private SceneryData scenery;
-        private List<VertexBufferData> sceneryObjects = new List<VertexBufferData>();
+        private readonly FileController file;
+        private readonly ChunkLinks links;
+        private readonly SceneryData scenery;
+        private readonly List<VertexBufferData> sceneryObjects = new List<VertexBufferData>();
 
         private bool showScenery;
 
@@ -66,7 +65,7 @@ namespace TwinsanityEditor
             {
                 GL.LineWidth(2);
                 GL.DepthMask(false);
-                foreach (var l in links.Links)
+                foreach (ChunkLinks.ChunkLink l in links.Links)
                 {
                     Color cur_color = colors[(links.Links.IndexOf(l) + 2) % colors.Length];
                     GL.PushMatrix();
@@ -120,10 +119,10 @@ namespace TwinsanityEditor
                                     case 4: GL.Color4(Color.Magenta); break;
                                     case 5: GL.Color4(Color.Cyan); break;
                                 }
-                                int i1 = i >= 4 ? 1 - (i - 4) : (0 + 2 * i) % 8;
-                                int i2 = i >= 4 ? i1 + 2 : (1 + 2 * i) % 8;
-                                int i3 = i >= 4 ? i2 + 2 : (2 + 2 * i) % 8;
-                                int i4 = i >= 4 ? i3 + 2 : (3 + 2 * i) % 8;
+                                int i1 = i >= 4 ? 1 - (i - 4) : (0 + (2 * i)) % 8;
+                                int i2 = i >= 4 ? i1 + 2 : (1 + (2 * i)) % 8;
+                                int i3 = i >= 4 ? i2 + 2 : (2 + (2 * i)) % 8;
+                                int i4 = i >= 4 ? i3 + 2 : (3 + (2 * i)) % 8;
                                 Vector3 mid_vec = new Vector3(tree.LoadArea[i1].X + tree.LoadArea[i2].X + tree.LoadArea[i3].X + tree.LoadArea[i4].X,
                                     tree.LoadArea[i1].Y + tree.LoadArea[i2].Y + tree.LoadArea[i3].Y + tree.LoadArea[i4].Y,
                                     tree.LoadArea[i1].Z + tree.LoadArea[i2].Z + tree.LoadArea[i3].Z + tree.LoadArea[i4].Z) / 4;
@@ -217,7 +216,9 @@ namespace TwinsanityEditor
                                 tree = tree.Next;
                             }
                             else
+                            {
                                 break;
+                            }
                         }
                     }
                     GL.PopMatrix();
@@ -305,10 +306,14 @@ namespace TwinsanityEditor
                         //int targetLOD = LODcount == 1 ? 0 : 1;
                         modelID = special_sec.Data.GetItem<LodModel>(leaf.Models[m].ModelID).LODModelIDs[0];
                     }
-                    if (modelID == 0xDDDDDDDD) continue;
+                    if (modelID == 0xDDDDDDDD)
+                    {
+                        continue;
+                    }
+
                     mesh = mesh_sec.GetItem<ModelController>(model_sec.GetItem<RigidModelController>(modelID).Data.MeshID);
 
-                    var rigid = model_sec.GetItem<RigidModelController>(modelID).Data;
+                    RigidModel rigid = model_sec.GetItem<RigidModelController>(modelID).Data;
                     mesh.LoadMeshData();
 
                     Matrix4 modelMatrix = Matrix4.Identity;
@@ -353,7 +358,7 @@ namespace TwinsanityEditor
                             mesh.Vertices[v][k].Pos = new Vector3(vertexPos.X, vertexPos.Y, vertexPos.Z);
                         }
 
-                        foreach (var p in mesh.Vertices[v])
+                        foreach (Vertex p in mesh.Vertices[v])
                         {
                             min_x = Math.Min(min_x, p.Pos.X);
                             min_y = Math.Min(min_y, p.Pos.Y);
@@ -384,9 +389,14 @@ namespace TwinsanityEditor
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, sceneryObjects[id].ID);
             if (sceneryObjects[id].Vtx.Length > sceneryObjects[id].LastSize)
+            {
                 GL.BufferData(BufferTarget.ArrayBuffer, Vertex.SizeOf * sceneryObjects[id].Vtx.Length, sceneryObjects[id].Vtx, BufferUsageHint.StaticDraw);
+            }
             else
+            {
                 GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)0, Vertex.SizeOf * sceneryObjects[id].Vtx.Length, sceneryObjects[id].Vtx);
+            }
+
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             sceneryObjects[id].LastSize = sceneryObjects[id].Vtx.Length;
         }

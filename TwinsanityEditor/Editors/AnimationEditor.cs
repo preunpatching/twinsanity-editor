@@ -4,15 +4,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using Twinsanity;
 using TwinsanityEditor.Controllers;
 using TwinsanityEditor.Viewers;
-using Twinsanity;
 
 namespace TwinsanityEditor
 {
     public partial class AnimationEditor : Form
     {
-        private SectionController controller;
+        private readonly SectionController controller;
         private Animation animation;
         private Animation.JointSettings JointSettings;
         private Animation.JointSettings JointSettings2;
@@ -39,22 +39,17 @@ namespace TwinsanityEditor
             lbAnimations.Items.Clear();
             foreach (Animation anim in controller.Data.Records)
             {
-                if (controller.MainFile.Data.Type != TwinsFile.FileType.MonkeyBallRM && DefaultHashes.Hash_Animations.ContainsKey(anim.ID))
-                {
-                    lbAnimations.Items.Add($"ID {anim.ID} - {DefaultHashes.Hash_Animations[anim.ID]}");
-                }
-                else
-                {
-                    lbAnimations.Items.Add($"ID {anim.ID} - Unknown animation");
-                }
+                _ = controller.MainFile.Data.Type != TwinsFile.FileType.MonkeyBallRM && DefaultHashes.Hash_Animations.ContainsKey(anim.ID)
+                    ? lbAnimations.Items.Add($"ID {anim.ID} - {DefaultHashes.Hash_Animations[anim.ID]}")
+                    : lbAnimations.Items.Add($"ID {anim.ID} - Unknown animation");
             }
         }
 
         private void PopulateWithAnimData(IList list, IList data, Action<IList, string[], int> adder, params string[] namePattern)
         {
             list.Clear();
-            var index = 1;
-            foreach (var d in data)
+            int index = 1;
+            foreach (object d in data)
             {
                 adder.Invoke(list, namePattern, index++);
             }
@@ -62,7 +57,11 @@ namespace TwinsanityEditor
 
         private void lbAnimations_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (lbAnimations.SelectedIndex == -1) return;
+            if (lbAnimations.SelectedIndex == -1)
+            {
+                return;
+            }
+
             JointSettings = null;
             JointSettings2 = null;
             AnimatedTransform = null;
@@ -98,7 +97,7 @@ namespace TwinsanityEditor
         {
             void listAdder(IList list, string[] name, int index)
             {
-                list.Add($"{name[0]} {index}");
+                _ = list.Add($"{name[0]} {index}");
             }
 
             PopulateWithAnimData(lbJointSettings.Items, animation.JointsSettings, listAdder, "Joint setting");
@@ -118,23 +117,23 @@ namespace TwinsanityEditor
             {
                 code_section = 11;
             }
-            var ogis = controller.MainFile.GetItem<SectionController>(code_section).GetItem<SectionController>(3);
-            var ogisList = new List<GraphicsInfo>();
+            SectionController ogis = controller.MainFile.GetItem<SectionController>(code_section).GetItem<SectionController>(3);
+            List<GraphicsInfo> ogisList = new List<GraphicsInfo>();
             foreach (GraphicsInfo ogi in ogis.Data.Records.Cast<GraphicsInfo>())
             {
                 if (ogi.Joints.Length <= lbJointSettings.Items.Count)
                 {
-                    cbOGIList.Items.Add(ogi);
+                    _ = cbOGIList.Items.Add(ogi);
                     ogisList.Add(ogi);
                 }
             }
             if (cbOGIList.Items.Count > 0)
             {
-                var bestFitOgi = ogisList.FindIndex((gi) => { return gi.Joints.Length == lbJointSettings.Items.Count; });
+                int bestFitOgi = ogisList.FindIndex((gi) => { return gi.Joints.Length == lbJointSettings.Items.Count; });
                 cbOGIList.SelectedIndex = bestFitOgi == -1 ? 0 : bestFitOgi;
-                var ogi = cbOGIList.SelectedItem as GraphicsInfo;
-                var ogic = ogis.GetItem<GraphicsInfoController>(ogi.ID);
-                var animViewer = new AnimationViewer(ogic, controller.GetItem<AnimationController>(animation.ID), controller.MainFile)
+                GraphicsInfo ogi = cbOGIList.SelectedItem as GraphicsInfo;
+                GraphicsInfoController ogic = ogis.GetItem<GraphicsInfoController>(ogi.ID);
+                AnimationViewer animViewer = new AnimationViewer(ogic, controller.GetItem<AnimationController>(animation.ID), controller.MainFile)
                 {
                     Parent = tpPreview,
                     AutoSize = true,
@@ -146,7 +145,7 @@ namespace TwinsanityEditor
             }
             else
             {
-                var animViewer = new AnimationViewer()
+                AnimationViewer animViewer = new AnimationViewer()
                 {
                     Parent = tpPreview,
                     AutoSize = true,
@@ -164,48 +163,54 @@ namespace TwinsanityEditor
 
         private void Viewer_FrameChanged(object sender, EventArgs e)
         {
-            if (viewer.CurrentFrame > tbAnimationTimeline.Maximum) return;
+            if (viewer.CurrentFrame > tbAnimationTimeline.Maximum)
+            {
+                return;
+            }
 
             tbAnimationTimeline.Value = viewer.CurrentFrame;
         }
 
         private void lbDisplacements_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var list = (ListBox)sender;
-            if (list.SelectedIndex == -1) return;
+            ListBox list = (ListBox)sender;
+            if (list.SelectedIndex == -1)
+            {
+                return;
+            }
 
             Animation.JointSettings jointSettings = animation.JointsSettings[list.SelectedIndex];
             JointSettings = jointSettings;
-            cbAddRotation.Checked = (jointSettings.Flags >> 0xC & 0x1) != 0;
-            cbParentScale.Checked = (jointSettings.Flags >> 0xD & 0x1) != 0;
+            cbAddRotation.Checked = ((jointSettings.Flags >> 0xC) & 0x1) != 0;
+            cbParentScale.Checked = ((jointSettings.Flags >> 0xD) & 0x1) != 0;
             tbJointTransformChoice.Text = jointSettings.TransformationChoice.ToString();
             tbJointTransformIndex.Text = jointSettings.TransformationIndex.ToString();
             tbJointAnimatedTransformIndex.Text = jointSettings.AnimatedTransformIndex.ToString();
             tbJointFlags.Text = $"{jointSettings.Flags:X4}";
 
-            var transformChoice = JointSettings.TransformationChoice;
-            var timelineText = new List<string>();
+            ushort transformChoice = JointSettings.TransformationChoice;
+            List<string> timelineText = new List<string>();
             for (int i = 0; i < animation.TotalFrames - 1; i++)
             {
-                var transformIndex = JointSettings.TransformationIndex;
+                ushort transformIndex = JointSettings.TransformationIndex;
                 int currentFrameTransformIndex = JointSettings.AnimatedTransformIndex;
-                var nextFrameTransformIndex = JointSettings.AnimatedTransformIndex;
+                ushort nextFrameTransformIndex = JointSettings.AnimatedTransformIndex;
                 timelineText.Add($"Frame {i + 1}:\n");
-                var translateXChoice = (transformChoice & 0x1) == 0;
-                var translateYChoice = (transformChoice & 0x2) == 0;
-                var translateZChoice = (transformChoice & 0x4) == 0;
-                var rotXChoice = (transformChoice & 0x8) == 0;
-                var rotYChoice = (transformChoice & 0x10) == 0;
-                var rotZChoice = (transformChoice & 0x20) == 0;
-                var scaleXChoice = (transformChoice & 0x40) == 0;
-                var scaleYChoice = (transformChoice & 0x80) == 0;
-                var scaleZChoice = (transformChoice & 0x100) == 0;
-                
+                bool translateXChoice = (transformChoice & 0x1) == 0;
+                bool translateYChoice = (transformChoice & 0x2) == 0;
+                bool translateZChoice = (transformChoice & 0x4) == 0;
+                bool rotXChoice = (transformChoice & 0x8) == 0;
+                bool rotYChoice = (transformChoice & 0x10) == 0;
+                bool rotZChoice = (transformChoice & 0x20) == 0;
+                bool scaleXChoice = (transformChoice & 0x40) == 0;
+                bool scaleYChoice = (transformChoice & 0x80) == 0;
+                bool scaleZChoice = (transformChoice & 0x100) == 0;
+
 
                 if (translateXChoice)
                 {
                     timelineText.Add($"Animate Translate from X {animation.AnimatedTransforms[i].GetOffset(currentFrameTransformIndex++)}\n");
-                    timelineText.Add($"Animate Translate to X {animation.AnimatedTransforms[i+1].GetOffset(nextFrameTransformIndex++)}\n");
+                    timelineText.Add($"Animate Translate to X {animation.AnimatedTransforms[i + 1].GetOffset(nextFrameTransformIndex++)}\n");
                 }
                 else
                 {
@@ -215,7 +220,7 @@ namespace TwinsanityEditor
                 if (translateYChoice)
                 {
                     timelineText.Add($"Animate Translate from Y {animation.AnimatedTransforms[i].GetOffset(currentFrameTransformIndex++)}\n");
-                    timelineText.Add($"Animate Translate to Y {animation.AnimatedTransforms[i+1].GetOffset(nextFrameTransformIndex++)}\n");
+                    timelineText.Add($"Animate Translate to Y {animation.AnimatedTransforms[i + 1].GetOffset(nextFrameTransformIndex++)}\n");
                 }
                 else
                 {
@@ -225,7 +230,7 @@ namespace TwinsanityEditor
                 if (translateZChoice)
                 {
                     timelineText.Add($"Animate Translate from Z {animation.AnimatedTransforms[i].GetOffset(currentFrameTransformIndex++)}\n");
-                    timelineText.Add($"Animate Translate to Z {animation.AnimatedTransforms[i+1].GetOffset(nextFrameTransformIndex++)}\n");
+                    timelineText.Add($"Animate Translate to Z {animation.AnimatedTransforms[i + 1].GetOffset(nextFrameTransformIndex++)}\n");
                 }
                 else
                 {
@@ -234,9 +239,9 @@ namespace TwinsanityEditor
 
                 if (rotXChoice)
                 {
-                    var rot1 = animation.AnimatedTransforms[i].GetPureOffset(currentFrameTransformIndex++) * 16;
-                    var rot2 = animation.AnimatedTransforms[i+1].GetPureOffset(nextFrameTransformIndex++) * 16;
-                    var diff = rot1 - rot2;
+                    int rot1 = animation.AnimatedTransforms[i].GetPureOffset(currentFrameTransformIndex++) * 16;
+                    int rot2 = animation.AnimatedTransforms[i + 1].GetPureOffset(nextFrameTransformIndex++) * 16;
+                    int diff = rot1 - rot2;
                     if (diff < -0x8000)
                     {
                         rot1 += 0x10000;
@@ -245,22 +250,22 @@ namespace TwinsanityEditor
                     {
                         rot1 -= 0x10000;
                     }
-                    var rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
-                    var rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
-                    timelineText.Add($"Animate Rotation from X {(rot1Rad)}");
-                    timelineText.Add($"Animate Rotation to X {(rot2Rad)}");
+                    float rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                    float rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                    timelineText.Add($"Animate Rotation from X {rot1Rad}");
+                    timelineText.Add($"Animate Rotation to X {rot2Rad}");
                 }
                 else
                 {
-                    var rot = animation.StaticTransforms[transformIndex++].RotValue;
-                    timelineText.Add($"Static Rotation X {(rot)}");
+                    float rot = animation.StaticTransforms[transformIndex++].RotValue;
+                    timelineText.Add($"Static Rotation X {rot}");
                 }
 
                 if (rotYChoice)
                 {
-                    var rot1 = animation.AnimatedTransforms[i].GetPureOffset(currentFrameTransformIndex++) * 16;
-                    var rot2 = animation.AnimatedTransforms[i + 1].GetPureOffset(nextFrameTransformIndex++) * 16;
-                    var diff = rot1 - rot2;
+                    int rot1 = animation.AnimatedTransforms[i].GetPureOffset(currentFrameTransformIndex++) * 16;
+                    int rot2 = animation.AnimatedTransforms[i + 1].GetPureOffset(nextFrameTransformIndex++) * 16;
+                    int diff = rot1 - rot2;
                     if (diff < -0x8000)
                     {
                         rot1 += 0x10000;
@@ -269,22 +274,22 @@ namespace TwinsanityEditor
                     {
                         rot1 -= 0x10000;
                     }
-                    var rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
-                    var rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
-                    timelineText.Add($"Animate Rotation from Y {(-rot1Rad)}");
-                    timelineText.Add($"Animate Rotation to Y {(-rot2Rad)}");
+                    float rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                    float rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                    timelineText.Add($"Animate Rotation from Y {-rot1Rad}");
+                    timelineText.Add($"Animate Rotation to Y {-rot2Rad}");
                 }
                 else
                 {
-                    var rot = animation.StaticTransforms[transformIndex++].RotValue;
-                    timelineText.Add($"Static Rotation Y {(-rot)}");
+                    float rot = animation.StaticTransforms[transformIndex++].RotValue;
+                    timelineText.Add($"Static Rotation Y {-rot}");
                 }
 
                 if (rotZChoice)
                 {
-                    var rot1 = animation.AnimatedTransforms[i].GetPureOffset(currentFrameTransformIndex++) * 16;
-                    var rot2 = animation.AnimatedTransforms[i + 1].GetPureOffset(nextFrameTransformIndex++) * 16;
-                    var diff = rot1 - rot2;
+                    int rot1 = animation.AnimatedTransforms[i].GetPureOffset(currentFrameTransformIndex++) * 16;
+                    int rot2 = animation.AnimatedTransforms[i + 1].GetPureOffset(nextFrameTransformIndex++) * 16;
+                    int diff = rot1 - rot2;
                     if (diff < -0x8000)
                     {
                         rot1 += 0x10000;
@@ -293,15 +298,15 @@ namespace TwinsanityEditor
                     {
                         rot1 -= 0x10000;
                     }
-                    var rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
-                    var rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
-                    timelineText.Add($"Animate Rotation from Z {(-rot1Rad)}");
-                    timelineText.Add($"Animate Rotation to Z {(-rot2Rad)}");
+                    float rot1Rad = rot1 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                    float rot2Rad = rot2 / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi;
+                    timelineText.Add($"Animate Rotation from Z {-rot1Rad}");
+                    timelineText.Add($"Animate Rotation to Z {-rot2Rad}");
                 }
                 else
                 {
-                    var rot = animation.StaticTransforms[transformIndex++].RotValue;
-                    timelineText.Add($"Static Rotation Z {(-rot)}");
+                    float rot = animation.StaticTransforms[transformIndex++].RotValue;
+                    timelineText.Add($"Static Rotation Z {-rot}");
                 }
 
                 if (scaleXChoice)
@@ -339,8 +344,11 @@ namespace TwinsanityEditor
 
         private void lbScales_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var list = (ListBox)sender;
-            if (list.SelectedIndex == -1) return;
+            ListBox list = (ListBox)sender;
+            if (list.SelectedIndex == -1)
+            {
+                return;
+            }
 
             Animation.Transformation scale = animation.StaticTransforms[list.SelectedIndex];
             StaticTransform = scale;
@@ -349,8 +357,11 @@ namespace TwinsanityEditor
 
         private void lbRotations_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var list = (ListBox)sender;
-            if (list.SelectedIndex == -1) return;
+            ListBox list = (ListBox)sender;
+            if (list.SelectedIndex == -1)
+            {
+                return;
+            }
 
             Animation.AnimatedTransform timeline = animation.AnimatedTransforms[list.SelectedIndex];
             AnimatedTransform = timeline;
@@ -358,27 +369,30 @@ namespace TwinsanityEditor
 
         private void lbDisplacements2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var list = (ListBox)sender;
-            if (list.SelectedIndex == -1) return;
+            ListBox list = (ListBox)sender;
+            if (list.SelectedIndex == -1)
+            {
+                return;
+            }
 
             Animation.JointSettings jointSettings = animation.FacialJointsSettings[list.SelectedIndex];
             JointSettings2 = jointSettings;
-            var flags = jointSettings.Flags;
-            tbShapesAmount.Text = (flags >> 0x8 & 0xf).ToString();
+            ushort flags = jointSettings.Flags;
+            tbShapesAmount.Text = ((flags >> 0x8) & 0xf).ToString();
             tbJointTransformChoice2.Text = jointSettings.TransformationChoice.ToString();
             tbJointTransformIndex2.Text = jointSettings.TransformationIndex.ToString();
             tbJointTwoPartTransformIndex2.Text = jointSettings.AnimatedTransformIndex.ToString();
-            var timelineText = new List<string>();
-            var joints = (flags >> 0x8 & 0xf);
-            var floats = new float[joints];
-            
+            List<string> timelineText = new List<string>();
+            int joints = (flags >> 0x8) & 0xf;
+            float[] floats = new float[joints];
+
 
             for (int j = 0; j < animation.FacialAnimationTotalFrames - 1; j++)
             {
-                var transformIndex = jointSettings.TransformationIndex;
+                ushort transformIndex = jointSettings.TransformationIndex;
                 int currentFrameTransformIndex = jointSettings.AnimatedTransformIndex;
-                var nextFrameTransformIndex = jointSettings.AnimatedTransformIndex;
-                var transformChoice = jointSettings.TransformationChoice;
+                ushort nextFrameTransformIndex = jointSettings.AnimatedTransformIndex;
+                ushort transformChoice = jointSettings.TransformationChoice;
 
                 timelineText.Add($"Frame {j + 1}:\n");
 
@@ -386,8 +400,8 @@ namespace TwinsanityEditor
                 {
                     if ((transformChoice & 0x1) == 0)
                     {
-                        var f1 = animation.FacialAnimatedTransforms[j].GetOffset(currentFrameTransformIndex++);
-                        var f2 = animation.FacialAnimatedTransforms[j + 1].GetOffset(nextFrameTransformIndex++);
+                        float f1 = animation.FacialAnimatedTransforms[j].GetOffset(currentFrameTransformIndex++);
+                        float f2 = animation.FacialAnimatedTransforms[j + 1].GetOffset(nextFrameTransformIndex++);
                         timelineText.Add($"\tAnimation value {i} from {f1} to {f2}");
                     }
                     else
@@ -398,14 +412,17 @@ namespace TwinsanityEditor
                     transformChoice >>= 1;
                 }
             }
-            
+
             tbMorphTimeline.Lines = timelineText.ToArray();
         }
 
         private void lbScales2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var list = (ListBox)sender;
-            if (list.SelectedIndex == -1) return;
+            ListBox list = (ListBox)sender;
+            if (list.SelectedIndex == -1)
+            {
+                return;
+            }
 
             Animation.Transformation scale = animation.FacialStaticTransforms[list.SelectedIndex];
             StaticTransform2 = scale;
@@ -414,8 +431,11 @@ namespace TwinsanityEditor
 
         private void lbRotations2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var list = (ListBox)sender;
-            if (list.SelectedIndex == -1) return;
+            ListBox list = (ListBox)sender;
+            if (list.SelectedIndex == -1)
+            {
+                return;
+            }
 
             Animation.AnimatedTransform timeline = animation.FacialAnimatedTransforms[list.SelectedIndex];
             AnimatedTransform2 = timeline;
@@ -423,86 +443,132 @@ namespace TwinsanityEditor
 
         private void tbDisB1_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings == null) return;
+            TextBox tb = (TextBox)sender;
+            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings == null)
+            {
+                return;
+            }
+
             JointSettings.Flags = result;
         }
 
         private void tbDisB3_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings == null) return;
+            TextBox tb = (TextBox)sender;
+            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings == null)
+            {
+                return;
+            }
+
             JointSettings.TransformationChoice = result;
         }
 
         private void tbDisB5_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings == null) return;
+            TextBox tb = (TextBox)sender;
+            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings == null)
+            {
+                return;
+            }
+
             JointSettings.TransformationIndex = result;
         }
 
         private void tbDisB7_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings == null) return;
+            TextBox tb = (TextBox)sender;
+            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings == null)
+            {
+                return;
+            }
+
             JointSettings.AnimatedTransformIndex = result;
         }
 
         private void tbTransformation_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!Single.TryParse(tb.Text, out Single result) || StaticTransform == null) return;
+            TextBox tb = (TextBox)sender;
+            if (!float.TryParse(tb.Text, out float result) || StaticTransform == null)
+            {
+                return;
+            }
+
             StaticTransform.Value = result;
         }
 
         private void tbDis2B3_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings2 == null) return;
+            TextBox tb = (TextBox)sender;
+            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings2 == null)
+            {
+                return;
+            }
+
             JointSettings2.TransformationChoice = result;
         }
 
         private void tbDis2B5_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings2 == null) return;
+            TextBox tb = (TextBox)sender;
+            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings2 == null)
+            {
+                return;
+            }
+
             JointSettings2.TransformationIndex = result;
         }
 
         private void tbDis2B7_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings2 == null) return;
+            TextBox tb = (TextBox)sender;
+            if (!ushort.TryParse(tb.Text, out ushort result) || JointSettings2 == null)
+            {
+                return;
+            }
+
             JointSettings2.AnimatedTransformIndex = result;
         }
 
         private void tbTransformation2_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!Single.TryParse(tb.Text, out Single result) || StaticTransform2 == null) return;
+            TextBox tb = (TextBox)sender;
+            if (!float.TryParse(tb.Text, out float result) || StaticTransform2 == null)
+            {
+                return;
+            }
+
             StaticTransform2.Value = result;
         }
 
         private void tbTransformOffset_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!Int16.TryParse(tb.Text, out Int16 result) || AnimatedTransform == null) return;
+            TextBox tb = (TextBox)sender;
+            if (!short.TryParse(tb.Text, out _) || AnimatedTransform == null)
+            {
+                return;
+            }
             //TwoPartTransform.SetOffset(tbTimeline.Value, result);
         }
 
         private void tbTransformOffset2_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!Int16.TryParse(tb.Text, out Int16 result) || AnimatedTransform2 == null) return;
+            TextBox tb = (TextBox)sender;
+            if (!short.TryParse(tb.Text, out _) || AnimatedTransform2 == null)
+            {
+                return;
+            }
             //TwoPartTransform2.SetOffset(tbTimeline2.Value, result);
         }
 
         private void btnAddTimeline_Click(object sender, EventArgs e)
         {
-            if (animation == null) return;
+            if (animation == null)
+            {
+                return;
+            }
+
             animation.AnimatedTransforms.Add(new Animation.AnimatedTransform(animation.TotalFrames));
-            for (var i = 0; i < animation.AnimatedTransforms[animation.AnimatedTransforms.Count - 1].Values.Capacity; ++i)
+            for (int i = 0; i < animation.AnimatedTransforms[animation.AnimatedTransforms.Count - 1].Values.Capacity; ++i)
             {
                 animation.AnimatedTransforms[animation.AnimatedTransforms.Count - 1].Values.Add(0);
             }
@@ -511,16 +577,19 @@ namespace TwinsanityEditor
 
         private void cbOGIList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cbOGIList.SelectedIndex == -1) return;
+            if (cbOGIList.SelectedIndex == -1)
+            {
+                return;
+            }
 
             uint code_section = 10;
             if (controller.MainFile.Data.Type == TwinsFile.FileType.MonkeyBallRM)
             {
                 code_section = 11;
             }
-            var ogis = controller.MainFile.GetItem<SectionController>(code_section).GetItem<SectionController>(3);
-            var ogi = cbOGIList.SelectedItem as GraphicsInfo;
-            var ogic = ogis.GetItem<GraphicsInfoController>(ogi.ID);
+            SectionController ogis = controller.MainFile.GetItem<SectionController>(code_section).GetItem<SectionController>(3);
+            GraphicsInfo ogi = cbOGIList.SelectedItem as GraphicsInfo;
+            GraphicsInfoController ogic = ogis.GetItem<GraphicsInfoController>(ogi.ID);
             viewer?.ChangeGraphicsInfo(ogic);
         }
 
@@ -535,23 +604,34 @@ namespace TwinsanityEditor
 
         private void tbPlaybackFps_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox)sender;
-            if (!UInt16.TryParse(tb.Text, out UInt16 result) || viewer == null || result > 120 || result == 0) return;
+            TextBox tb = (TextBox)sender;
+            if (!ushort.TryParse(tb.Text, out ushort result) || viewer == null || result > 120 || result == 0)
+            {
+                return;
+            }
+
             fps = result;
             viewer.FPS = fps;
         }
 
         private void cbLoop_CheckedChanged(object sender, EventArgs e)
         {
-            if (viewer == null) return;
+            if (viewer == null)
+            {
+                return;
+            }
+
             loop = cbLoop.Checked;
             viewer.Loop = loop;
-            
+
         }
 
         private void tbAnimationTimeline_Scroll(object sender, EventArgs e)
         {
-            if (viewer == null) return;
+            if (viewer == null)
+            {
+                return;
+            }
 
             viewer.ChangeAnimationFrame(tbAnimationTimeline.Value);
             playing = false;
@@ -559,14 +639,21 @@ namespace TwinsanityEditor
 
         private void cbShowSkeleton_CheckedChanged(object sender, EventArgs e)
         {
-            if (viewer == null) return;
+            if (viewer == null)
+            {
+                return;
+            }
 
             viewer.DrawSkeletonOutline = cbShowSkeleton.Checked;
         }
 
         private void btnDeleteTimeline2_Click(object sender, EventArgs e)
         {
-            if (animation == null) return;
+            if (animation == null)
+            {
+                return;
+            }
+
             animation.FacialAnimatedTransforms.RemoveAt(animation.FacialAnimatedTransforms.Count - 1);
             UpdateLists();
         }

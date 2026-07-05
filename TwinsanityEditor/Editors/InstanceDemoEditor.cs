@@ -11,7 +11,7 @@ namespace TwinsanityEditor
         private readonly SectionController controller;
         private InstanceDemo ins;
         private InstanceDemoFlagsEditor flagsEditor;
-        
+
         private FileController File { get; set; }
         private TwinsFile FileData => File.Data;
 
@@ -35,10 +35,7 @@ namespace TwinsanityEditor
         private void InstanceDemoEditor_FormClosed(object sender, FormClosedEventArgs e)
         {
             File.SelectItem(null);
-            if (flagsEditor != null)
-            {
-                flagsEditor.Close();
-            }
+            flagsEditor?.Close();
         }
 
         private void PopulateList()
@@ -47,22 +44,25 @@ namespace TwinsanityEditor
             listBox1.Items.Clear();
             foreach (InstanceDemo i in controller.Data.Records)
             {
-                listBox1.Items.Add(GenTextForList(i));
+                _ = listBox1.Items.Add(GenTextForList(i));
             }
             listBox1.EndUpdate();
             comboBox1.Items.Clear();
-            var s_dic = new SortedDictionary<uint, int>(FileData.GetItem<TwinsSection>(10).GetItem<TwinsSection>(0).RecordIDs);
-            foreach (var i in s_dic)
+            SortedDictionary<uint, int> s_dic = new SortedDictionary<uint, int>(FileData.GetItem<TwinsSection>(10).GetItem<TwinsSection>(0).RecordIDs);
+            foreach (KeyValuePair<uint, int> i in s_dic)
             {
                 string obj_name = File.GetObjectName(i.Key);
                 obj_name = Utils.TextUtils.TruncateObjectName(obj_name, (ushort)i.Key, "*", "");
-                comboBox1.Items.Add($"{i.Key} - {obj_name}");
+                _ = comboBox1.Items.Add($"{i.Key} - {obj_name}");
             }
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listBox1.SelectedIndex == -1) return;
+            if (listBox1.SelectedIndex == -1)
+            {
+                return;
+            }
 
             this.SuspendDrawing();
 
@@ -71,7 +71,7 @@ namespace TwinsanityEditor
             tabControl1.Enabled = true;
             dirty.Push(true);
             Control cur = splitContainer1.ActiveControl;
-            var tabIndex = tabControl1.SelectedIndex;
+            int tabIndex = tabControl1.SelectedIndex;
             tabControl1.SelectedIndex = -1;
             tabControl1.SelectedIndex = tabIndex; // yes, this is intentional! don't judge me
             splitContainer1.ActiveControl = cur;
@@ -89,9 +89,15 @@ namespace TwinsanityEditor
         {
             dirty.Push(true);
             if (slider)
+            {
                 trackBar1.Value = ins.RotX;
+            }
+
             if (num)
+            {
                 numericUpDown6.Value = ins.RotX;
+            }
+
             label6.Text = string.Format(angleFormat, ins.RotX / (float)(ushort.MaxValue + 1) * 360f);
             dirty.Push(false);
         }
@@ -100,9 +106,15 @@ namespace TwinsanityEditor
         {
             dirty.Push(true);
             if (slider)
+            {
                 trackBar2.Value = ins.RotY;
+            }
+
             if (num)
+            {
                 numericUpDown7.Value = ins.RotY;
+            }
+
             label7.Text = string.Format(angleFormat, ins.RotY / (float)(ushort.MaxValue + 1) * 360f);
             dirty.Push(false);
         }
@@ -111,9 +123,15 @@ namespace TwinsanityEditor
         {
             dirty.Push(true);
             if (slider)
+            {
                 trackBar3.Value = ins.RotZ;
+            }
+
             if (num)
+            {
                 numericUpDown8.Value = ins.RotZ;
+            }
+
             label9.Text = string.Format(angleFormat, ins.RotZ / (float)(ushort.MaxValue + 1) * 360f);
             dirty.Push(false);
         }
@@ -127,7 +145,11 @@ namespace TwinsanityEditor
 
         private void comboBox1_TextChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             if (ushort.TryParse(comboBox1.Text.Split(new char[] { ' ' }, 2)[0], out ushort oid))
             {
                 ins.ObjectID = oid;
@@ -138,7 +160,11 @@ namespace TwinsanityEditor
 
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.Pos.X = (float)numericUpDown2.Value;
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateTextBox();
             File.RMViewer_LoadInstances();
@@ -146,7 +172,11 @@ namespace TwinsanityEditor
 
         private void numericUpDown3_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.Pos.Y = (float)numericUpDown3.Value;
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateTextBox();
             File.RMViewer_LoadInstances();
@@ -154,7 +184,11 @@ namespace TwinsanityEditor
 
         private void numericUpDown4_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.Pos.Z = (float)numericUpDown4.Value;
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateTextBox();
             File.RMViewer_LoadInstances();
@@ -162,7 +196,11 @@ namespace TwinsanityEditor
 
         private void numericUpDown5_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.Pos.W = (float)numericUpDown5.Value;
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateTextBox();
         }
@@ -193,7 +231,11 @@ namespace TwinsanityEditor
 
         private void numericUpDown6_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.RotX = (ushort)numericUpDown6.Value;
             GetXRot(true, false);
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
@@ -202,14 +244,22 @@ namespace TwinsanityEditor
 
         private void numericUpDown13_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.COMRotX = (ushort)numericUpDown13.Value;
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void numericUpDown7_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.RotY = (ushort)numericUpDown7.Value;
             GetYRot(true, false);
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
@@ -218,129 +268,200 @@ namespace TwinsanityEditor
 
         private void numericUpDown14_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.COMRotY = (ushort)numericUpDown14.Value;
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void numericUpDown9_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.SomeNum1 = (int)numericUpDown9.Value;
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void numericUpDown10_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.SomeNum2 = (int)numericUpDown10.Value;
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void numericUpDown11_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.SomeNum3 = (int)numericUpDown11.Value;
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.InstanceIDs.Clear();
             for (int i = 0; i < textBox2.Lines.Length; ++i)
             {
                 if (ushort.TryParse(textBox2.Lines[i], out ushort v))
+                {
                     ins.InstanceIDs.Add(v);
+                }
             }
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.PositionIDs.Clear();
             for (int i = 0; i < textBox3.Lines.Length; ++i)
             {
                 if (ushort.TryParse(textBox3.Lines[i], out ushort v))
+                {
                     ins.PositionIDs.Add(v);
+                }
             }
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void textBox4_TextChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.PathIDs.Clear();
             for (int i = 0; i < textBox4.Lines.Length; ++i)
             {
                 if (ushort.TryParse(textBox4.Lines[i], out ushort v))
+                {
                     ins.PathIDs.Add(v);
+                }
             }
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void textBox7_TextChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.UnkI321.Clear();
             for (int i = 0; i < textBox7.Lines.Length; ++i)
             {
                 if (uint.TryParse(textBox7.Lines[i], System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out uint v))
+                {
                     ins.UnkI321.Add(v);
+                }
             }
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void textBox6_TextChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.UnkI322.Clear();
             for (int i = 0; i < textBox6.Lines.Length; ++i)
             {
                 if (float.TryParse(textBox6.Lines[i], out float v))
+                {
                     ins.UnkI322.Add(v);
+                }
             }
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void textBox5_TextChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.UnkI323.Clear();
             for (int i = 0; i < textBox5.Lines.Length; ++i)
             {
                 if (uint.TryParse(textBox5.Lines[i], out uint v))
+                {
                     ins.UnkI323.Add(v);
+                }
             }
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (controller.Data.RecordIDs.Count >= ushort.MaxValue) return;
+            if (controller.Data.RecordIDs.Count >= ushort.MaxValue)
+            {
+                return;
+            }
+
             uint id;
             for (id = 0; id < uint.MaxValue; ++id)
             {
                 if (!controller.Data.ContainsItem(id))
+                {
                     break;
+                }
             }
-            InstanceDemo new_ins = new InstanceDemo { ID = id, RefList = -1, ScriptID = -1, Pos = new Pos(0, 0, 0, 1), SomeNum1 = 10, SomeNum2 = 10, SomeNum3 = 10, Flags = 0x1CE,
+            InstanceDemo new_ins = new InstanceDemo
+            {
+                ID = id,
+                RefList = -1,
+                ScriptID = -1,
+                Pos = new Pos(0, 0, 0, 1),
+                SomeNum1 = 10,
+                SomeNum2 = 10,
+                SomeNum3 = 10,
+                Flags = 0x1CE,
                 UnkI322 = new List<float>() { 1 },
-                UnkI323 = new List<uint>() { 0, 0 } };
+                UnkI323 = new List<uint>() { 0, 0 }
+            };
             controller.Data.AddItem(id, new_ins);
             ((MainForm)Tag).GenTreeNode(new_ins, controller);
             ins = new_ins;
-            listBox1.Items.Add(GenTextForList(ins));
+            _ = listBox1.Items.Add(GenTextForList(ins));
             controller.UpdateText();
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
 
         private void removeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var sel_i = listBox1.SelectedIndex;
+            int sel_i = listBox1.SelectedIndex;
             if (sel_i == -1)
+            {
                 return;
+            }
+
             controller.RemoveItem(ins.ID);
             listBox1.BeginUpdate();
             listBox1.Items.RemoveAt(sel_i);
@@ -370,11 +491,12 @@ namespace TwinsanityEditor
                     }
                 }
                 if (update_text)
+                {
                     ((Controller)controller.Node.Nodes[i].Tag).UpdateTextBox();
-                update_text = false;
+                }
             }
 
-            var trig_sec_c = (SectionController)controller.Node.Parent.Nodes[7].Tag;
+            SectionController trig_sec_c = (SectionController)controller.Node.Parent.Nodes[7].Tag;
 
             foreach (TreeNode node in trig_sec_c.Node.Nodes)
             {
@@ -394,23 +516,38 @@ namespace TwinsanityEditor
                         --j;
                     }
                     else
+                    {
                         continue;
+                    }
                 }
                 if (update_text)
+                {
                     ((Controller)node.Tag).UpdateTextBox();
+                }
             }
             trig_sec_c.UpdateTextBox();
-            if (sel_i >= listBox1.Items.Count) sel_i = listBox1.Items.Count - 1;
+            if (sel_i >= listBox1.Items.Count)
+            {
+                sel_i = listBox1.Items.Count - 1;
+            }
+
             listBox1.SelectedIndex = sel_i;
             listBox1.EndUpdate();
             if (listBox1.Items.Count == 0)
+            {
                 tabControl1.Enabled = false;
+            }
+
             controller.UpdateTextBox();
         }
 
         private void numericUpDown8_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.RotZ = (ushort)numericUpDown8.Value;
             GetZRot(true, false);
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
@@ -419,7 +556,11 @@ namespace TwinsanityEditor
 
         private void numericUpDown15_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.COMRotZ = (ushort)numericUpDown15.Value;
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
@@ -440,25 +581,33 @@ namespace TwinsanityEditor
 
         private void duplicateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var sel_i = listBox1.SelectedIndex;
+            int sel_i = listBox1.SelectedIndex;
             if (sel_i == -1)
+            {
                 return;
+            }
 
             InstanceDemo last_inst = ins;
 
-            if (controller.Data.RecordIDs.Count >= ushort.MaxValue) return;
+            if (controller.Data.RecordIDs.Count >= ushort.MaxValue)
+            {
+                return;
+            }
+
             uint id;
             for (id = 0; id < uint.MaxValue; ++id)
             {
                 if (!controller.Data.ContainsItem(id))
+                {
                     break;
+                }
             }
             InstanceDemo new_ins = new InstanceDemo
             {
                 ID = id,
                 RefList = -1,
                 ScriptID = -1,
-                Pos = new Pos(last_inst.Pos.X,last_inst.Pos.Y + 1f,last_inst.Pos.Z, 1),
+                Pos = new Pos(last_inst.Pos.X, last_inst.Pos.Y + 1f, last_inst.Pos.Z, 1),
                 RotX = last_inst.RotX,
                 RotY = last_inst.RotY,
                 RotZ = last_inst.RotZ,
@@ -480,7 +629,7 @@ namespace TwinsanityEditor
             controller.Data.AddItem(id, new_ins);
             ((MainForm)Tag).GenTreeNode(new_ins, controller);
             ins = new_ins;
-            listBox1.Items.Add(GenTextForList(ins));
+            _ = listBox1.Items.Add(GenTextForList(ins));
             controller.UpdateText();
             ((Controller)controller.Node.Nodes[controller.Data.RecordIDs[ins.ID]].Tag).UpdateText();
         }
@@ -496,13 +645,21 @@ namespace TwinsanityEditor
 
         private void numScript_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.ScriptID = (short)numScript.Value;
         }
 
         private void numRefList_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.RefList = (short)numRefList.Value;
         }
 
@@ -534,34 +691,56 @@ namespace TwinsanityEditor
 
             string[] lines = new string[ins.InstanceIDs.Count];
             for (int i = 0; i < ins.InstanceIDs.Count; ++i)
+            {
                 lines[i] = ins.InstanceIDs[i].ToString();
+            }
+
             textBox2.Lines = lines;
             lines = new string[ins.PositionIDs.Count];
             for (int i = 0; i < ins.PositionIDs.Count; ++i)
+            {
                 lines[i] = ins.PositionIDs[i].ToString();
+            }
+
             textBox3.Lines = lines;
             lines = new string[ins.PathIDs.Count];
             for (int i = 0; i < ins.PathIDs.Count; ++i)
+            {
                 lines[i] = ins.PathIDs[i].ToString();
+            }
+
             textBox4.Lines = lines;
 
             lines = new string[ins.UnkI321.Count];
             for (int i = 0; i < ins.UnkI321.Count; ++i)
+            {
                 lines[i] = ins.UnkI321[i].ToString("X");
+            }
+
             textBox7.Lines = lines;
             lines = new string[ins.UnkI322.Count];
             for (int i = 0; i < ins.UnkI322.Count; ++i)
+            {
                 lines[i] = ins.UnkI322[i].ToString();
+            }
+
             textBox6.Lines = lines;
             lines = new string[ins.UnkI323.Count];
             for (int i = 0; i < ins.UnkI323.Count; ++i)
+            {
                 lines[i] = ins.UnkI323[i].ToString();
+            }
+
             textBox5.Lines = lines;
         }
 
         private void numFlags_ValueChanged(object sender, EventArgs e)
         {
-            if (Dirty) return;
+            if (Dirty)
+            {
+                return;
+            }
+
             ins.Flags = (uint)numFlags.Value;
             flagsEditor?.UpdateCheckBoxes();
         }

@@ -25,16 +25,18 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            List<string> text = new List<string>();
-            text.Add($"ID: {Data.ID}");
-            text.Add($"Size: {Data.Size}");
-            text.Add($"Name: {Data.Name}");
-            text.Add($"Unknown bitfield: 0x{Data.UnkBitfield:X}");
-            text.Add($"Object type: {Data.UnkBitfield >> 0x14 & 0xFF}");
+            List<string> text = new List<string>
+            {
+                $"ID: {Data.ID}",
+                $"Size: {Data.Size}",
+                $"Name: {Data.Name}",
+                $"Unknown bitfield: 0x{Data.UnkBitfield:X}",
+                $"Object type: {(Data.UnkBitfield >> 0x14) & 0xFF}"
+            };
             for (int i = 0; i < Data.ScriptSlots.Count; ++i)
             {
-                var slotName = "Reserved";
-                var slotAmt = Data.ScriptSlots[i];
+                string slotName = "Reserved";
+                byte slotAmt = Data.ScriptSlots[i];
                 switch (i)
                 {
                     case 0:
@@ -73,10 +75,10 @@ namespace TwinsanityEditor
             text.Add($"Message Reciever Count: {Data.UI32.Count}");
             for (int i = 0; i < Data.UI32.Count; ++i)
             {
-                var u32 = Data.UI32[i];
+                uint u32 = Data.UI32[i];
                 ushort script = (ushort)((u32 >> 0xA) & 0x3FFF);
                 ushort arg = (ushort)(u32 & 0x3FF);
-                ushort caller = (ushort)((u32 >> 0x18 & 0x1));
+                ushort caller = (ushort)((u32 >> 0x18) & 0x1);
                 string scriptLine = "";//Data.UI32[i].ToString("X");
                 scriptLine += " Arg: " + arg;
                 scriptLine += " Caller: " + caller;
@@ -90,11 +92,15 @@ namespace TwinsanityEditor
 
             text.Add($"OGICount: {Data.OGIs.Count}");
             for (int i = 0; i < Data.OGIs.Count; ++i)
+            {
                 text.Add(Data.OGIs[i].ToString());
+            }
 
             text.Add($"AnimCount: {Data.Anims.Count}");
             for (int i = 0; i < Data.Anims.Count; ++i)
+            {
                 text.Add(Data.Anims[i].ToString());
+            }
 
             text.Add($"ScriptCount: {Data.Scripts.Count}");
             for (int i = 0; i < Data.Scripts.Count; ++i)
@@ -117,11 +123,15 @@ namespace TwinsanityEditor
 
             text.Add($"ObjectCount: {Data.Objects.Count}");
             for (int i = 0; i < Data.Objects.Count; ++i)
+            {
                 text.Add(Data.Objects[i].ToString());
+            }
 
             text.Add($"SoundCount: {Data.Sounds.Count}");
             for (int i = 0; i < Data.Sounds.Count; ++i)
+            {
                 text.Add(Data.Sounds[i].ToString());
+            }
 
             text.Add($"Instance Flags Count: {Data.instFlagsList.Count}");
             text.Add($"Instance Floats Count: {Data.instFloatsList.Count}");
@@ -133,19 +143,27 @@ namespace TwinsanityEditor
 
             text.Add($"ObjectCount: {Data.cObjects.Count}");
             for (int i = 0; i < Data.cObjects.Count; ++i)
+            {
                 text.Add(Data.cObjects[i].ToString());
+            }
 
             text.Add($"OGICount: {Data.cOGIs.Count}");
             for (int i = 0; i < Data.cOGIs.Count; ++i)
+            {
                 text.Add(Data.cOGIs[i].ToString());
+            }
 
             text.Add($"AnimCount: {Data.cAnims.Count}");
             for (int i = 0; i < Data.cAnims.Count; ++i)
+            {
                 text.Add(Data.cAnims[i].ToString());
+            }
 
             text.Add($"CMCount: {Data.cCM.Count}");
             for (int i = 0; i < Data.cCM.Count; ++i)
+            {
                 text.Add(Data.cCM[i].ToString());
+            }
 
             text.Add($"ScriptCount: {Data.cScripts.Count}");
             for (int i = 0; i < Data.cScripts.Count; ++i)
@@ -164,16 +182,20 @@ namespace TwinsanityEditor
 
             text.Add($"UnkCount: {Data.cUnk.Count}");
             for (int i = 0; i < Data.cUnk.Count; ++i)
+            {
                 text.Add(Data.cUnk[i].ToString());
+            }
 
             text.Add($"SoundCount: {Data.cSounds.Count}");
             for (int i = 0; i < Data.cSounds.Count; ++i)
+            {
                 text.Add(Data.cSounds[i].ToString());
+            }
 
             text.Add($"Commands amount: {Data.scriptCommandsAmount}");
             if (Data.scriptCommandsAmount > 0)
             {
-                var command = Data.scriptCommand;
+                Script.MainScript.ScriptCommand command = Data.scriptCommand;
                 do
                 {
                     if (Enum.IsDefined(typeof(DefaultEnums.CommandID), command.VTableIndex))
@@ -202,7 +224,7 @@ namespace TwinsanityEditor
                 sfd.Filter = "RM2 file|*.rm2";
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    var package = new TwinsFile();
+                    TwinsFile package = new TwinsFile();
                     package.FillExportPackageDemoStructure();
                     Data.FillPackage(MainFile.Data, package);
                     package.SaveFile(sfd.FileName);

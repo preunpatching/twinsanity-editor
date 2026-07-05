@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Twinsanity
 {
     public class CodeModel : TwinsItem
     {
-        public UInt32 Header;
+        public uint Header;
         public class AgentLabAdditions
         {
             public int scriptCommandsAmount;
@@ -21,7 +18,7 @@ namespace Twinsanity
             }
         }
         public List<AgentLabAdditions> agentLabAdditionsList = new List<AgentLabAdditions>();
-        public List<UInt16> scriptIds = new List<UInt16>();
+        public List<ushort> scriptIds = new List<ushort>();
         public Script.MainScript.ScriptCommand scriptCommand = null;
         public int scriptGameVersion;
         private uint arraySize;
@@ -36,16 +33,14 @@ namespace Twinsanity
                 Header = (Header & 0xFF00FFFF) | (value << 16);
                 arraySize = value;
             }
-            get
-            {
-                return arraySize;
-            }
+
+            get => arraySize;
         }
 
         protected override int GetSize()
         {
-            var totalSize = 4; // Header
-            foreach (var agentLabAddition in agentLabAdditionsList)
+            int totalSize = 4; // Header
+            foreach (AgentLabAdditions agentLabAddition in agentLabAdditionsList)
             {
                 totalSize += 4;
                 if (agentLabAddition.scriptCommandsAmount > 0)
@@ -60,9 +55,9 @@ namespace Twinsanity
 
         public override void Save(BinaryWriter writer)
         {
-            var sk = writer.BaseStream.Position;
+            _ = writer.BaseStream.Position;
             writer.Write(Header);
-            for (var i = 0; i < arraySize; ++i)
+            for (int i = 0; i < arraySize; ++i)
             {
                 writer.Write(agentLabAdditionsList[i].scriptCommandsAmount);
                 if (agentLabAdditionsList[i].scriptCommandsAmount > 0)
@@ -76,25 +71,16 @@ namespace Twinsanity
 
         public override void Load(BinaryReader reader, int size)
         {
-            if (ParentType == SectionType.CustomAgentX)
-            {
-                scriptGameVersion = 1;
-            }
-            else if (ParentType == SectionType.CustomAgentDemo)
-            {
-                scriptGameVersion = 2;
-            }
-            else
-            {
-                scriptGameVersion = 0;
-            }
+            scriptGameVersion = ParentType == SectionType.CustomAgentX ? 1 : ParentType == SectionType.CustomAgentDemo ? 2 : 0;
 
             Header = reader.ReadUInt32();
-            arraySize = (Header >> 16 & 0xFF);
-            for (var i = 0; i < arraySize; ++i)
+            arraySize = (Header >> 16) & 0xFF;
+            for (int i = 0; i < arraySize; ++i)
             {
-                var agentLabAddition = new AgentLabAdditions(scriptGameVersion);
-                agentLabAddition.scriptCommandsAmount = reader.ReadInt32();
+                AgentLabAdditions agentLabAddition = new AgentLabAdditions(scriptGameVersion)
+                {
+                    scriptCommandsAmount = reader.ReadInt32()
+                };
                 if (agentLabAddition.scriptCommandsAmount > 0)
                 {
                     agentLabAddition.scriptCommand = new Script.MainScript.ScriptCommand(reader, scriptGameVersion);

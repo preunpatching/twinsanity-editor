@@ -13,7 +13,7 @@ namespace TwinsanityEditor
         public byte[] RawData { get; set; }
         public byte[] SoundData { get; set; }
 
-        private static SoundPlayer player = new SoundPlayer();
+        private static readonly SoundPlayer player = new SoundPlayer();
 
         public SEController(MainForm topform, SoundEffect item) : base(topform, item)
         {
@@ -54,28 +54,31 @@ namespace TwinsanityEditor
 
         private void Menu_ReplaceSoundWav()
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "WAV|*.wav";
-            ofd.FileName = Data.ID.ToString();
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Filter = "WAV|*.wav",
+                FileName = Data.ID.ToString()
+            };
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 using (FileStream file = new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read))
                 using (BinaryReader reader = new BinaryReader(file))
                 {
                     file.Position = 0x16;
-                    UInt16 channels = reader.ReadUInt16();
-                    UInt32 frequency = reader.ReadUInt32();
+                    ushort channels = reader.ReadUInt16();
+                    uint frequency = reader.ReadUInt32();
                     file.Position = 0x28;
                     int len = reader.ReadInt32();
-                    Byte[] PCM = reader.ReadBytes(len);
+                    byte[] PCM = reader.ReadBytes(len);
                     if (channels == 1)
                     {
                         Data.Freq = (ushort)frequency;
-                        Byte[] newData = ADPCM.FromPCMMono(PCM);
-                        UInt32 newSize = (uint)newData.Length;
+                        byte[] newData = ADPCM.FromPCMMono(PCM);
+                        uint newSize = (uint)newData.Length;
                         InjectData(Data.SoundOffset, Data.SoundSize, newData);
                         Data.SoundSize = newSize;
-                    } else
+                    }
+                    else
                     {
                         throw new ArgumentException("ATM only mono, sorry fam");
                     }
@@ -84,10 +87,10 @@ namespace TwinsanityEditor
                 }
             }
         }
-        public void InjectData(UInt32 oldOffset, UInt32 oldSize, Byte[] newData)
+        public void InjectData(uint oldOffset, uint oldSize, byte[] newData)
         {
-            Byte[] piece1 = new byte[oldOffset];
-            Byte[] piece2 = new byte[Data.Parent.ExtraData.Length - oldOffset - oldSize];
+            byte[] piece1 = new byte[oldOffset];
+            byte[] piece2 = new byte[Data.Parent.ExtraData.Length - oldOffset - oldSize];
             Array.Copy(Data.Parent.ExtraData, 0, piece1, 0, piece1.Length);
             Array.Copy(Data.Parent.ExtraData, oldOffset + oldSize, piece2, 0, piece2.Length);
             Data.Parent.ExtraData = new byte[piece1.Length + newData.Length + piece2.Length];
@@ -99,15 +102,17 @@ namespace TwinsanityEditor
                 SoundEffect se = (SoundEffect)item;
                 if (se.SoundOffset > oldOffset)
                 {
-                    se.SoundOffset += (UInt32)(newData.Length - oldSize);
+                    se.SoundOffset += (uint)(newData.Length - oldSize);
                 }
             }
         }
         private void Menu_ExportWAV()
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "WAV|*.wav";
-            sfd.FileName = Data.ID.ToString();
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "WAV|*.wav",
+                FileName = Data.ID.ToString()
+            };
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 FileStream file = new FileStream(sfd.FileName, FileMode.Create, FileAccess.Write);
@@ -119,9 +124,11 @@ namespace TwinsanityEditor
 
         private void Menu_ExportVAG()
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "VAG|*.vag";
-            var id_str = Data.ID.ToString();
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "VAG|*.vag"
+            };
+            string id_str = Data.ID.ToString();
             sfd.FileName = id_str;
             if (sfd.ShowDialog() == DialogResult.OK)
             {

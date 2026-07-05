@@ -11,7 +11,7 @@ namespace TwinsanityEditor
 
         public new ColData Data { get; set; }
 
-        public ColDataController(MainForm topform, ColData item) : base (topform, item)
+        public ColDataController(MainForm topform, ColData item) : base(topform, item)
         {
             Data = item;
             AddMenu("Open RMViewer", Menu_OpenRMViewer);
@@ -61,15 +61,17 @@ namespace TwinsanityEditor
 
         private void Menu_Export()
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Wavefront OBJ file (*.obj)|*.obj";
-            sfd.FileName = MainFile.SafeFileName;
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "Wavefront OBJ file (*.obj)|*.obj",
+                FileName = MainFile.SafeFileName
+            };
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 StreamWriter writer = new StreamWriter(new FileStream(sfd.FileName, FileMode.Create, FileAccess.Write));
                 writer.WriteLine("# Generated using the TwinsanityEditor @ https://github.com/Smartkin/twinsanity-editor");
                 writer.WriteLine();
-                foreach (var i in Data.Vertices)
+                foreach (Pos i in Data.Vertices)
                 {
                     writer.WriteLine("v {0} {1} {2}", i.X, i.Y, i.Z);
                 }
@@ -85,17 +87,20 @@ namespace TwinsanityEditor
                 //writer.Close();
                 //return;
                 Dictionary<int, List<ColData.ColTri>> polys = new Dictionary<int, List<ColData.ColTri>>();
-                foreach (var i in Data.Tris)
+                foreach (ColData.ColTri i in Data.Tris)
                 {
                     if (!polys.ContainsKey(i.Surface))
+                    {
                         polys.Add(i.Surface, new List<ColData.ColTri>());
+                    }
+
                     polys[i.Surface].Add(i);
                 }
                 //???
-                foreach (var d in polys)
+                foreach (KeyValuePair<int, List<ColData.ColTri>> d in polys)
                 {
                     writer.WriteLine("o Surface {0}", d.Key);
-                    foreach (var i in d.Value)
+                    foreach (ColData.ColTri i in d.Value)
                     {
                         writer.WriteLine("f {0} {1} {2}", i.Vert1 + 1, i.Vert2 + 1, i.Vert3 + 1);
                     }
@@ -116,7 +121,9 @@ namespace TwinsanityEditor
                 importer.Show();
             }
             else
+            {
                 importer.Select();
+            }
         }
     }
 }

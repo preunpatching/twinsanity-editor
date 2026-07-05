@@ -1,9 +1,7 @@
-﻿using Twinsanity;
-using System;
-using System.IO;
+﻿using OpenTK;
 using System.Collections.Generic;
-using OpenTK;
 using System.Drawing;
+using Twinsanity;
 
 namespace TwinsanityEditor
 {
@@ -50,16 +48,16 @@ namespace TwinsanityEditor
                         text.Add($"\t Vertexes {Data.Models[i].SubModels[a].BlendShapes[b].VertexesAmount}");
                         for (int k = 0; k < Data.Models[i].SubModels[a].BlendShapes[b].ShapeVertecies.Length; k++)
                         {
-                            var blendVec = new Vector3(-Data.Models[i].SubModels[a].Vertexes[k].BlendShapes[b].Offset.X,
+                            Vector3 blendVec = new Vector3(-Data.Models[i].SubModels[a].Vertexes[k].BlendShapes[b].Offset.X,
                             Data.Models[i].SubModels[a].Vertexes[k].BlendShapes[b].Offset.Y,
                             Data.Models[i].SubModels[a].Vertexes[k].BlendShapes[b].Offset.Z);
-                            var x_comp = -Data.Models[i].SubModels[a].Vertexes[k].X + blendVec.X;
-                            var y_comp = Data.Models[i].SubModels[a].Vertexes[k].Y + blendVec.Y;
-                            var z_comp = Data.Models[i].SubModels[a].Vertexes[k].Z + blendVec.Z;
+                            float x_comp = -Data.Models[i].SubModels[a].Vertexes[k].X + blendVec.X;
+                            float y_comp = Data.Models[i].SubModels[a].Vertexes[k].Y + blendVec.Y;
+                            float z_comp = Data.Models[i].SubModels[a].Vertexes[k].Z + blendVec.Z;
                             text.Add($"\t Vec {k}: {new Vector3(x_comp, y_comp, z_comp)}");
                         }
                     }
-                    for (var j = 0; j < Data.Models[i].SubModels[a].Vertexes.Count; j++)
+                    for (int j = 0; j < Data.Models[i].SubModels[a].Vertexes.Count; j++)
                     {
                         text.Add($"Vertex {j}: {-Data.Models[i].SubModels[a].Vertexes[j].X}; {Data.Models[i].SubModels[a].Vertexes[j].Y}; {Data.Models[i].SubModels[a].Vertexes[j].Z}");
                         text.Add($"\tJoint index 1 {Data.Models[i].SubModels[a].Vertexes[j].Joint.JointIndex1}; Weight 1 {Data.Models[i].SubModels[a].Vertexes[j].Joint.Weight1}");
@@ -78,21 +76,23 @@ namespace TwinsanityEditor
             Indices.Clear();
             JointInfos.Clear();
 
-            var refIndex = 0U;
-            var offset = 0;
+            uint refIndex = 0U;
+            int offset = 0;
 
-            var isSpyroModel = false;
+            bool isSpyroModel = false;
             if (DefaultHashes.Hash_BlendSkins.ContainsKey(Data.ID) && DefaultHashes.Hash_BlendSkins[Data.ID] == "Spyro")
+            {
                 isSpyroModel = true;
+            }
 
-            foreach (var rigidModel in Data.Models)
+            foreach (BlendSkin.BlendSkinRigidModel rigidModel in Data.Models)
             {
                 List<Vertex> vtx = new List<Vertex>();
                 List<uint> idx = new List<uint>();
                 List<BlendSkin.JointInfo> jointInfos = new List<BlendSkin.JointInfo>();
-                foreach (var model in rigidModel.SubModels)
+                foreach (BlendSkin.BlendSkinSubModel model in rigidModel.SubModels)
                 {
-                    for (var j = 0; j < model.Vertexes.Count; ++j)
+                    for (int j = 0; j < model.Vertexes.Count; ++j)
                     {
                         if (j < model.Vertexes.Count - 2)
                         {
@@ -135,13 +135,13 @@ namespace TwinsanityEditor
 
                 for (int i = 0; i < idx.Count; i += 3)
                 {
-                    var n1 = idx[i];
-                    var n2 = idx[i + 1];
-                    var n3 = idx[i + 2];
-                    var v1 = vtx[(int)n1];
-                    var v2 = vtx[(int)n2];
-                    var v3 = vtx[(int)n3];
-                    var normal = VectorFuncs.CalcNormal(v1.Pos, v2.Pos, v3.Pos);
+                    uint n1 = idx[i];
+                    uint n2 = idx[i + 1];
+                    uint n3 = idx[i + 2];
+                    Vertex v1 = vtx[(int)n1];
+                    Vertex v2 = vtx[(int)n2];
+                    Vertex v3 = vtx[(int)n3];
+                    Vector3 normal = VectorFuncs.CalcNormal(v1.Pos, v2.Pos, v3.Pos);
                     v1.Nor += normal;
                     v2.Nor += normal;
                     v3.Nor += normal;
@@ -162,20 +162,22 @@ namespace TwinsanityEditor
             Indices.Clear();
             JointInfos.Clear();
 
-            var refIndex = 0U;
+            uint refIndex = 0U;
 
-            var isSpyroModel = false;
+            bool isSpyroModel = false;
             if (DefaultHashes.Hash_BlendSkins.ContainsKey(Data.ID) && DefaultHashes.Hash_BlendSkins[Data.ID] == "Spyro")
+            {
                 isSpyroModel = true;
+            }
 
-            foreach (var rigidModel in Data.Models)
+            foreach (BlendSkin.BlendSkinRigidModel rigidModel in Data.Models)
             {
                 List<Vertex> vtx = new List<Vertex>();
                 List<uint> idx = new List<uint>();
                 List<BlendSkin.JointInfo> jointInfos = new List<BlendSkin.JointInfo>();
-                foreach (var model in rigidModel.SubModels)
+                foreach (BlendSkin.BlendSkinSubModel model in rigidModel.SubModels)
                 {
-                    for (var j = 0; j < model.Vertexes.Count; ++j)
+                    for (int j = 0; j < model.Vertexes.Count; ++j)
                     {
                         if (j < model.Vertexes.Count - 2)
                         {
@@ -188,13 +190,13 @@ namespace TwinsanityEditor
                             ++refIndex;
                         }
                         Color col = Color.FromArgb(model.Vertexes[j].A, model.Vertexes[j].R, model.Vertexes[j].G, model.Vertexes[j].B);
-                        var blendVec = new Vector3(-model.Vertexes[j].BlendShapes[blendShape].Offset.X,
+                        Vector3 blendVec = new Vector3(-model.Vertexes[j].BlendShapes[blendShape].Offset.X,
                             model.Vertexes[j].BlendShapes[blendShape].Offset.Y,
                             model.Vertexes[j].BlendShapes[blendShape].Offset.Z);
                         blendVec *= shapeWeight;
-                        var x_comp = -model.Vertexes[j].X + blendVec.X;
-                        var y_comp = model.Vertexes[j].Y + blendVec.Y;
-                        var z_comp = model.Vertexes[j].Z + blendVec.Z;
+                        float x_comp = -model.Vertexes[j].X + blendVec.X;
+                        float y_comp = model.Vertexes[j].Y + blendVec.Y;
+                        float z_comp = model.Vertexes[j].Z + blendVec.Z;
                         if (isSpyroModel)
                         { // Spyro model specifically doesn't need UV flipping
                             vtx.Add(new Vertex(new Vector3(x_comp, y_comp, z_comp),
@@ -215,13 +217,13 @@ namespace TwinsanityEditor
 
                 for (int i = 0; i < idx.Count; i += 3)
                 {
-                    var n1 = idx[i];
-                    var n2 = idx[i + 1];
-                    var n3 = idx[i + 2];
-                    var v1 = vtx[(int)n1];
-                    var v2 = vtx[(int)n2];
-                    var v3 = vtx[(int)n3];
-                    var normal = VectorFuncs.CalcNormal(v1.Pos, v2.Pos, v3.Pos);
+                    uint n1 = idx[i];
+                    uint n2 = idx[i + 1];
+                    uint n3 = idx[i + 2];
+                    Vertex v1 = vtx[(int)n1];
+                    Vertex v2 = vtx[(int)n2];
+                    Vertex v3 = vtx[(int)n3];
+                    Vector3 normal = VectorFuncs.CalcNormal(v1.Pos, v2.Pos, v3.Pos);
                     v1.Nor += normal;
                     v2.Nor += normal;
                     v3.Nor += normal;
@@ -238,15 +240,15 @@ namespace TwinsanityEditor
 
         public List<Vector3[]> GetFacialPositions(int blendShape, float faceProgress)
         {
-            var faceOffsets = new List<Vector3[]>();
-            foreach (var rigidModel in Data.Models)
+            List<Vector3[]> faceOffsets = new List<Vector3[]>();
+            foreach (BlendSkin.BlendSkinRigidModel rigidModel in Data.Models)
             {
-                var modelFace = new List<Vector3>();
-                foreach (var model in rigidModel.SubModels)
+                List<Vector3> modelFace = new List<Vector3>();
+                foreach (BlendSkin.BlendSkinSubModel model in rigidModel.SubModels)
                 {
-                    for (var j = 0; j < model.Vertexes.Count; ++j)
+                    for (int j = 0; j < model.Vertexes.Count; ++j)
                     {
-                        var blendVec = new Vector3(-model.Vertexes[j].BlendShapes[blendShape].Offset.X,
+                        Vector3 blendVec = new Vector3(-model.Vertexes[j].BlendShapes[blendShape].Offset.X,
                             model.Vertexes[j].BlendShapes[blendShape].Offset.Y,
                             model.Vertexes[j].BlendShapes[blendShape].Offset.Z);
                         blendVec *= faceProgress;

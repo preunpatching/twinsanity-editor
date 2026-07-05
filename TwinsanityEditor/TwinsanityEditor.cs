@@ -26,7 +26,9 @@ namespace TwinsanityEditor
                 string path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
                 path = Path.Combine(path, IntPtr.Size == 8 ? "x64" : "x86");
                 if (!SetDllDirectory(path))
+                {
                     throw new System.ComponentModel.Win32Exception();
+                }
             }
 
             Application.EnableVisualStyles();

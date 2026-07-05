@@ -1,50 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Twinsanity.VIF
 {
     public class VIFInterpreter
     {
-        public UInt32[] VIFn_R = { 0, 0, 0, 0 };
-        public UInt32[] VIFn_C = { 0, 0, 0, 0 };
-        public UInt32 VIFn_CYCLE;
-        public UInt32 VIFn_MASK;
-        public UInt32 VIFn_MODE;
-        public UInt32 VIFn_ITOP;
-        public UInt32 VIFn_ITOPS;
-        public UInt32 VIF1_BASE;
-        public UInt32 VIF1_OFST;
-        public UInt32 VIF1_TOP;
-        public UInt32 VIF1_TOPS;
-        public UInt32 VIFn_MARK;
-        public UInt32 VIFn_NUM;
-        public UInt32 VIFn_CODE;
+        public uint[] VIFn_R = { 0, 0, 0, 0 };
+        public uint[] VIFn_C = { 0, 0, 0, 0 };
+        public uint VIFn_CYCLE;
+        public uint VIFn_MASK;
+        public uint VIFn_MODE;
+        public uint VIFn_ITOP;
+        public uint VIFn_ITOPS;
+        public uint VIF1_BASE;
+        public uint VIF1_OFST;
+        public uint VIF1_TOP;
+        public uint VIF1_TOPS;
+        public uint VIFn_MARK;
+        public uint VIFn_NUM;
+        public uint VIFn_CODE;
 
-        private List<List<Vector4>> VUMem = new List<List<Vector4>>();
-        private List<GIFTag> GifBuffer = new List<GIFTag>();
-        private List<UInt32> tmpStack = new List<UInt32>();
-        private List<List<UInt16>> AddressOuput = new List<List<UInt16>>();
+        private readonly List<List<Vector4>> VUMem = new List<List<Vector4>>();
+        private readonly List<GIFTag> GifBuffer = new List<GIFTag>();
+        private readonly List<uint> tmpStack = new List<uint>();
+        private readonly List<List<ushort>> AddressOuput = new List<List<ushort>>();
 
         // Wrapper function for generating Interpreter instances
         public static VIFInterpreter InterpretCode(BinaryReader reader)
         {
             DMATag tag = new DMATag();
             tag.Read(reader);
-            using (var mem = new MemoryStream())
-            using (var writer = new BinaryWriter(mem))
+            using (MemoryStream mem = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(mem))
             {
                 // Transfer tag's extra data and its QWC data to VIF
                 writer.Write(tag.Extra);
                 writer.Write(reader.ReadBytes(tag.QWC * 0x10));
                 mem.Position = 0;
-                using (var vifReader = new BinaryReader(mem))
+                using (BinaryReader vifReader = new BinaryReader(mem))
                 {
-                    var vifCode = new VIFInterpreter();
+                    VIFInterpreter vifCode = new VIFInterpreter();
                     vifCode.Execute(vifReader);
                     return vifCode;
                 }
@@ -52,7 +48,7 @@ namespace Twinsanity.VIF
         }
 
         // Wrapper function for generating Interpreter instances using pure bytecode
-        public static VIFInterpreter InterpretCode(Byte[] code)
+        public static VIFInterpreter InterpretCode(byte[] code)
         {
             using (MemoryStream codeStr = new MemoryStream(code))
             {
@@ -69,7 +65,7 @@ namespace Twinsanity.VIF
             return VUMem;
         }
 
-        public List<List<UInt16>> GetAddressOutput()
+        public List<List<ushort>> GetAddressOutput()
         {
             return AddressOuput;
         }
@@ -87,40 +83,40 @@ namespace Twinsanity.VIF
                 vif.Read(reader);
                 if (vif.isUnpack())
                 {
-                    Byte cmd = (Byte)vif.OP;
-                    Byte vn = (Byte)((cmd & 0b1100) >> 2);
-                    Byte vl = (Byte)((cmd & 0b0011) >> 0);
-                    Byte m = (Byte)((cmd & 0b10000) >> 4);
-                    Byte amount = vif.Amount;
-                    UInt16 addr = (UInt16)(vif.Immediate & 0b111111111);
-                    Byte usn = (Byte)(vif.Immediate & 0b0100000000000000);
-                    Byte flg = (Byte)(vif.Immediate & 0b1000000000000000);
-                    Byte WL = (Byte)((VIFn_CYCLE >> 8) & 0xFF);
-                    Byte CL = (Byte)((VIFn_CYCLE >> 0) & 0xFF);
-                    UInt32 dimensions = (UInt32)(vn + 1);
-                    UInt32 packet_length = 0;
-                    Boolean fill = WL > CL;
+                    byte cmd = (byte)vif.OP;
+                    byte vn = (byte)((cmd & 0b1100) >> 2);
+                    byte vl = (byte)((cmd & 0b0011) >> 0);
+                    _ = (byte)((cmd & 0b10000) >> 4);
+                    byte amount = vif.Amount;
+                    ushort addr = (ushort)(vif.Immediate & 0b111111111);
+                    byte usn = (byte)(vif.Immediate & 0b0100000000000000);
+                    _ = (byte)(vif.Immediate & 0b1000000000000000);
+                    byte WL = (byte)((VIFn_CYCLE >> 8) & 0xFF);
+                    byte CL = (byte)((VIFn_CYCLE >> 0) & 0xFF);
+                    uint dimensions = (uint)(vn + 1);
+                    bool fill = WL > CL;
+                    uint packet_length;
                     //Console.WriteLine($"Total cycle specifier {CL}");
                     //Console.WriteLine($"Write cycle specifier {WL}");
                     if (!fill)
                     {
-                        UInt32 a = (UInt32)(32 >> vl);
-                        UInt32 b = dimensions;
-                        Single c = (Single)(a * b * amount);
-                        Single d = c / 32.0f;
-                        Single e = (Single)Math.Ceiling(d);
-                        UInt32 f = (UInt32)e;
+                        uint a = (uint)(32 >> vl);
+                        uint b = dimensions;
+                        float c = a * b * amount;
+                        float d = c / 32.0f;
+                        float e = (float)Math.Ceiling(d);
+                        uint f = (uint)e;
                         packet_length = 1 + f;
                     }
                     else
                     {
-                        UInt32 n = (UInt32)(CL * (amount / WL) + ((amount % WL) > CL ? CL : (amount % WL)));
-                        UInt32 a = (UInt32)(32 >> vl);
-                        UInt32 b = dimensions;
-                        Single c = (Single)(a * b * n);
-                        Single d = c / 32.0f;
-                        Single e = (Single)Math.Ceiling(d);
-                        UInt32 f = (UInt32)e;
+                        uint n = (uint)((CL * (amount / WL)) + ((amount % WL) > CL ? CL : (amount % WL)));
+                        uint a = (uint)(32 >> vl);
+                        uint b = dimensions;
+                        float c = a * b * n;
+                        float d = c / 32.0f;
+                        float e = (float)Math.Ceiling(d);
+                        uint f = (uint)e;
                         packet_length = 1 + f;
                     }
                     //Console.WriteLine($"VU memory address 0x{addr:x}");
@@ -207,10 +203,10 @@ namespace Twinsanity.VIF
                             //throw new NotImplementedException();
                             break;
                         case VIFCodeEnum.DIRECT:
-                            UInt32 amount = (UInt32)((vif.Immediate == 0) ? 65536 * 16 : vif.Immediate * 16);
+                            _ = (uint)((vif.Immediate == 0) ? 65536 * 16 : vif.Immediate * 16);
                             GifBuffer.Clear();
-                            bool flag = false;
                             int len = 0;
+                            bool flag;
                             do
                             {
                                 GIFTag tag = new GIFTag();
@@ -229,19 +225,19 @@ namespace Twinsanity.VIF
             }
         }
 
-        private void SEXT(ref UInt32 n)
+        private void SEXT(ref uint n)
         {
             n = ((n & 0x8000) != 0) ? n | 0xFFFF0000 : n;
         }
 
-        private void SEXT8(ref UInt32 n)
+        private void SEXT8(ref uint n)
         {
             n = ((n & 0x80) != 0) ? n | 0xFFFFFF00 : n;
         }
 
-        private void Unpack(List<UInt32> src, List<Vector4> dst, PackFormat fmt, Byte amount, Byte unsigned, Boolean fill, Byte write, Byte cycle, UInt16 addr)
+        private void Unpack(List<uint> src, List<Vector4> dst, PackFormat fmt, byte amount, byte unsigned, bool fill, byte write, byte cycle, ushort addr)
         {
-            var srcIdx = 0;
+            int srcIdx = 0;
             switch (fmt)
             {
                 case PackFormat.S_32:
@@ -260,8 +256,8 @@ namespace Twinsanity.VIF
                     for (int i = 0; i < amount; ++i)
                     {
                         Vector4 v1 = new Vector4();
-                        var mask = (i % 2 == 0) ? 0x0000FFFF : 0xFFFF0000;
-                        UInt32 w1 = src[srcIdx] & mask;
+                        uint mask = (i % 2 == 0) ? 0x0000FFFF : 0xFFFF0000;
+                        uint w1 = src[srcIdx] & mask;
                         if (i % 2 != 0)
                         {
                             w1 >>= 16;
@@ -282,8 +278,8 @@ namespace Twinsanity.VIF
                     for (int i = 0; i < amount; ++i)
                     {
                         Vector4 v1 = new Vector4();
-                        UInt32 mask = 0x000000FF;
-                        var shift = 0;
+                        uint mask = 0x000000FF;
+                        int shift = 0;
                         switch (i % 4)
                         {
                             case 1:
@@ -299,7 +295,7 @@ namespace Twinsanity.VIF
                                 shift = 24;
                                 break;
                         }
-                        UInt32 w1 = (src[srcIdx] & mask) >> shift;
+                        uint w1 = (src[srcIdx] & mask) >> shift;
                         if (unsigned == 0)
                         {
                             SEXT8(ref w1);
@@ -319,8 +315,8 @@ namespace Twinsanity.VIF
                     for (int i = 0; i < src.Count / 2; ++i)
                     {
                         Vector4 v = new Vector4();
-                        v.SetBinaryX(src[i * 2 + 0] + (IsInOffsetMode() ? VIFn_R[0] : 0));
-                        v.SetBinaryY(src[i * 2 + 1] + (IsInOffsetMode() ? VIFn_R[1] : 0));
+                        v.SetBinaryX(src[(i * 2) + 0] + (IsInOffsetMode() ? VIFn_R[0] : 0));
+                        v.SetBinaryY(src[(i * 2) + 1] + (IsInOffsetMode() ? VIFn_R[1] : 0));
                         Fill(dst, v, i, fill, write, cycle, ref addr);
                     }
                     break;
@@ -328,8 +324,8 @@ namespace Twinsanity.VIF
                     for (int i = 0; i < src.Count; ++i)
                     {
                         Vector4 v = new Vector4();
-                        UInt32 w1 = src[i] & 0x0000FFFF;
-                        UInt32 w2 = (src[i] & 0xFFFF0000) >> 16;
+                        uint w1 = src[i] & 0x0000FFFF;
+                        uint w2 = (src[i] & 0xFFFF0000) >> 16;
                         if (unsigned == 0)
                         {
                             SEXT(ref w1);
@@ -344,8 +340,8 @@ namespace Twinsanity.VIF
                     for (int i = 0; i < amount; ++i)
                     {
                         Vector4 v1 = new Vector4();
-                        UInt32[] mask = { 0x000000FF, 0x0000FF00 };
-                        Int32[] shift = { 0, 8 };
+                        uint[] mask = { 0x000000FF, 0x0000FF00 };
+                        int[] shift = { 0, 8 };
                         if (i % 2 != 0)
                         {
                             mask[0] = 0x00FF0000;
@@ -353,8 +349,8 @@ namespace Twinsanity.VIF
                             shift[0] = 16;
                             shift[1] = 24;
                         }
-                        UInt32 w1 = (Byte)((src[srcIdx] & mask[0]) >> shift[0]);
-                        UInt32 w2 = (Byte)((src[srcIdx] & mask[1]) >> shift[1]);
+                        uint w1 = (byte)((src[srcIdx] & mask[0]) >> shift[0]);
+                        uint w2 = (byte)((src[srcIdx] & mask[1]) >> shift[1]);
                         if (unsigned == 0)
                         {
                             SEXT8(ref w1);
@@ -374,17 +370,17 @@ namespace Twinsanity.VIF
                     for (int i = 0; i < src.Count / 3; ++i)
                     {
                         Vector4 v = new Vector4();
-                        v.SetBinaryX(src[i * 3 + 0] + (IsInOffsetMode() ? VIFn_R[0] : 0));
-                        v.SetBinaryY(src[i * 3 + 1] + (IsInOffsetMode() ? VIFn_R[1] : 0));
-                        v.SetBinaryZ(src[i * 3 + 2] + (IsInOffsetMode() ? VIFn_R[2] : 0));
+                        v.SetBinaryX(src[(i * 3) + 0] + (IsInOffsetMode() ? VIFn_R[0] : 0));
+                        v.SetBinaryY(src[(i * 3) + 1] + (IsInOffsetMode() ? VIFn_R[1] : 0));
+                        v.SetBinaryZ(src[(i * 3) + 2] + (IsInOffsetMode() ? VIFn_R[2] : 0));
                         Fill(dst, v, i, fill, write, cycle, ref addr);
                     }
                     break;
                 case PackFormat.V3_16:
                     for (int i = 0; i < amount; ++i)
                     {
-                        UInt32[] mask = { 0x0000FFFF, 0xFFFF0000 };
-                        Int32[] shift = { 0, 16 };
+                        uint[] mask = { 0x0000FFFF, 0xFFFF0000 };
+                        int[] shift = { 0, 16 };
                         if (i % 2 != 0)
                         {
                             mask[0] = 0xFFFF0000;
@@ -393,17 +389,17 @@ namespace Twinsanity.VIF
                             shift[1] = 0;
                         }
                         Vector4 v1 = new Vector4();
-                        UInt32 w1 = (src[srcIdx] & mask[0]) >> shift[0];
+                        uint w1 = (src[srcIdx] & mask[0]) >> shift[0];
                         if (i % 2 != 0)
                         {
                             srcIdx++;
                         }
-                        UInt32 w2 = (src[srcIdx] & mask[1]) >> shift[1];
+                        uint w2 = (src[srcIdx] & mask[1]) >> shift[1];
                         if (i % 2 == 0)
                         {
                             srcIdx++;
                         }
-                        UInt32 w3 = (src[srcIdx] & mask[0]) >> shift[0];
+                        uint w3 = (src[srcIdx] & mask[0]) >> shift[0];
                         if (i % 2 != 0)
                         {
                             srcIdx++;
@@ -425,9 +421,9 @@ namespace Twinsanity.VIF
                     {
                         Vector4 v1 = new Vector4();
                         // Is this scuffed? This is 100% scuffed
-                        UInt32[] mask = { 0x000000FF, 0x0000FF00, 0x00FF0000 };
-                        Int32[] shift = { 0, 8, 16 };
-                        Boolean[] incIdx = { false, false, false };
+                        uint[] mask = { 0x000000FF, 0x0000FF00, 0x00FF0000 };
+                        int[] shift = { 0, 8, 16 };
+                        bool[] incIdx = { false, false, false };
                         switch (i % 4)
                         {
                             case 1:
@@ -458,12 +454,24 @@ namespace Twinsanity.VIF
                                 incIdx[2] = true;
                                 break;
                         }
-                        UInt32 w1 = (Byte)((src[srcIdx] & mask[0]) >> shift[0]);
-                        if (incIdx[0]) srcIdx++;
-                        UInt32 w2 = (Byte)((src[srcIdx] & mask[1]) >> shift[1]);
-                        if (incIdx[1]) srcIdx++;
-                        UInt32 w3 = (Byte)((src[srcIdx] & mask[2]) >> shift[2]);
-                        if (incIdx[2]) srcIdx++;
+                        uint w1 = (byte)((src[srcIdx] & mask[0]) >> shift[0]);
+                        if (incIdx[0])
+                        {
+                            srcIdx++;
+                        }
+
+                        uint w2 = (byte)((src[srcIdx] & mask[1]) >> shift[1]);
+                        if (incIdx[1])
+                        {
+                            srcIdx++;
+                        }
+
+                        uint w3 = (byte)((src[srcIdx] & mask[2]) >> shift[2]);
+                        if (incIdx[2])
+                        {
+                            srcIdx++;
+                        }
+
                         if (unsigned == 0)
                         {
                             SEXT8(ref w1);
@@ -480,10 +488,10 @@ namespace Twinsanity.VIF
                     for (int i = 0; i < src.Count / 4; ++i)
                     {
                         Vector4 v = new Vector4();
-                        v.SetBinaryX(src[i * 4 + 0] + (IsInOffsetMode() ? VIFn_R[0] : 0));
-                        v.SetBinaryY(src[i * 4 + 1] + (IsInOffsetMode() ? VIFn_R[1] : 0));
-                        v.SetBinaryZ(src[i * 4 + 2] + (IsInOffsetMode() ? VIFn_R[2] : 0));
-                        v.SetBinaryW(src[i * 4 + 3] + (IsInOffsetMode() ? VIFn_R[3] : 0));
+                        v.SetBinaryX(src[(i * 4) + 0] + (IsInOffsetMode() ? VIFn_R[0] : 0));
+                        v.SetBinaryY(src[(i * 4) + 1] + (IsInOffsetMode() ? VIFn_R[1] : 0));
+                        v.SetBinaryZ(src[(i * 4) + 2] + (IsInOffsetMode() ? VIFn_R[2] : 0));
+                        v.SetBinaryW(src[(i * 4) + 3] + (IsInOffsetMode() ? VIFn_R[3] : 0));
                         Fill(dst, v, i, fill, write, cycle, ref addr);
                     }
                     break;
@@ -491,10 +499,10 @@ namespace Twinsanity.VIF
                     for (int i = 0; i < src.Count / 2; ++i)
                     {
                         Vector4 v = new Vector4();
-                        UInt32 w1 = src[i * 2] & 0x0000FFFF;
-                        UInt32 w2 = (src[i * 2] & 0xFFFF0000) >> 16;
-                        UInt32 w3 = src[i * 2 + 1] & 0x0000FFFF;
-                        UInt32 w4 = (src[i * 2 + 1] & 0xFFFF0000) >> 16;
+                        uint w1 = src[i * 2] & 0x0000FFFF;
+                        uint w2 = (src[i * 2] & 0xFFFF0000) >> 16;
+                        uint w3 = src[(i * 2) + 1] & 0x0000FFFF;
+                        uint w4 = (src[(i * 2) + 1] & 0xFFFF0000) >> 16;
                         if (unsigned == 0)
                         {
                             SEXT(ref w1);
@@ -513,10 +521,10 @@ namespace Twinsanity.VIF
                     for (int i = 0; i < src.Count; ++i)
                     {
                         Vector4 v = new Vector4();
-                        UInt32 w1 = (Byte)(src[i] & 0x000000FF);
-                        UInt32 w2 = (Byte)((src[i] & 0x0000FF00) >> 8);
-                        UInt32 w3 = (Byte)((src[i] & 0x00FF0000) >> 16);
-                        UInt32 w4 = (Byte)((src[i] & 0xFF000000) >> 24);
+                        uint w1 = (byte)(src[i] & 0x000000FF);
+                        uint w2 = (byte)((src[i] & 0x0000FF00) >> 8);
+                        uint w3 = (byte)((src[i] & 0x00FF0000) >> 16);
+                        uint w4 = (byte)((src[i] & 0xFF000000) >> 24);
                         if (unsigned == 0)
                         {
                             SEXT8(ref w1);
@@ -534,8 +542,8 @@ namespace Twinsanity.VIF
                 case PackFormat.V4_5:
                     for (int i = 0; i < amount; ++i)
                     {
-                        var mask = (i % 2 == 0) ? 0x0000FFFF : 0xFFFF0000;
-                        UInt32 rgba1 = src[srcIdx] & mask;
+                        uint mask = (i % 2 == 0) ? 0x0000FFFF : 0xFFFF0000;
+                        uint rgba1 = src[srcIdx] & mask;
                         if (i % 2 != 0)
                         {
                             rgba1 >>= 16;
@@ -543,10 +551,10 @@ namespace Twinsanity.VIF
                         }
                         Color c1 = new Color
                         {
-                            R = (Byte)(rgba1 & 0b11111 << 3),
-                            G = (Byte)((rgba1 & (0b11111 << 5)) >> 5 << 3),
-                            B = (Byte)((rgba1 & (0b11111 << 10)) >> 10 << 3),
-                            A = (Byte)((rgba1 & (0b1 << 15)) >> 15 << 7)
+                            R = (byte)(rgba1 & (0b11111 << 3)),
+                            G = (byte)((rgba1 & (0b11111 << 5)) >> 5 << 3),
+                            B = (byte)((rgba1 & (0b11111 << 10)) >> 10 << 3),
+                            A = (byte)((rgba1 & (0b1 << 15)) >> 15 << 7)
                         };
                         Fill(dst, c1.GetVector(), i, fill, write, cycle, ref addr);
                     }
@@ -554,24 +562,24 @@ namespace Twinsanity.VIF
             }
         }
 
-        private void Pack(List<Vector4> src, List<UInt32> dst, PackFormat fmt)
+        private void Pack(List<Vector4> src, List<uint> dst, PackFormat fmt)
         {
-            UInt32 resUInt = 0;
+            uint resUInt = 0;
             switch (fmt)
             {
                 case PackFormat.S_32:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
                         dst.Add(src[i].GetBinaryX());
                     }
                     break;
                 case PackFormat.S_16:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
-                        var vecPart = (src[i].GetBinaryX() & 0xFFFF);
+                        uint vecPart = src[i].GetBinaryX() & 0xFFFF;
                         if (i % 2 != 0)
                         {
-                            resUInt |= (vecPart << 16);
+                            resUInt |= vecPart << 16;
                             dst.Add(resUInt);
                             resUInt = 0; // Reset bits
                         }
@@ -587,22 +595,22 @@ namespace Twinsanity.VIF
                     }
                     break;
                 case PackFormat.S_8:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
-                        var vecPart = (src[i].GetBinaryX() & 0xFF);
+                        uint vecPart = src[i].GetBinaryX() & 0xFF;
                         switch (i % 4)
                         {
                             case 0:
                                 resUInt |= vecPart;
                                 break;
                             case 1:
-                                resUInt |= (vecPart << 8);
+                                resUInt |= vecPart << 8;
                                 break;
                             case 2:
-                                resUInt |= (vecPart << 16);
+                                resUInt |= vecPart << 16;
                                 break;
                             case 3:
-                                resUInt |= (vecPart << 24);
+                                resUInt |= vecPart << 24;
                                 dst.Add(resUInt);
                                 resUInt = 0; // Reset bits
                                 break;
@@ -615,14 +623,14 @@ namespace Twinsanity.VIF
                     }
                     break;
                 case PackFormat.V2_32:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
                         dst.Add(src[i].GetBinaryX());
                         dst.Add(src[i].GetBinaryY());
                     }
                     break;
                 case PackFormat.V2_16:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
                         resUInt |= src[i].GetBinaryX() & 0xFFFF;
                         resUInt |= (src[i].GetBinaryY() & 0xFFFF) << 16;
@@ -631,21 +639,21 @@ namespace Twinsanity.VIF
                     }
                     break;
                 case PackFormat.V2_8:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
-                        var vecX = src[i].GetBinaryX() & 0xFF;
-                        var vecY = src[i].GetBinaryY() & 0xFF;
+                        uint vecX = src[i].GetBinaryX() & 0xFF;
+                        uint vecY = src[i].GetBinaryY() & 0xFF;
                         if (i % 2 != 0)
                         {
-                            resUInt |= (vecX << 16);
-                            resUInt |= (vecY << 24);
+                            resUInt |= vecX << 16;
+                            resUInt |= vecY << 24;
                             dst.Add(resUInt);
                             resUInt = 0; // Reset bits
                         }
                         else
                         {
                             resUInt |= vecX;
-                            resUInt |= (vecY << 8);
+                            resUInt |= vecY << 8;
                             // Add last vector with padding 0 bits
                             if (i == src.Count - 1)
                             {
@@ -655,7 +663,7 @@ namespace Twinsanity.VIF
                     }
                     break;
                 case PackFormat.V3_32:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
                         dst.Add(src[i].GetBinaryX());
                         dst.Add(src[i].GetBinaryY());
@@ -663,25 +671,25 @@ namespace Twinsanity.VIF
                     }
                     break;
                 case PackFormat.V3_16:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
-                        var vecX = src[i].GetBinaryX() & 0xFFFF;
-                        var vecY = src[i].GetBinaryY() & 0xFFFF;
-                        var vecZ = src[i].GetBinaryZ() & 0xFFFF;
+                        uint vecX = src[i].GetBinaryX() & 0xFFFF;
+                        uint vecY = src[i].GetBinaryY() & 0xFFFF;
+                        uint vecZ = src[i].GetBinaryZ() & 0xFFFF;
                         if (i % 2 != 0)
                         {
-                            resUInt |= (vecX << 16);
+                            resUInt |= vecX << 16;
                             dst.Add(resUInt);
                             resUInt = 0; // Reset bits
                             resUInt |= vecY;
-                            resUInt |= (vecZ << 16);
+                            resUInt |= vecZ << 16;
                             dst.Add(resUInt);
                             resUInt = 0; // Reset bits
                         }
                         else
                         {
                             resUInt |= vecX;
-                            resUInt |= (vecY << 16);
+                            resUInt |= vecY << 16;
                             dst.Add(resUInt);
                             resUInt = 0; // Reset bits
                             resUInt |= vecZ;
@@ -694,36 +702,36 @@ namespace Twinsanity.VIF
                     }
                     break;
                 case PackFormat.V3_8:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
-                        var vecX = src[i].GetBinaryX() & 0xFF;
-                        var vecY = src[i].GetBinaryY() & 0xFF;
-                        var vecZ = src[i].GetBinaryZ() & 0xFF;
+                        uint vecX = src[i].GetBinaryX() & 0xFF;
+                        uint vecY = src[i].GetBinaryY() & 0xFF;
+                        uint vecZ = src[i].GetBinaryZ() & 0xFF;
                         switch (i % 4)
                         {
                             case 0:
                                 resUInt |= vecX;
-                                resUInt |= (vecY << 8);
-                                resUInt |= (vecZ << 16);
+                                resUInt |= vecY << 8;
+                                resUInt |= vecZ << 16;
                                 break;
                             case 1:
-                                resUInt |= (vecX << 24);
+                                resUInt |= vecX << 24;
                                 dst.Add(resUInt);
                                 resUInt = 0; // Reset bits
                                 resUInt |= vecY;
-                                resUInt |= (vecZ << 8);
+                                resUInt |= vecZ << 8;
                                 break;
                             case 2:
-                                resUInt |= (vecX << 16);
-                                resUInt |= (vecY << 24);
+                                resUInt |= vecX << 16;
+                                resUInt |= vecY << 24;
                                 dst.Add(resUInt);
                                 resUInt = 0; // Reset bits
                                 resUInt |= vecZ;
                                 break;
                             case 3:
-                                resUInt |= (vecX << 8);
-                                resUInt |= (vecY << 16);
-                                resUInt |= (vecZ << 24);
+                                resUInt |= vecX << 8;
+                                resUInt |= vecY << 16;
+                                resUInt |= vecZ << 24;
                                 dst.Add(resUInt);
                                 resUInt = 0; // Reset bits
                                 break;
@@ -736,7 +744,7 @@ namespace Twinsanity.VIF
                     }
                     break;
                 case PackFormat.V4_32:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
                         dst.Add(src[i].GetBinaryX());
                         dst.Add(src[i].GetBinaryY());
@@ -745,60 +753,60 @@ namespace Twinsanity.VIF
                     }
                     break;
                 case PackFormat.V4_16:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
-                        var vecX = src[i].GetBinaryX() & 0xFFFF;
-                        var vecY = src[i].GetBinaryY() & 0xFFFF;
-                        var vecZ = src[i].GetBinaryZ() & 0xFFFF;
-                        var vecW = src[i].GetBinaryW() & 0xFFFF;
+                        uint vecX = src[i].GetBinaryX() & 0xFFFF;
+                        uint vecY = src[i].GetBinaryY() & 0xFFFF;
+                        uint vecZ = src[i].GetBinaryZ() & 0xFFFF;
+                        uint vecW = src[i].GetBinaryW() & 0xFFFF;
                         resUInt |= vecX;
-                        resUInt |= (vecY << 16);
+                        resUInt |= vecY << 16;
                         dst.Add(resUInt);
                         resUInt = 0; // Reset bits
                         resUInt |= vecZ;
-                        resUInt |= (vecW << 16);
+                        resUInt |= vecW << 16;
                         dst.Add(resUInt);
                         resUInt = 0; // Reset bits
                     }
                     break;
                 case PackFormat.V4_8:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
-                        var vecX = src[i].GetBinaryX() & 0xFF;
-                        var vecY = src[i].GetBinaryY() & 0xFF;
-                        var vecZ = src[i].GetBinaryZ() & 0xFF;
-                        var vecW = src[i].GetBinaryW() & 0xFF;
+                        uint vecX = src[i].GetBinaryX() & 0xFF;
+                        uint vecY = src[i].GetBinaryY() & 0xFF;
+                        uint vecZ = src[i].GetBinaryZ() & 0xFF;
+                        uint vecW = src[i].GetBinaryW() & 0xFF;
                         resUInt |= vecX;
-                        resUInt |= (vecY << 8);
-                        resUInt |= (vecZ << 16);
-                        resUInt |= (vecW << 24);
+                        resUInt |= vecY << 8;
+                        resUInt |= vecZ << 16;
+                        resUInt |= vecW << 24;
                         dst.Add(resUInt);
                         resUInt = 0; // Reset bits
                     }
                     break;
                 case PackFormat.V4_5:
-                    for (var i = 0; i < src.Count; ++i)
+                    for (int i = 0; i < src.Count; ++i)
                     {
-                        var c = src[i].GetColor();
-                        UInt32 r = (UInt32)c.R >> 3 & 0b11111;
-                        UInt32 g = (UInt32)c.G >> 3 & 0b11111;
-                        UInt32 b = (UInt32)c.B >> 3 & 0b11111;
-                        UInt32 a = (UInt32)c.A >> 7 & 0b1;
+                        Color c = src[i].GetColor();
+                        uint r = ((uint)c.R >> 3) & 0b11111;
+                        uint g = ((uint)c.G >> 3) & 0b11111;
+                        uint b = ((uint)c.B >> 3) & 0b11111;
+                        uint a = ((uint)c.A >> 7) & 0b1;
                         if (i % 2 != 0)
                         {
-                            resUInt |= (r << 16);
-                            resUInt |= (g << 21);
-                            resUInt |= (b << 26);
-                            resUInt |= (a << 31);
+                            resUInt |= r << 16;
+                            resUInt |= g << 21;
+                            resUInt |= b << 26;
+                            resUInt |= a << 31;
                             dst.Add(resUInt);
                             resUInt = 0; // Reset bits
                         }
                         else
                         {
                             resUInt |= r;
-                            resUInt |= (g << 5);
-                            resUInt |= (b << 10);
-                            resUInt |= (a << 15);
+                            resUInt |= g << 5;
+                            resUInt |= b << 10;
+                            resUInt |= a << 15;
                             // Add last vector with padding 0 bits
                             if (i == src.Count - 1)
                             {
@@ -810,16 +818,16 @@ namespace Twinsanity.VIF
             }
         }
 
-        private void Fill(List<Vector4> dst, Vector4 vec, Int32 index, Boolean fill, Byte wl, Byte cl, ref UInt16 addr)
+        private void Fill(List<Vector4> dst, Vector4 vec, int index, bool fill, byte wl, byte cl, ref ushort addr)
         {
             // Fill writing
             if (fill)
             {
-                var doFill = ((index + 1) % cl == 0);
+                bool doFill = (index + 1) % cl == 0;
                 dst[addr++] = vec;
                 if (doFill)
                 {
-                    var fillVec = new Vector4();
+                    Vector4 fillVec = new Vector4();
                     fillVec.SetBinaryX(VIFn_R[0]);
                     fillVec.SetBinaryY(VIFn_R[1]);
                     fillVec.SetBinaryZ(VIFn_R[2]);
@@ -832,20 +840,20 @@ namespace Twinsanity.VIF
                 return;
             }
             // Skip writing
-            var nullVec = new Vector4();
-            var skipAmt = cl - wl;
+            _ = new Vector4();
+            int skipAmt = cl - wl;
             dst[addr++] = vec;
             if (wl != 0)
             {
-                var doSkip = ((index + 1) % wl == 0);
+                bool doSkip = (index + 1) % wl == 0;
                 if (doSkip)
                 {
-                    addr += (UInt16)skipAmt;
+                    addr += (ushort)skipAmt;
                 }
             }
         }
 
-        private Boolean IsInOffsetMode()
+        private bool IsInOffsetMode()
         {
             return (VIFn_MODE & 0b01) == 1;
         }

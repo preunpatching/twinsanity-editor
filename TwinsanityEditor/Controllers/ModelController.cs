@@ -1,6 +1,6 @@
 ﻿using OpenTK;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -17,7 +17,7 @@ namespace TwinsanityEditor
         public List<uint[]> Indices { get; set; } = new List<uint[]>();
         public bool IsLoaded { get; private set; }
 
-        public ModelController(MainForm topform, Model item) : base (topform, item)
+        public ModelController(MainForm topform, Model item) : base(topform, item)
         {
             Data = item;
             AddMenu("Export to PLY", Menu_ExportPLY);
@@ -34,10 +34,10 @@ namespace TwinsanityEditor
         protected override void GenText()
         {
             //TODO use array
-            var ex_lines = new List<string>();
+            List<string> ex_lines = new List<string>();
             for (int i = 0; i < Data.SubModels.Count; ++i)
             {
-                var sub = Data.SubModels[i];
+                Model.SubModel sub = Data.SubModels[i];
                 ex_lines.Add($"SubModel{i}");
                 ex_lines.Add($"VertexCount: {sub.VertexCount} VIF code length: {sub.VifCode.Length}");
             }
@@ -54,21 +54,19 @@ namespace TwinsanityEditor
             Indices.Clear();
             TposeVertices.Clear();
 
-            var refIndex = 0U;
-            var offset = 0;
-
-            foreach (var model in Data.SubModels)
+            uint refIndex = 0U;
+            foreach (Model.SubModel model in Data.SubModels)
             {
                 List<Vertex> vtx = new List<Vertex>();
                 List<uint> idx = new List<uint>();
 
-                for (var j = 0; j < model.Vertexes.Count; ++j)
+                for (int j = 0; j < model.Vertexes.Count; ++j)
                 {
                     if (j < model.Vertexes.Count - 2)
                     {
                         if (model.Vertexes[j + 2].Conn)
                         {
-                            if ((/*offset +*/ j) % 2 == 0)
+                            if (/*offset +*/ j % 2 == 0)
                             {
                                 idx.Add(refIndex);
                                 idx.Add(refIndex + 1);
@@ -99,13 +97,13 @@ namespace TwinsanityEditor
                 {
                     for (int i = 0; i < idx.Count; i += 3)
                     {
-                        var n1 = idx[i];
-                        var n2 = idx[i + 1];
-                        var n3 = idx[i + 2];
-                        var v1 = vtx[(int)n1];
-                        var v2 = vtx[(int)n2];
-                        var v3 = vtx[(int)n3];
-                        var normal = VectorFuncs.CalcNormal(v1.Pos, v2.Pos, v3.Pos);
+                        uint n1 = idx[i];
+                        uint n2 = idx[i + 1];
+                        uint n3 = idx[i + 2];
+                        Vertex v1 = vtx[(int)n1];
+                        Vertex v2 = vtx[(int)n2];
+                        Vertex v3 = vtx[(int)n3];
+                        Vector3 normal = VectorFuncs.CalcNormal(v1.Pos, v2.Pos, v3.Pos);
                         v1.Nor += normal;
                         v2.Nor += normal;
                         v3.Nor += normal;

@@ -11,53 +11,113 @@ namespace Twinsanity
             while (true)
             {
                 uint mOff = 1;
-                uint mLen = 0;
-                if (reader.EndOfData()) break;
+                if (reader.EndOfData())
+                {
+                    break;
+                }
+
                 while (reader.ReadBit() != 0)
                 {
-                    if (reader.EndOfData()) break;
+                    if (reader.EndOfData())
+                    {
+                        break;
+                    }
+
                     buffer.Add(reader.ReadByte());
-                    if (reader.EndOfData()) break;
+                    if (reader.EndOfData())
+                    {
+                        break;
+                    }
                 }
-                if (reader.EndOfData()) break;
+                if (reader.EndOfData())
+                {
+                    break;
+                }
+
                 do
                 {
-                    if (reader.EndOfData()) break;
-                    mOff = mOff * 2 + reader.ReadBit();
-                    if (reader.EndOfData()) break;
+                    if (reader.EndOfData())
+                    {
+                        break;
+                    }
+
+                    mOff = (mOff * 2) + reader.ReadBit();
+                    if (reader.EndOfData())
+                    {
+                        break;
+                    }
                 } while (reader.ReadBit() == 0);
-                if (reader.EndOfData()) break;
+                if (reader.EndOfData())
+                {
+                    break;
+                }
+
                 if (mOff == 2)
                 {
                     mOff = lastmOff;
                 }
                 else
                 {
-                    mOff = (mOff - 3) * 256 + reader.ReadByte();
-                    if (mOff == 0xFFFFFFFF) break;
-                    if (reader.EndOfData()) break;
+                    mOff = ((mOff - 3) * 256) + reader.ReadByte();
+                    if (mOff == 0xFFFFFFFF)
+                    {
+                        break;
+                    }
+
+                    if (reader.EndOfData())
+                    {
+                        break;
+                    }
+
                     lastmOff = ++mOff;
                 }
-                mLen = reader.ReadBit();
-                if (reader.EndOfData()) break;
-                mLen = mLen * 2 + reader.ReadBit();
-                if (reader.EndOfData()) break;
+                uint mLen = reader.ReadBit();
+                if (reader.EndOfData())
+                {
+                    break;
+                }
+
+                mLen = (mLen * 2) + reader.ReadBit();
+                if (reader.EndOfData())
+                {
+                    break;
+                }
+
                 if (mLen == 0)
                 {
                     mLen++;
                     do
                     {
-                        if (reader.EndOfData()) break;
-                        mLen = mLen * 2 + reader.ReadBit();
-                        if (reader.EndOfData()) break;
+                        if (reader.EndOfData())
+                        {
+                            break;
+                        }
+
+                        mLen = (mLen * 2) + reader.ReadBit();
+                        if (reader.EndOfData())
+                        {
+                            break;
+                        }
                     } while (reader.ReadBit() == 0);
-                    if (reader.EndOfData()) break;
+                    if (reader.EndOfData())
+                    {
+                        break;
+                    }
+
                     mLen += 2;
                 }
-                if (mOff > 0xD00) mLen += 1;
+                if (mOff > 0xD00)
+                {
+                    mLen += 1;
+                }
+
                 int mPos = (int)(buffer.Count - mOff);
                 buffer.Add(buffer[mPos++]);
-                do buffer.Add(buffer[mPos++]); while (--mLen > 0);
+                do
+                {
+                    buffer.Add(buffer[mPos++]);
+                }
+                while (--mLen > 0);
             }
 
             byte[] outData = buffer.ToArray();
@@ -67,9 +127,9 @@ namespace Twinsanity
 
     public class BitReader
     {
-        byte[] data;
-        int bitPos;
-        int curByte;
+        private readonly byte[] data;
+        private int bitPos;
+        private int curByte;
         public int dataPos;
 
         public BitReader(byte[] d)

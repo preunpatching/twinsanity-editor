@@ -1,5 +1,5 @@
-﻿using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Twinsanity
 {
@@ -9,13 +9,13 @@ namespace Twinsanity
 
         public override void Load(BinaryReader reader, int size)
         {
-            var count = reader.ReadInt32();
+            int count = reader.ReadInt32();
             SubModels.Clear();
             for (int i = 0; i < count; i++)
             {
                 SubModel sub = new SubModel();
                 int VertexCount = reader.ReadInt32();
-                uint DataSize = reader.ReadUInt32(); // vertex count * 0x10
+                _ = reader.ReadUInt32(); // vertex count * 0x10
                 uint GroupCount = reader.ReadUInt32();
                 sub.GroupList = new List<uint>();
                 for (int c = 0; c < GroupCount; c++)
@@ -31,12 +31,14 @@ namespace Twinsanity
                 sub.VData = new List<VertexData>();
                 for (int c = 0; c < VertexCount; c++)
                 {
-                    VertexData v = new VertexData();
-                    v.UV_X = reader.ReadInt16();
-                    v.UV_Y = reader.ReadInt16();
-                    v.X = reader.ReadSingle();
-                    v.Y = reader.ReadSingle();
-                    v.Z = reader.ReadSingle();
+                    VertexData v = new VertexData
+                    {
+                        UV_X = reader.ReadInt16(),
+                        UV_Y = reader.ReadInt16(),
+                        X = reader.ReadSingle(),
+                        Y = reader.ReadSingle(),
+                        Z = reader.ReadSingle()
+                    };
                     sub.VData.Add(v);
                 }
                 sub.UnkInt = reader.ReadUInt32();

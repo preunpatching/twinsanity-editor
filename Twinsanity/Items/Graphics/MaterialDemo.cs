@@ -1,6 +1,5 @@
-﻿using System.IO;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Twinsanity
 {
@@ -18,7 +17,7 @@ namespace Twinsanity
             writer.Write(Name.Length);
             writer.Write(Name.ToCharArray());
             writer.Write(Shaders.Count);
-            foreach (var shd in Shaders)
+            foreach (TwinsShader shd in Shaders)
             {
                 shd.Write(writer);
             }
@@ -28,11 +27,11 @@ namespace Twinsanity
         {
             Header = reader.ReadUInt64();
             Unknown = reader.ReadInt32();
-            var nameLen = reader.ReadInt32();
+            int nameLen = reader.ReadInt32();
             Name = new string(reader.ReadChars(nameLen));
-            var shdCnt = reader.ReadInt32();
+            int shdCnt = reader.ReadInt32();
             Shaders.Clear();
-            for (var i = 0; i < shdCnt; ++i)
+            for (int i = 0; i < shdCnt; ++i)
             {
                 TwinsShader shd = new TwinsShader();
                 shd.Read(reader, 0, true);
@@ -42,8 +41,8 @@ namespace Twinsanity
 
         protected override int GetSize()
         {
-            var shdLen = 0;
-            foreach (var shd in Shaders)
+            int shdLen = 0;
+            foreach (TwinsShader shd in Shaders)
             {
                 shdLen += shd.GetLength();
             }
@@ -52,16 +51,16 @@ namespace Twinsanity
 
         internal void FillPackage(TwinsFile source, TwinsFile destination)
         {
-            var sourceTextures = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(0);
-            var destinationTextures = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(0);
-            foreach (var shader in Shaders)
+            TwinsSection sourceTextures = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(0);
+            TwinsSection destinationTextures = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(0);
+            foreach (TwinsShader shader in Shaders)
             {
-                var textureId = shader.TextureId;
+                uint textureId = shader.TextureId;
                 if (destinationTextures.HasItem(textureId))
                 {
                     continue;
                 }
-                var linkedTexture = sourceTextures.GetItem<Texture>(textureId);
+                Texture linkedTexture = sourceTextures.GetItem<Texture>(textureId);
                 destinationTextures.AddItem(textureId, linkedTexture);
             }
         }

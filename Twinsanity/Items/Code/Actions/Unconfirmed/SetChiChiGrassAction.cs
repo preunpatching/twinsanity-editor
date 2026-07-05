@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Twinsanity.Actions
 {
@@ -23,7 +22,7 @@ namespace Twinsanity.Actions
 
         public override void Load(Script.MainScript.ScriptCommand input)
         {
-            ushort FlagsWatch = (ushort)(input.arguments[0]);
+            ushort FlagsWatch = (ushort)input.arguments[0];
             ushort FlagsChange = (ushort)(input.arguments[0] / 65536);
             AgentFlags AFlags1 = (AgentFlags)FlagsWatch;
             AgentFlags AFlags2 = (AgentFlags)FlagsChange;

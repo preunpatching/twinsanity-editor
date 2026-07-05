@@ -1,28 +1,29 @@
-﻿using OpenTK.Graphics.OpenGL;
-using OpenTK;
+﻿using OpenTK;
+using OpenTK.Graphics.OpenGL;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using Twinsanity;
-using System.Linq;
 
 namespace TwinsanityEditor
 {
     public class MeshViewer : ThreeDViewer
     {
-        private FileController targetFile;
+        private readonly FileController targetFile;
         private ModelController mesh;
-        private RigidModelController rigid;
+        private readonly RigidModelController rigid;
         private SkinController skin;
         private BlendSkinController bskin;
         private ModelXController meshX;
         private SkinXController skinX;
         private BlendSkinXController bskinX;
-        private ModelPController meshP;
-        private GraphicsInfoController model;
-        private FileController file;
+        private readonly ModelPController meshP;
+        private readonly GraphicsInfoController model;
+        private readonly FileController file;
         private uint TargetBlendShape = 0;
-        private bool BSkinActive = false;
-        private bool FullModelActive = false;
+        private readonly bool BSkinActive = false;
+        private readonly bool FullModelActive = false;
         private bool Visible_Models = true;
         private bool Visible_Skin = true;
         private bool Visible_BSkin = true;
@@ -52,12 +53,12 @@ namespace TwinsanityEditor
         {
             if (rigid.MainFile.MeshSection.Data.Parent.Type == SectionType.GraphicsX)
             {
-                this.meshX = rigid.MainFile.MeshSection.GetItem<ModelXController>(rigid.Data.MeshID);
+                meshX = rigid.MainFile.MeshSection.GetItem<ModelXController>(rigid.Data.MeshID);
                 file = meshX.MainFile;
             }
             else
             {
-                this.mesh = rigid.MainFile.MeshSection.GetItem<ModelController>(rigid.Data.MeshID);
+                mesh = rigid.MainFile.MeshSection.GetItem<ModelController>(rigid.Data.MeshID);
                 file = mesh.MainFile;
             }
             this.rigid = rigid;
@@ -82,7 +83,7 @@ namespace TwinsanityEditor
         }
         public MeshViewer(SkinController mesh, Form pform)
         {
-            this.skin = mesh;
+            skin = mesh;
             file = mesh.MainFile;
             zFar = 50F;
             lighting = false;
@@ -95,7 +96,7 @@ namespace TwinsanityEditor
         }
         public MeshViewer(BlendSkinController mesh, Form pform)
         {
-            this.bskin = mesh;
+            bskin = mesh;
             zFar = 50F;
             file = mesh.MainFile;
             targetFile = file;
@@ -111,7 +112,7 @@ namespace TwinsanityEditor
         public MeshViewer(ModelXController mesh, Form pform)
         {
             //initialize variables here
-            this.meshX = mesh;
+            meshX = mesh;
             file = mesh.MainFile;
             zFar = 50F;
             lighting = true;
@@ -125,7 +126,7 @@ namespace TwinsanityEditor
         public MeshViewer(SkinXController mesh, Form pform)
         {
             //initialize variables here
-            this.skinX = mesh;
+            skinX = mesh;
             file = mesh.MainFile;
             targetFile = file;
             zFar = 50F;
@@ -140,7 +141,7 @@ namespace TwinsanityEditor
         public MeshViewer(BlendSkinXController mesh, Form pform)
         {
             //initialize variables here
-            this.bskinX = mesh;
+            bskinX = mesh;
             file = mesh.MainFile;
             targetFile = file;
             zFar = 50F;
@@ -156,7 +157,7 @@ namespace TwinsanityEditor
         public MeshViewer(ModelPController mesh, Form pform)
         {
             //initialize variables here
-            this.meshP = mesh;
+            meshP = mesh;
             zFar = 50F;
             file = mesh.MainFile;
             lighting = true;
@@ -172,12 +173,12 @@ namespace TwinsanityEditor
             //initialize variables here
             targetFile = tFile;
             file = mesh.MainFile;
-            this.model = mesh;
+            model = mesh;
             zFar = 50F;
             lighting = false;
             wire = false;
             Tag = pform;
-            var vbos = 0;
+            int vbos = 0;
             uint gfx_section = 11;
             if (targetFile.Data.Type == TwinsFile.FileType.MonkeyBallRM)
             {
@@ -186,7 +187,7 @@ namespace TwinsanityEditor
             SectionController mesh_sec = targetFile.GetItem<SectionController>(gfx_section).GetItem<SectionController>(2);
             if (mesh_sec.Data.Type == SectionType.ModelX)
             {
-                foreach (var pair in model.Data.ModelIDs)
+                foreach (KeyValuePair<int, GraphicsInfo.ModelLink> pair in model.Data.ModelIDs)
                 {
                     foreach (RigidModel mod in targetFile.Data.GetItem<TwinsSection>(gfx_section).GetItem<TwinsSection>(3).Records)
                     {
@@ -202,7 +203,7 @@ namespace TwinsanityEditor
             }
             else
             {
-                foreach (var pair in model.Data.ModelIDs)
+                foreach (KeyValuePair<int, GraphicsInfo.ModelLink> pair in model.Data.ModelIDs)
                 {
                     foreach (RigidModel mod in targetFile.Data.GetItem<TwinsSection>(gfx_section).GetItem<TwinsSection>(3).Records)
                     {
@@ -216,7 +217,7 @@ namespace TwinsanityEditor
                     }
                 }
             }
-            
+
             if (model.Data.SkinID != 0)
             {
                 SectionController skin_sec = targetFile.GetItem<SectionController>(gfx_section).GetItem<SectionController>(4);
@@ -269,7 +270,7 @@ namespace TwinsanityEditor
                         }
                     }
                 }
-                
+
             }
             FullModelActive = true;
 
@@ -290,7 +291,7 @@ namespace TwinsanityEditor
         {
             base.RenderHUD();
 
-            var renderString = $"L Lights {lighting}\nX Wireframe {wire}\nY Textures {textures}\n";
+            string renderString = $"L Lights {lighting}\nX Wireframe {wire}\nY Textures {textures}\n";
             if (FullModelActive)
             {
                 renderString += $"V Model {Visible_Models}\nB Skin {Visible_Skin}\nN Blend Skin {Visible_BSkin}\n";
@@ -323,9 +324,11 @@ namespace TwinsanityEditor
         protected override void RenderObjects()
         {
             //put all object rendering code here
-            var flags = lighting ? BufferPointerFlags.Normal : BufferPointerFlags.Default;
+            BufferPointerFlags flags = lighting ? BufferPointerFlags.Normal : BufferPointerFlags.Default;
             if (lighting)
+            {
                 GL.Enable(EnableCap.Lighting);
+            }
 
             if (!wire)
             {
@@ -363,10 +366,13 @@ namespace TwinsanityEditor
             }
 
             if (lighting)
+            {
                 GL.Disable(EnableCap.Lighting);
+            }
+
             if (wire)
             {
-                var wire_flags = textures ? BufferPointerFlags.TexCoord : BufferPointerFlags.None;
+                BufferPointerFlags wire_flags = textures ? BufferPointerFlags.TexCoord : BufferPointerFlags.None;
                 GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
                 GL.Color3(System.Drawing.Color.Black);
                 GL.LineWidth(2);
@@ -392,7 +398,7 @@ namespace TwinsanityEditor
                 {
                     for (int i = 0; i < vtx.Count; i++)
                     {
-                        
+
                         vtx[i].DrawAllElements(PrimitiveType.Triangles, wire_flags, true);
                     }
                 }
@@ -470,9 +476,9 @@ namespace TwinsanityEditor
         {
             mesh.LoadMeshData();
             float min_x = float.MaxValue, min_y = float.MaxValue, min_z = float.MaxValue, max_x = float.MinValue, max_y = float.MinValue, max_z = float.MinValue;
-            foreach (var list in mesh.Vertices)
+            foreach (Vertex[] list in mesh.Vertices)
             {
-                foreach (var v in list)
+                foreach (Vertex v in list)
                 {
                     min_x = Math.Min(min_x, v.Pos.X);
                     min_y = Math.Min(min_y, v.Pos.Y);
@@ -492,18 +498,18 @@ namespace TwinsanityEditor
                 }
                 UpdateVBO(i);
             }
-            
+
             zFar = Math.Max(zFar, Math.Max(max_x - min_x, Math.Max(max_y - min_y, max_z - min_z)));
-            
+
         }
 
         public void LoadSkin()
         {
             skin.LoadMeshData();
             float min_x = float.MaxValue, min_y = float.MaxValue, min_z = float.MaxValue, max_x = float.MinValue, max_y = float.MinValue, max_z = float.MinValue;
-            foreach (var list in skin.Vertices)
+            foreach (Vertex[] list in skin.Vertices)
             {
-                foreach (var v in list)
+                foreach (Vertex v in list)
                 {
                     min_x = Math.Min(min_x, v.Pos.X);
                     min_y = Math.Min(min_y, v.Pos.Y);
@@ -530,9 +536,9 @@ namespace TwinsanityEditor
         {
             bskin.LoadMeshData();
             float min_x = float.MaxValue, min_y = float.MaxValue, min_z = float.MaxValue, max_x = float.MinValue, max_y = float.MinValue, max_z = float.MinValue;
-            foreach (var list in bskin.Vertices)
+            foreach (Vertex[] list in bskin.Vertices)
             {
-                foreach (var v in list)
+                foreach (Vertex v in list)
                 {
                     min_x = Math.Min(min_x, v.Pos.X);
                     min_y = Math.Min(min_y, v.Pos.Y);
@@ -556,9 +562,9 @@ namespace TwinsanityEditor
         {
             meshX.LoadMeshData();
             float min_x = float.MaxValue, min_y = float.MaxValue, min_z = float.MaxValue, max_x = float.MinValue, max_y = float.MinValue, max_z = float.MinValue;
-            foreach (var list in meshX.Vertices)
+            foreach (Vertex[] list in meshX.Vertices)
             {
-                foreach (var v in list)
+                foreach (Vertex v in list)
                 {
                     min_x = Math.Min(min_x, v.Pos.X);
                     min_y = Math.Min(min_y, v.Pos.Y);
@@ -584,9 +590,9 @@ namespace TwinsanityEditor
         {
             skinX.LoadMeshData();
             float min_x = float.MaxValue, min_y = float.MaxValue, min_z = float.MaxValue, max_x = float.MinValue, max_y = float.MinValue, max_z = float.MinValue;
-            foreach (var list in skinX.Vertices)
+            foreach (Vertex[] list in skinX.Vertices)
             {
-                foreach (var v in list)
+                foreach (Vertex v in list)
                 {
                     min_x = Math.Min(min_x, v.Pos.X);
                     min_y = Math.Min(min_y, v.Pos.Y);
@@ -612,9 +618,9 @@ namespace TwinsanityEditor
         {
             bskinX.LoadMeshData();
             float min_x = float.MaxValue, min_y = float.MaxValue, min_z = float.MaxValue, max_x = float.MinValue, max_y = float.MinValue, max_z = float.MinValue;
-            foreach (var list in bskinX.Vertices)
+            foreach (Vertex[] list in bskinX.Vertices)
             {
-                foreach (var v in list)
+                foreach (Vertex v in list)
                 {
                     min_x = Math.Min(min_x, v.Pos.X);
                     min_y = Math.Min(min_y, v.Pos.Y);
@@ -641,7 +647,7 @@ namespace TwinsanityEditor
         {
             float min_x = float.MaxValue, min_y = float.MaxValue, min_z = float.MaxValue, max_x = float.MinValue, max_y = float.MinValue, max_z = float.MinValue;
 
-            var vtxIndex = 0;
+            int vtxIndex = 0;
             if (model.Data.BlendSkinID != 0)
             {
                 SectionController mesh_sec = targetFile.GetItem<SectionController>(11).GetItem<SectionController>(5);
@@ -654,9 +660,9 @@ namespace TwinsanityEditor
                 }
 
                 bskinX.LoadMeshData();
-                foreach (var list in bskinX.Vertices)
+                foreach (Vertex[] list in bskinX.Vertices)
                 {
-                    foreach (var v in list)
+                    foreach (Vertex v in list)
                     {
                         min_x = Math.Min(min_x, v.Pos.X);
                         min_y = Math.Min(min_y, v.Pos.Y);
@@ -691,9 +697,9 @@ namespace TwinsanityEditor
                 }
 
                 skinX.LoadMeshData();
-                foreach (var list in skinX.Vertices)
+                foreach (Vertex[] list in skinX.Vertices)
                 {
-                    foreach (var v in list)
+                    foreach (Vertex v in list)
                     {
                         min_x = Math.Min(min_x, v.Pos.X);
                         min_y = Math.Min(min_y, v.Pos.Y);
@@ -716,7 +722,7 @@ namespace TwinsanityEditor
                 }
             }
             skinEndIndex = vtxIndex;
-            foreach (var pair in model.Data.ModelIDs)
+            foreach (KeyValuePair<int, GraphicsInfo.ModelLink> pair in model.Data.ModelIDs)
             {
                 SectionController mesh_sec = targetFile.GetItem<SectionController>(11).GetItem<SectionController>(2);
                 SectionController rigid_sec = targetFile.GetItem<SectionController>(11).GetItem<SectionController>(3);
@@ -785,7 +791,7 @@ namespace TwinsanityEditor
                     }
 
 
-                    foreach (var p in meshX.Vertices[v])
+                    foreach (Vertex p in meshX.Vertices[v])
                     {
                         min_x = Math.Min(min_x, p.Pos.X);
                         min_y = Math.Min(min_y, p.Pos.Y);
@@ -822,7 +828,7 @@ namespace TwinsanityEditor
                 gfx_section = 12;
             }
 
-            var vtxIndex = 0;
+            int vtxIndex = 0;
             if (model.Data.BlendSkinID != 0)
             {
                 SectionController mesh_sec = targetFile.GetItem<SectionController>(gfx_section).GetItem<SectionController>(5);
@@ -835,9 +841,9 @@ namespace TwinsanityEditor
                 }
 
                 bskin.LoadMeshData();
-                foreach (var list in bskin.Vertices)
+                foreach (Vertex[] list in bskin.Vertices)
                 {
-                    foreach (var v in list)
+                    foreach (Vertex v in list)
                     {
                         min_x = Math.Min(min_x, v.Pos.X);
                         min_y = Math.Min(min_y, v.Pos.Y);
@@ -872,9 +878,9 @@ namespace TwinsanityEditor
                 }
 
                 skin.LoadMeshData();
-                foreach (var list in skin.Vertices)
+                foreach (Vertex[] list in skin.Vertices)
                 {
-                    foreach (var v in list)
+                    foreach (Vertex v in list)
                     {
                         min_x = Math.Min(min_x, v.Pos.X);
                         min_y = Math.Min(min_y, v.Pos.Y);
@@ -897,7 +903,7 @@ namespace TwinsanityEditor
                 }
             }
             skinEndIndex = vtxIndex;
-            foreach (var pair in model.Data.ModelIDs)
+            foreach (KeyValuePair<int, GraphicsInfo.ModelLink> pair in model.Data.ModelIDs)
             {
                 SectionController mesh_sec = targetFile.GetItem<SectionController>(gfx_section).GetItem<SectionController>(2);
                 SectionController rigid_sec = targetFile.GetItem<SectionController>(gfx_section).GetItem<SectionController>(3);
@@ -949,7 +955,7 @@ namespace TwinsanityEditor
 
                 mesh.LoadMeshData();
 
-                
+
 
                 for (int v = 0; v < mesh.Vertices.Count; v++)
                 {
@@ -964,9 +970,9 @@ namespace TwinsanityEditor
                         mesh.Vertices[v][k].Pos = new Vector3(targetPos.X, targetPos.Y, targetPos.Z);
 
                     }
-                    
 
-                    foreach (var p in mesh.Vertices[v])
+
+                    foreach (Vertex p in mesh.Vertices[v])
                     {
                         min_x = Math.Min(min_x, p.Pos.X);
                         min_y = Math.Min(min_y, p.Pos.Y);
@@ -997,9 +1003,9 @@ namespace TwinsanityEditor
         {
             meshP.LoadMeshData();
             float min_x = float.MaxValue, min_y = float.MaxValue, min_z = float.MaxValue, max_x = float.MinValue, max_y = float.MinValue, max_z = float.MinValue;
-            foreach (var list in meshP.Vertices)
+            foreach (Vertex[] list in meshP.Vertices)
             {
-                foreach (var v in list)
+                foreach (Vertex v in list)
                 {
                     min_x = Math.Min(min_x, v.Pos.X);
                     min_y = Math.Min(min_y, v.Pos.Y);
@@ -1024,7 +1030,10 @@ namespace TwinsanityEditor
 
         public void NextBlendShape()
         {
-            if (bskinX == null && bskin == null) return;
+            if (bskinX == null && bskin == null)
+            {
+                return;
+            }
 
             TargetBlendShape++;
             if (bskinX != null)
@@ -1061,9 +1070,9 @@ namespace TwinsanityEditor
             float min_x = float.MaxValue, min_y = float.MaxValue, min_z = float.MaxValue, max_x = float.MinValue, max_y = float.MinValue, max_z = float.MinValue;
             if (bskinX != null)
             {
-                foreach (var list in bskinX.Vertices)
+                foreach (Vertex[] list in bskinX.Vertices)
                 {
-                    foreach (var v in list)
+                    foreach (Vertex v in list)
                     {
                         min_x = Math.Min(min_x, v.Pos.X);
                         min_y = Math.Min(min_y, v.Pos.Y);
@@ -1086,9 +1095,9 @@ namespace TwinsanityEditor
             }
             if (bskin != null)
             {
-                foreach (var list in bskin.Vertices)
+                foreach (Vertex[] list in bskin.Vertices)
                 {
-                    foreach (var v in list)
+                    foreach (Vertex v in list)
                     {
                         min_x = Math.Min(min_x, v.Pos.X);
                         min_y = Math.Min(min_y, v.Pos.Y);

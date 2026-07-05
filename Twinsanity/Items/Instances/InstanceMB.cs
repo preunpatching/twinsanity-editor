@@ -45,17 +45,26 @@ namespace Twinsanity
             writer.Write(InstanceIDs.Count);
             writer.Write(SomeNum1);
             for (int i = 0; i < InstanceIDs.Count; ++i)
+            {
                 writer.Write(InstanceIDs[i]);
+            }
+
             writer.Write(PositionIDs.Count);
             writer.Write(PositionIDs.Count);
             writer.Write(SomeNum2);
             for (int i = 0; i < PositionIDs.Count; ++i)
+            {
                 writer.Write(PositionIDs[i]);
+            }
+
             writer.Write(PathIDs.Count);
             writer.Write(PathIDs.Count);
             writer.Write(SomeNum3);
             for (int i = 0; i < PathIDs.Count; ++i)
+            {
                 writer.Write(PathIDs[i]);
+            }
+
             writer.Write(ObjectID);
             writer.Write(RefList);
             writer.Write(ScriptID);
@@ -101,26 +110,35 @@ namespace Twinsanity
             RotZ = reader.ReadUInt16();
             COMRotZ = reader.ReadUInt16();
 
-            n = reader.ReadInt32();
+            _ = reader.ReadInt32();
             n = reader.ReadInt32();
             SomeNum1 = reader.ReadInt32();
             for (int i = 0; i < n; ++i)
+            {
                 InstanceIDs.Add(reader.ReadUInt16());
-            n = reader.ReadInt32();
+            }
+
+            _ = reader.ReadInt32();
             n = reader.ReadInt32();
             SomeNum2 = reader.ReadInt32();
             for (int i = 0; i < n; ++i)
+            {
                 PositionIDs.Add(reader.ReadUInt16());
-            n = reader.ReadInt32();
+            }
+
+            _ = reader.ReadInt32();
             n = reader.ReadInt32();
             SomeNum3 = reader.ReadInt32();
             for (int i = 0; i < n; ++i)
+            {
                 PathIDs.Add(reader.ReadUInt16());
+            }
+
             ObjectID = reader.ReadUInt16();
             RefList = reader.ReadInt16();
             ScriptID = reader.ReadInt16();
 
-            Remain = reader.ReadBytes((int)((start_pos + size) - reader.BaseStream.Position));
+            Remain = reader.ReadBytes((int)(start_pos + size - reader.BaseStream.Position));
 
             /*
 
@@ -140,7 +158,7 @@ namespace Twinsanity
 
         protected override int GetSize()
         {
-            return 70 + Remain.Length + (InstanceIDs.Count + PositionIDs.Count + PathIDs.Count) * 2;
+            return 70 + Remain.Length + ((InstanceIDs.Count + PositionIDs.Count + PathIDs.Count) * 2);
         }
     }
 }

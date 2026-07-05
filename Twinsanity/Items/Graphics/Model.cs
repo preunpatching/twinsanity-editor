@@ -1,9 +1,8 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Twinsanity.VIF;
+using System.IO;
 using System.Linq;
+using Twinsanity.VIF;
 
 namespace Twinsanity
 {
@@ -15,15 +14,16 @@ namespace Twinsanity
 
         public override void Load(BinaryReader reader, int size)
         {
-            var sk = reader.BaseStream.Position;
-            var count = reader.ReadInt32();
+            _ = reader.BaseStream.Position;
+            int count = reader.ReadInt32();
 
             SubModels.Clear();
             for (int i = 0; i < count; i++)
             {
-                var sub = new SubModel();
-
-                sub.VertexCount = (int)reader.ReadUInt32();
+                SubModel sub = new SubModel
+                {
+                    VertexCount = (int)reader.ReadUInt32()
+                };
                 int vertexLen = reader.ReadInt32();
                 sub.VifCode = reader.ReadBytes(vertexLen);
                 int blobLen = reader.ReadInt32();
@@ -53,24 +53,24 @@ namespace Twinsanity
 
         public List<VertexData> CalculateData(SubModel model)
         {
-            var vertexes = new List<VertexData>();
+            List<VertexData> vertexes = new List<VertexData>();
 
-            var interpreter = VIFInterpreter.InterpretCode(model.VifCode);
-            var data = interpreter.GetMem();
-            var Vertexes = new List<Vector4>();
-            var UVW = new List<Vector4>();
-            var EmitColor = new List<Vector4>();
-            var Colors = new List<Color>();
-            var Normals = new List<Vector4>();
-            var Connection = new List<bool>();
-            var index = 0;
-            for (var i = 0; i < data.Count;)
+            VIFInterpreter interpreter = VIFInterpreter.InterpretCode(model.VifCode);
+            List<List<Vector4>> data = interpreter.GetMem();
+            List<Vector4> Vertexes = new List<Vector4>();
+            List<Vector4> UVW = new List<Vector4>();
+            List<Vector4> EmitColor = new List<Vector4>();
+            List<Color> Colors = new List<Color>();
+            List<Vector4> Normals = new List<Vector4>();
+            List<bool> Connection = new List<bool>();
+            int index = 0;
+            for (int i = 0; i < data.Count;)
             {
-                var verts = (data[i][0].GetBinaryX() & 0xFF);
-                var fieldsPresent = FieldsPresent.Vertex;
-                var outputAddr = interpreter.GetAddressOutput();
-                var fields = 0;
-                foreach (var addr in outputAddr[index++])
+                uint verts = data[i][0].GetBinaryX() & 0xFF;
+                FieldsPresent fieldsPresent = FieldsPresent.Vertex;
+                List<List<ushort>> outputAddr = interpreter.GetAddressOutput();
+                int fields = 0;
+                foreach (ushort addr in outputAddr[index++])
                 {
                     switch (addr)
                     {
@@ -92,21 +92,22 @@ namespace Twinsanity
                             break;
                     }
                     if (i + fields + 2 >= data.Count)
+                    {
                         break;
-
+                    }
                 }
                 Vertexes.AddRange(data[i + 2].Where((v) => v != null));
                 if (fieldsPresent.HasFlag(FieldsPresent.UV_Color))
                 {
-                    var uv_con = data[i + 3].Where((v) => v != null);
-                    foreach (var e in uv_con)
+                    IEnumerable<Vector4> uv_con = data[i + 3].Where((v) => v != null);
+                    foreach (Vector4 e in uv_con)
                     {
-                        var conn = (e.GetBinaryW() & 0xFF00) >> 8;
-                        Connection.Add(conn == 128 ? false : true);
-                        var r = Math.Min(e.GetBinaryX() & 0xFF, 255);
-                        var g = Math.Min(e.GetBinaryY() & 0xFF, 255);
-                        var b = Math.Min(e.GetBinaryZ() & 0xFF, 255);
-                        var a = (e.GetBinaryW() & 0xFF) << 1;
+                        uint conn = (e.GetBinaryW() & 0xFF00) >> 8;
+                        Connection.Add(conn != 128);
+                        uint r = Math.Min(e.GetBinaryX() & 0xFF, 255);
+                        uint g = Math.Min(e.GetBinaryY() & 0xFF, 255);
+                        uint b = Math.Min(e.GetBinaryZ() & 0xFF, 255);
+                        uint a = (e.GetBinaryW() & 0xFF) << 1;
 
                         Color col = new Color((byte)r, (byte)g, (byte)b, (byte)a);
                         Colors.Add(col);
@@ -121,24 +122,30 @@ namespace Twinsanity
                 }
                 if (fieldsPresent.HasFlag(FieldsPresent.Normals))
                 {
-                    foreach (var e in data[i + 4])
+                    foreach (Vector4 e in data[i + 4])
                     {
                         if (e == null)
+                        {
                             break;
+                        }
+
                         Normals.Add(new Vector4(e.X, e.Y, e.Z, 1.0f));
                     }
                 }
                 if (fieldsPresent.HasFlag(FieldsPresent.EmitColors))
                 {
-                    foreach (var e in data[i + fields + 1])
+                    foreach (Vector4 e in data[i + fields + 1])
                     {
                         if (e == null)
+                        {
                             break;
+                        }
+
                         Vector4 emit = new Vector4(e);
-                        emit.X = (emit.GetBinaryX() & 0xFF);// / 256.0f;
-                        emit.Y = (emit.GetBinaryY() & 0xFF);// / 256.0f;
-                        emit.Z = (emit.GetBinaryZ() & 0xFF);// / 256.0f;
-                        emit.W = (emit.GetBinaryW() & 0xFF);// / 256.0f;
+                        emit.X = emit.GetBinaryX() & 0xFF;// / 256.0f;
+                        emit.Y = emit.GetBinaryY() & 0xFF;// / 256.0f;
+                        emit.Z = emit.GetBinaryZ() & 0xFF;// / 256.0f;
+                        emit.W = emit.GetBinaryW() & 0xFF;// / 256.0f;
                         EmitColor.Add(emit);
                     }
                 }
@@ -150,7 +157,7 @@ namespace Twinsanity
 
             for (int i = 0; i < Vertexes.Count; i++)
             {
-                var vertData = new VertexData
+                VertexData vertData = new VertexData
                 {
                     X = Vertexes[i].X,
                     Y = Vertexes[i].Y,
@@ -176,7 +183,7 @@ namespace Twinsanity
             return vertexes;
         }
 
-        private void TrimList(List<Vector4> list, Int32 desiredLength, Vector4 defaultValue = null)
+        private void TrimList(List<Vector4> list, int desiredLength, Vector4 defaultValue = null)
         {
             if (list != null)
             {
@@ -203,7 +210,7 @@ namespace Twinsanity
             writer.Write(SubModels.Count);
             for (int i = 0; i < SubModels.Count; ++i)
             {
-                var sub = SubModels[i];
+                SubModel sub = SubModels[i];
                 writer.Write(sub.VertexCount);
                 writer.Write(sub.VifCode.Length);
                 writer.Write(sub.VifCode);
@@ -301,7 +308,9 @@ namespace Twinsanity
                         for (int f = 0; f < SubModels[i].Vertexes.Count - 2; ++f)
                         {
                             if (SubModels[i].Vertexes[f + 2].Conn)
+                            {
                                 ++polycount;
+                            }
                         }
                     }
                     ply.WriteLine("ply");
@@ -316,9 +325,9 @@ namespace Twinsanity
                     ply.WriteLine("element face {0}", polycount);
                     ply.WriteLine("property list uchar int vertex_index");
                     ply.WriteLine("end_header");
-                    foreach (var s in SubModels) //vertices
+                    foreach (SubModel s in SubModels) //vertices
                     {
-                        foreach (var g in s.Vertexes)
+                        foreach (VertexData g in s.Vertexes)
                         {
                             byte red, green, blue;
                             red = (byte)(g.R * 256);
@@ -334,12 +343,14 @@ namespace Twinsanity
                         }
                     }
                     vertexcount = 0;
-                    foreach (var s in SubModels) //polys
+                    foreach (SubModel s in SubModels) //polys
                     {
                         for (int i = 0; i < s.Vertexes.Count - 2; ++i)
                         {
                             if (s.Vertexes[i].Conn)
+                            {
                                 ply.WriteLine("3 {0} {1} {2}", vertexcount + ((i & 0x1) == 0x1 ? i + 1 : i + 0), vertexcount + ((i & 0x1) == 0x1 ? i + 0 : i + 1), vertexcount + ((i & 0x1) == 0x1 ? i + 2 : i + 2));
+                            }
                         }
                         vertexcount += s.Vertexes.Count;
                     }
@@ -353,8 +364,8 @@ namespace Twinsanity
         {
             // Primary Header
             public int VertexCount;
-            public Byte[] VifCode { get; set; }
-            public Byte[] UnusedBlob { get; set; }
+            public byte[] VifCode { get; set; }
+            public byte[] UnusedBlob { get; set; }
             public List<VertexData> Vertexes;
         }
         public struct VertexData

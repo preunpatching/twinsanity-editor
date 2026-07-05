@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Twinsanity;
-using System.Text;
 
 namespace TwinsanityEditor
 {
@@ -21,11 +19,12 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            List<string> text = new List<string>();
-
-            text.Add($"ID: {Data.ID}");
-            text.Add($"Size: {Data.Size}");
-            text.Add($"Model Count: {Data.Models.Count}");
+            List<string> text = new List<string>
+            {
+                $"ID: {Data.ID}",
+                $"Size: {Data.Size}",
+                $"Model Count: {Data.Models.Count}"
+            };
 
             TextPrev = text.ToArray();
         }

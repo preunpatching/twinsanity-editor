@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
 using System.Reflection;
 
 namespace Twinsanity.Actions
@@ -72,12 +68,16 @@ namespace Twinsanity.Actions
             foreach (Type type in assembly.GetTypes())
             {
                 if (type.IsAbstract || !typeof(ScriptPerceptAbstract).IsAssignableFrom(type)) // only get non-abstract modders
+                {
                     continue;
+                }
 
                 PerceptID tName = (PerceptID)type.GetCustomAttribute(typeof(PerceptID), false);
 
                 if (tName == null)
+                {
                     continue;
+                }
 
                 SupportedTypes.Add(tName.Type, type);
             }

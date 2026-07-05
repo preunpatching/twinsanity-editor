@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
 namespace Twinsanity
 {
@@ -10,11 +9,7 @@ namespace Twinsanity
 
         public override ushort Freq
         {
-            get => (ushort)FreqReal;
-            set
-            {
-                FreqReal = value;
-            }
+            get => (ushort)FreqReal; set => FreqReal = value;
         }
 
         public override void Save(BinaryWriter writer)

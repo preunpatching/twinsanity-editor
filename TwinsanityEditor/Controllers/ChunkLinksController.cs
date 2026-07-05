@@ -21,10 +21,12 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            List<string> text = new List<string>();
-            text.Add($"ID: {Data.ID}");
-            text.Add($"Size: {Data.Size}");
-            text.Add($"LinkCount: {Data.Links.Count}");
+            List<string> text = new List<string>
+            {
+                $"ID: {Data.ID}",
+                $"Size: {Data.Size}",
+                $"LinkCount: {Data.Links.Count}"
+            };
             for (int i = 0; i < Data.Links.Count; ++i)
             {
                 text.Add($"Link{i}");
@@ -37,8 +39,8 @@ namespace TwinsanityEditor
                 while (tree != null)
                 {
                     text.Add(add + $"Load Zone {depth}");
-                    var gi_header = tree.GI_Type.Header;
-                    for (var j = 0; j < 11; ++j)
+                    ushort[] gi_header = tree.GI_Type.Header;
+                    for (int j = 0; j < 11; ++j)
                     {
                         text.Add(add + $"GI header {j}: {gi_header[j]}");
                     }
@@ -49,7 +51,9 @@ namespace TwinsanityEditor
                         tree = tree.Next;
                     }
                     else
+                    {
                         break;
+                    }
                 }
                 text.Add("");
             }

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Twinsanity
@@ -46,47 +46,146 @@ namespace Twinsanity
 
         protected override int GetSize()
         {
-            if (Version == 0x616E6942) return (int)DataSize;
+            if (Version == 0x616E6942)
+            {
+                return (int)DataSize;
+            }
+
             int count = 12;
-            if (IsDefault) count += 28;
+            if (IsDefault)
+            {
+                count += 28;
+            }
+
             count += Remain.Length;
 
             int instSize = 36;
-            if (Version >= 0x16) instSize += 2;
-            if (Version >= 0x08) instSize += 4;
-            if (Version >= 0x09) instSize += 12;
-            if (Version >= 0x0C) instSize += 8;
-            if (Version >= 0x0D) instSize += 4;
-            if (Version >= 0x0F) instSize += 2;
-            count += (int)ParticleInstances.Count * instSize;
+            if (Version >= 0x16)
+            {
+                instSize += 2;
+            }
+
+            if (Version >= 0x08)
+            {
+                instSize += 4;
+            }
+
+            if (Version >= 0x09)
+            {
+                instSize += 12;
+            }
+
+            if (Version >= 0x0C)
+            {
+                instSize += 8;
+            }
+
+            if (Version >= 0x0D)
+            {
+                instSize += 4;
+            }
+
+            if (Version >= 0x0F)
+            {
+                instSize += 2;
+            }
+
+            count += ParticleInstances.Count * instSize;
 
             int defSize = 690;
-            if (Version == 0x20) defSize += 76;
-            if (Version >= 0x06) defSize += 8;
-            if (Version >= 0x0A) defSize += 4;
-            if (Version > 0x16 && Version != 0x20) defSize += 4;
-            if (Version >= 0x18 && Version != 0x20) defSize += 4;
-            if (Version < 0x07) defSize += 8;
-            if (Version < 0x12) defSize += 24;
-            if (Version > 0x15) defSize += 8;
-            if (Version >= 0x03) defSize += 65;
-            if (Version >= 0x11) defSize += 1;
-            if (Version >= 0x10) defSize += 8;
-            if (Version >= 0x19 && Version != 0x20) defSize += 8;
-            if (Version >= 0x1A && Version != 0x20) defSize += 4;
-            if (Version > 0x1A && Version != 0x20) defSize += 4;
-            if (Version > 0x1B && Version != 0x20) defSize += 4;
-            if (Version >= 0x1E) defSize += 16;
-            count += (int)ParticleTypes.Count * defSize;
+            if (Version == 0x20)
+            {
+                defSize += 76;
+            }
+
+            if (Version >= 0x06)
+            {
+                defSize += 8;
+            }
+
+            if (Version >= 0x0A)
+            {
+                defSize += 4;
+            }
+
+            if (Version > 0x16 && Version != 0x20)
+            {
+                defSize += 4;
+            }
+
+            if (Version >= 0x18 && Version != 0x20)
+            {
+                defSize += 4;
+            }
+
+            if (Version < 0x07)
+            {
+                defSize += 8;
+            }
+
+            if (Version < 0x12)
+            {
+                defSize += 24;
+            }
+
+            if (Version > 0x15)
+            {
+                defSize += 8;
+            }
+
+            if (Version >= 0x03)
+            {
+                defSize += 65;
+            }
+
+            if (Version >= 0x11)
+            {
+                defSize += 1;
+            }
+
+            if (Version >= 0x10)
+            {
+                defSize += 8;
+            }
+
+            if (Version >= 0x19 && Version != 0x20)
+            {
+                defSize += 8;
+            }
+
+            if (Version >= 0x1A && Version != 0x20)
+            {
+                defSize += 4;
+            }
+
+            if (Version > 0x1A && Version != 0x20)
+            {
+                defSize += 4;
+            }
+
+            if (Version > 0x1B && Version != 0x20)
+            {
+                defSize += 4;
+            }
+
+            if (Version >= 0x1E)
+            {
+                defSize += 16;
+            }
+
+            count += ParticleTypes.Count * defSize;
             if (Version > 0x16 && Version < 0x1D && Version != 0x20)
             {
-                count += (int)ParticleTypes.Count * 4;
+                count += ParticleTypes.Count * 4;
                 for (int i = 0; i < ParticleTypes.Count; i++)
                 {
                     count += ParticleTypes[i].padAmount * 24;
                 }
             }
-            if (Version >= 0xB && Version <= 0x15) count += 0x30;
+            if (Version >= 0xB && Version <= 0x15)
+            {
+                count += 0x30;
+            }
 
             for (int i = 0; i < ParticleTypes.Count; i++)
             {
@@ -148,7 +247,7 @@ namespace Twinsanity
                     writer.Write(tempName.ToCharArray());
                     if (Version == 0x20)
                     {
-                        writer.Write((Byte)0);
+                        writer.Write((byte)0);
                         writer.Write(PS.UnkByte1);
                     }
                     writer.Write(PS.GenRate);
@@ -226,14 +325,14 @@ namespace Twinsanity
                     writer.Write(PS.JibberXAmp);
                     writer.Write(PS.JibberYFreq);
                     writer.Write(PS.JibberYAmp);
-                    for (var i = 0; i < 8; ++i)
+                    for (int i = 0; i < 8; ++i)
                     {
                         writer.Write(PS.ColorGradient[i].X);
                         writer.Write(PS.ColorGradient[i].Y);
                         writer.Write(PS.ColorGradient[i].Z);
                         writer.Write(PS.ColorGradient[i].W);
                     }
-                    for (var i = 0; i < 8; ++i)
+                    for (int i = 0; i < 8; ++i)
                     {
                         writer.Write(PS.AlphaGradientTime[i]);
                         writer.Write(PS.AlphaGradientValue[i]);
@@ -245,29 +344,29 @@ namespace Twinsanity
                     }
                     writer.Write(PS.MinSize);
                     writer.Write(PS.MaxSize);
-                    for (var i = 0; i < 8; ++i)
+                    for (int i = 0; i < 8; ++i)
                     {
                         writer.Write(PS.SizeWidthTime[i]);
                         writer.Write(PS.SizeWidthValue[i]);
                     }
-                    for (var i = 0; i < 8; ++i)
+                    for (int i = 0; i < 8; ++i)
                     {
                         writer.Write(PS.SizeHeightTime[i]);
                         writer.Write(PS.SizeHeightValue[i]);
                     }
                     writer.Write(PS.MinRotation);
                     writer.Write(PS.MaxRotation);
-                    for (var i = 0; i < 8; ++i)
+                    for (int i = 0; i < 8; ++i)
                     {
                         writer.Write(PS.RotationTime[i]);
                         writer.Write(PS.RotationValue[i]);
                     }
-                    for (var i = 0; i < 8; ++i)
+                    for (int i = 0; i < 8; ++i)
                     {
                         writer.Write(PS.UnkGradient1Time[i]);
                         writer.Write(PS.UnkGradient1Value[i]);
                     }
-                    for (var i = 0; i < 8; ++i)
+                    for (int i = 0; i < 8; ++i)
                     {
                         writer.Write(PS.UnkGradient2Time[i]);
                         writer.Write(PS.UnkGradient2Value[i]);
@@ -282,7 +381,7 @@ namespace Twinsanity
                     }
                     if (Version >= 0x3)
                     {
-                        for (var i = 0; i < 8; ++i)
+                        for (int i = 0; i < 8; ++i)
                         {
                             writer.Write(PS.CollisionTime[i]);
                             writer.Write(PS.CollisionValue[i]);
@@ -295,8 +394,8 @@ namespace Twinsanity
                     }
                     if (Version == 0x20)
                     {
-                        writer.Write((Byte)0);
-                        writer.Write((Byte)0);
+                        writer.Write((byte)0);
+                        writer.Write((byte)0);
                         writer.Write(0);
                     }
                     if (Version > 0x16 && Version != 0x20)
@@ -304,7 +403,7 @@ namespace Twinsanity
                         if (Version < 0x1D)
                         {
                             writer.Write(PS.padAmount);
-                            for (var i = 0; i < PS.padAmount * 6; ++i)
+                            for (int i = 0; i < PS.padAmount * 6; ++i)
                             {
                                 writer.Write(0);
                             }
@@ -315,7 +414,7 @@ namespace Twinsanity
                         if (Version == 0x20)
                         {
                             writer.Write(PS.ScaleFactor);
-                            for (var i = 0; i < 11; ++i)
+                            for (int i = 0; i < 11; ++i)
                             {
                                 writer.Write(0);
                             }
@@ -335,18 +434,18 @@ namespace Twinsanity
                         if (Version == 0x20)
                         {
                             writer.Write(PS.ParticleGhostsNum);
-                            writer.Write((Byte)0);
-                            writer.Write((Byte)0);
+                            writer.Write((byte)0);
+                            writer.Write((byte)0);
                         }
                         else
                         {
-                            writer.Write((Int32)PS.ParticleGhostsNum);
+                            writer.Write((int)PS.ParticleGhostsNum);
                         }
                         writer.Write(PS.GhostSeparation);
                     }
                     if (Version >= 0x19 && Version != 0x20)
                     {
-                        writer.Write((Int32)PS.StarRadialPoints);
+                        writer.Write((int)PS.StarRadialPoints);
                         writer.Write(PS.StarRadiusRatio);
                     }
                     if (Version >= 0x1A && Version != 0x20)
@@ -394,8 +493,8 @@ namespace Twinsanity
                     }
                     else
                     {
-                        writer.Write((Int32)ParticleInstances[i].EmitRotX);
-                        writer.Write((Int32)ParticleInstances[i].EmitRotY);
+                        writer.Write((int)ParticleInstances[i].EmitRotX);
+                        writer.Write((int)ParticleInstances[i].EmitRotY);
                     }
                     if (Version >= 0x16)
                     {
@@ -519,7 +618,7 @@ namespace Twinsanity
                         char namechar = reader.ReadChar();
                         if (namechar == '\0')
                         {
-                            reader.ReadBytes(0x0F - tempName.Length);
+                            _ = reader.ReadBytes(0x0F - tempName.Length);
                             break;
                         }
                         tempName += namechar;
@@ -527,7 +626,7 @@ namespace Twinsanity
                     PS.Name = tempName;
                     if (Version == 0x20)
                     {
-                        reader.ReadByte();
+                        _ = reader.ReadByte();
                         PS.UnkByte1 = reader.ReadByte();
                     }
 
@@ -543,7 +642,11 @@ namespace Twinsanity
                     PS.TextureFilter = (ParticleSystemDefinition.TextureFiltering)reader.ReadByte();
                     PS.UnkByte5 = reader.ReadByte();
                     PS.UnkFloat1 = reader.ReadSingle();
-                    if (Version == 0x20) PS.UnkFloat1 = 25f;
+                    if (Version == 0x20)
+                    {
+                        PS.UnkFloat1 = 25f;
+                    }
+
                     PS.CutOnRadius = 0f;
                     PS.CutOffRadius = 25f;
                     if (Version >= 0x6)
@@ -560,25 +663,11 @@ namespace Twinsanity
                             PS.DrawCutOff = 999999.875f;
                         }
                     }
-                    if (Version <= 0x16 || Version == 0x20)
-                    {
-                        PS.UnkFloat5 = 0f;
-                    }
-                    else
-                    {
-                        PS.UnkFloat5 = reader.ReadSingle();
-                    }
-                    if (Version < 0x18 || Version == 0x20)
-                    {
-                        PS.UnkFloat6 = 0.5f;
-                    }
-                    else
-                    {
-                        PS.UnkFloat6 = reader.ReadSingle();
-                    }
+                    PS.UnkFloat5 = Version <= 0x16 || Version == 0x20 ? 0f : reader.ReadSingle();
+                    PS.UnkFloat6 = Version < 0x18 || Version == 0x20 ? 0.5f : reader.ReadSingle();
                     if (Version < 0x7)
                     {
-                        reader.ReadBytes(8);
+                        _ = reader.ReadBytes(8);
                     }
                     PS.Velocity = reader.ReadSingle();
                     PS.Random_Emit_X = reader.ReadSingle();
@@ -586,14 +675,14 @@ namespace Twinsanity
                     PS.Random_Emit_Z = reader.ReadSingle();
                     if (Version < 0x12)
                     {
-                        reader.ReadBytes(0xC);
+                        _ = reader.ReadBytes(0xC);
                     }
                     PS.Random_Start_X = reader.ReadSingle();
                     PS.Random_Start_Y = reader.ReadSingle();
                     PS.Random_Start_Z = reader.ReadSingle();
                     if (Version < 0x12)
                     {
-                        reader.ReadBytes(0xC);
+                        _ = reader.ReadBytes(0xC);
                     }
                     PS.UnkFloat8 = reader.ReadSingle();
                     PS.UnkFloat9 = reader.ReadSingle();
@@ -619,11 +708,13 @@ namespace Twinsanity
                     PS.JibberYAmp = reader.ReadSingle();
                     for (int a = 0; a < 8; a++)
                     {
-                        PS.ColorGradient[a] = new TwinsVector4();
-                        PS.ColorGradient[a].X = reader.ReadSingle();
-                        PS.ColorGradient[a].Y = reader.ReadSingle();
-                        PS.ColorGradient[a].Z = reader.ReadSingle();
-                        PS.ColorGradient[a].W = reader.ReadSingle();
+                        PS.ColorGradient[a] = new TwinsVector4
+                        {
+                            X = reader.ReadSingle(),
+                            Y = reader.ReadSingle(),
+                            Z = reader.ReadSingle(),
+                            W = reader.ReadSingle()
+                        };
                     }
                     for (int a = 0; a < 8; a++)
                     {
@@ -639,29 +730,29 @@ namespace Twinsanity
                     }
                     PS.MinSize = reader.ReadSingle();
                     PS.MaxSize = reader.ReadSingle();
-                    for (var a = 0; a < 8; ++a)
+                    for (int a = 0; a < 8; ++a)
                     {
                         PS.SizeWidthTime[a] = reader.ReadSingle();
                         PS.SizeWidthValue[a] = reader.ReadSingle();
                     }
-                    for (var a = 0; a < 8; ++a)
+                    for (int a = 0; a < 8; ++a)
                     {
                         PS.SizeHeightTime[a] = reader.ReadSingle();
                         PS.SizeHeightValue[a] = reader.ReadSingle();
                     }
                     PS.MinRotation = reader.ReadSingle();
                     PS.MaxRotation = reader.ReadSingle();
-                    for (var a = 0; a < 8; ++a)
+                    for (int a = 0; a < 8; ++a)
                     {
                         PS.RotationTime[a] = reader.ReadSingle();
                         PS.RotationValue[a] = reader.ReadSingle();
                     }
-                    for (var a = 0; a < 8; ++a)
+                    for (int a = 0; a < 8; ++a)
                     {
                         PS.UnkGradient1Time[a] = reader.ReadSingle();
                         PS.UnkGradient1Value[a] = reader.ReadSingle();
                     }
-                    for (var a = 0; a < 8; ++a)
+                    for (int a = 0; a < 8; ++a)
                     {
                         PS.UnkGradient2Time[a] = reader.ReadSingle();
                         PS.UnkGradient2Value[a] = reader.ReadSingle();
@@ -672,11 +763,11 @@ namespace Twinsanity
                     PS.TextureEndY = reader.ReadSingle();
                     if (Version == 0x20)
                     {
-                        reader.ReadBytes(4);
+                        _ = reader.ReadBytes(4);
                     }
                     if (Version >= 0x3)
                     {
-                        for (var a = 0; a < 8; ++a)
+                        for (int a = 0; a < 8; ++a)
                         {
                             PS.CollisionTime[a] = reader.ReadSingle();
                             PS.CollisionValue[a] = reader.ReadSingle();
@@ -693,14 +784,14 @@ namespace Twinsanity
                     }
                     if (Version == 0x20)
                     {
-                        reader.ReadBytes(6);
+                        _ = reader.ReadBytes(6);
                     }
                     if (Version > 0x16 && Version != 0x20)
                     {
                         if (Version < 0x1D)
                         {
                             PS.padAmount = reader.ReadInt32();
-                            reader.ReadBytes(PS.padAmount * 24);
+                            _ = reader.ReadBytes(PS.padAmount * 24);
                         }
                     }
                     else
@@ -708,7 +799,7 @@ namespace Twinsanity
                         if (Version == 0x20)
                         {
                             PS.ScaleFactor = reader.ReadSingle();
-                            reader.ReadBytes(44);
+                            _ = reader.ReadBytes(44);
                         }
                     }
                     if (Version >= 0xB && Version <= 0x15)
@@ -728,11 +819,11 @@ namespace Twinsanity
                         if (Version == 0x20)
                         {
                             PS.ParticleGhostsNum = reader.ReadInt16();
-                            reader.ReadBytes(2);
+                            _ = reader.ReadBytes(2);
                         }
                         else
                         {
-                            PS.ParticleGhostsNum = (Int16)reader.ReadInt32();
+                            PS.ParticleGhostsNum = (short)reader.ReadInt32();
                         }
                         PS.GhostSeparation = reader.ReadSingle();
                     }
@@ -740,7 +831,7 @@ namespace Twinsanity
                     PS.StarRadiusRatio = 0.5f;
                     if (Version >= 0x19 && Version != 0x20)
                     {
-                        PS.StarRadialPoints = (Int16)reader.ReadInt32();
+                        PS.StarRadialPoints = (short)reader.ReadInt32();
                         PS.StarRadiusRatio = reader.ReadSingle();
                     }
                     PS.RampTime = 0;
@@ -774,10 +865,10 @@ namespace Twinsanity
                         PS.UnkVec3.W = 0f;
                         if (PS.GSort == ParticleSystemDefinition.GenSort.Normal)
                         {
-                            var f1 = PS.MaxSize * 0.0001f;
-                            PS.UnkVec3.X = ((PS.Velocity + PS.Random_Emit_X) * PS.ParticleLifeTime + PS.Random_Start_X + f1) * 0.75f;
-                            PS.UnkVec3.Y = ((PS.Velocity + PS.Random_Emit_Y) * PS.ParticleLifeTime + PS.Random_Start_Y + f1) * 0.75f;
-                            PS.UnkVec3.Z = ((PS.Velocity + PS.Random_Emit_Z) * PS.ParticleLifeTime + PS.Random_Start_Z + f1) * 0.75f;
+                            float f1 = PS.MaxSize * 0.0001f;
+                            PS.UnkVec3.X = (((PS.Velocity + PS.Random_Emit_X) * PS.ParticleLifeTime) + PS.Random_Start_X + f1) * 0.75f;
+                            PS.UnkVec3.Y = (((PS.Velocity + PS.Random_Emit_Y) * PS.ParticleLifeTime) + PS.Random_Start_Y + f1) * 0.75f;
+                            PS.UnkVec3.Z = (((PS.Velocity + PS.Random_Emit_Z) * PS.ParticleLifeTime) + PS.Random_Start_Z + f1) * 0.75f;
                         }
                     }
 
@@ -799,8 +890,10 @@ namespace Twinsanity
 
                 for (int i = 0; i < ParticleInstanceCount; i++)
                 {
-                    ParticleSystemInstance PI = new ParticleSystemInstance();
-                    PI.Position = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), 1f);
+                    ParticleSystemInstance PI = new ParticleSystemInstance
+                    {
+                        Position = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), 1f)
+                    };
                     if (Version >= 0x7)
                     {
                         PI.GravityRotX = reader.ReadInt16();
@@ -829,7 +922,7 @@ namespace Twinsanity
                         char namechar = reader.ReadChar();
                         if (namechar == '\0')
                         {
-                            reader.ReadBytes(0x0F - tempName.Length);
+                            _ = reader.ReadBytes(0x0F - tempName.Length);
                             break;
                         }
                         tempName += namechar;
@@ -862,7 +955,6 @@ namespace Twinsanity
             }
             else
             {
-                ParticleInstanceCount = 0;
             }
 
             // Default.rm has some extra data (decal stuff)
@@ -874,19 +966,10 @@ namespace Twinsanity
 
             // todo: more data after this in default (more decal/trail stuff?)
 
-            int RemainBytes = (int)((start_pos + size) - reader.BaseStream.Position);
-            if (RemainBytes > 0)
-            {
-                Remain = reader.ReadBytes(RemainBytes);
-            }
-            else if (RemainBytes < 0)
-            {
-                throw new Exception("Invalid particle parsing");
-            }
-            else
-            {
-                Remain = new byte[0];
-            }
+            int RemainBytes = (int)(start_pos + size - reader.BaseStream.Position);
+            Remain = RemainBytes > 0
+                ? reader.ReadBytes(RemainBytes)
+                : RemainBytes < 0 ? throw new Exception("Invalid particle parsing") : (new byte[0]);
         }
 
         public class ParticleSystemDefinition
@@ -897,21 +980,21 @@ namespace Twinsanity
             public byte UnkByte1; // Version == 0x20 (not used in any existing files)
             public short GenRate; // Multiplier
             public ushort MaxParticleCount;
-            public UInt16 UnkUShort3; // always 0
+            public ushort UnkUShort3; // always 0
             public ushort Emitter_OverTime;
             public ushort Emitter_OverTimeRandom;
             public ushort Emitter_OffTime;
             public ushort Emitter_OffTimeRandom;
             public GenSort GSort; // Emitter type
-            public Byte UnkByte3; // always 0, maybe GenCode enum?
+            public byte UnkByte3; // always 0, maybe GenCode enum?
             public TextureFiltering TextureFilter;
-            public Byte UnkByte5; // always 0
-            public Single UnkFloat1; // always 25? always 40000 in proto/twoc?
+            public byte UnkByte5; // always 0
+            public float UnkFloat1; // always 25? always 40000 in proto/twoc?
             public float CutOnRadius; // Version >= 0x6, distance at which particles start emitting
             public float CutOffRadius; // Version >= 0x6, distance at which particles stop emitting
             public float DrawCutOff; // Version >= 0xA, draw distance
-            public Single UnkFloat5; // Version > 0x16, always 0
-            public Single UnkFloat6; // Version >= 0x18, always 0.5
+            public float UnkFloat5; // Version > 0x16, always 0
+            public float UnkFloat6; // Version >= 0x18, always 0.5
             public float Velocity; // Towards instance emit direction
             public float Random_Emit_X; /* velocity on x axis (both sides)
             GSort Radial: Rand_Mag_X - random start distance from Base Mag */
@@ -924,24 +1007,24 @@ namespace Twinsanity
             public float Random_Start_X; // spawn point on x axis (both sides) | GSort Radial: Base_Mag - start distance from center of sphere
             public float Random_Start_Y; // spawn point on y axis (both sides) | GSort Radial: Base_Rot_Y - -180 to 180 starting point around sphere (X / 65535) * 360
             public float Random_Start_Z; // spawn point on z axis (both sides) | GSort Radial: Base_Rot_Z - -180 to 0 starting point on angle (top to bottom) (X / 65535) * 360
-            public Single UnkFloat8;
-            public Single UnkFloat9;
-            public Single UnkFloat10;
-            public Single UnkFloat11;
-            public Single UnkFloat12;
-            public Single UnkFloat13;
-            public Single UnkFloat14;
-            public Single UnkFloat15;
-            public Single UnkFloat16;
-            public Single UnkFloat17;
-            public Single UnkFloat18;
-            public Single UnkFloat19;
+            public float UnkFloat8;
+            public float UnkFloat9;
+            public float UnkFloat10;
+            public float UnkFloat11;
+            public float UnkFloat12;
+            public float UnkFloat13;
+            public float UnkFloat14;
+            public float UnkFloat15;
+            public float UnkFloat16;
+            public float UnkFloat17;
+            public float UnkFloat18;
+            public float UnkFloat19;
             public float Gravity; // Positive value - particle goes up
             public float ParticleLifeTime;
-            public UInt16 UnkUShort8; // usually 0 or 16 (together with the next two)
-            public Byte UnkByte6; // usually 0 or 1
-            public Byte UnkByte7; // usually 1 or 3
-            public Single UnkFloat22; // usually 0 or 320
+            public ushort UnkUShort8; // usually 0 or 16 (together with the next two)
+            public byte UnkByte6; // usually 0 or 1
+            public byte UnkByte7; // usually 1 or 3
+            public float UnkFloat22; // usually 0 or 320
             public float JibberXFreq; // particle vibration speed on X axis
             public float JibberXAmp; // particle vibration distance on X axis
             public float JibberYFreq; // particle vibration speed on Y axis
@@ -976,7 +1059,7 @@ namespace Twinsanity
             more spheres create more spheres at halfway size and positon step of the next bigger one, 
             collision deals damage, travels towards emit direction with velocity speed (ignores Rand_Emit/Rand_Start values?)*/
             public DrawFlags DrawFlag; // Version >= 0x11, always 0
-            public Int32 padAmount; // Version > 0x16 && Version < 0x1D, always 0
+            public int padAmount; // Version > 0x16 && Version < 0x1D, always 0
             public float ScaleFactor; // Version > 0x1B, scales the particles
             public short ParticleGhostsNum; // Version >= 0x10
             public float GhostSeparation; // Version >= 0x10
@@ -1095,14 +1178,14 @@ namespace Twinsanity
             public short GravityRotY; // Version >= 0x7
             public short EmitRotX;
             public short EmitRotY;
-            public Int16 UnkShort5; // Version >= 0x16
+            public short UnkShort5; // Version >= 0x16
             public uint Offset; // Version >= 0x08
             public string Name;
             public int SwitchType; // (0 - none, 1 - global switch) // Version >= 0x9
             public int SwitchID; // (default -1) (-1 - 128) // Version >= 0x9
             public float SwitchValue; // (0.0 - 20.0) // Version >= 0x9
-            public Int16 UnkShort6; // Version >= 0xC
-            public Int16 UnkShort7; // Version >= 0xC
+            public short UnkShort6; // Version >= 0xC
+            public short UnkShort7; // Version >= 0xC
             public float PlaneOffset; // -28.0 - 28.0 // Version >= 0xC
             public float BounceFactor; // 0.0 - 2.0 default 0.9 // Version >= 0xD
             public short GroupID; // (0-32) // Version >= 0xF

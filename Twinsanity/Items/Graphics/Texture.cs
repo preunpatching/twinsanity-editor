@@ -1,9 +1,7 @@
-using System.IO;
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.Drawing;
+using System.IO;
 
 namespace Twinsanity
 {
@@ -37,19 +35,19 @@ namespace Twinsanity
         private int rrw;
         private int rrh;
 
-        public int Width { get => 1 << w; }
-        public int Height { get => 1 << h; }
-        public int MipLevels { get => m - 1; }
-        public TexturePixelFormat PixelFormat { get => (TexturePixelFormat)format; }
-        public TexturePixelFormat DestinationPixelFormat { get => (TexturePixelFormat)destinationFormat; }
-        public TextureColorComponent ColorComponent { get => (TextureColorComponent)texColComponent; }
-        public TextureFunction TexFun { get => (TextureFunction)textureFun; }
+        public int Width => 1 << w;
+        public int Height => 1 << h;
+        public int MipLevels => m - 1;
+        public TexturePixelFormat PixelFormat => (TexturePixelFormat)format;
+        public TexturePixelFormat DestinationPixelFormat => (TexturePixelFormat)destinationFormat;
+        public TextureColorComponent ColorComponent => (TextureColorComponent)texColComponent;
+        public TextureFunction TexFun => (TextureFunction)textureFun;
         public Color[] RawData { get; set; }
-        public int TextureBufferWidth { get => textureBufferWidth * 64; }
+        public int TextureBufferWidth => textureBufferWidth * 64;
 
         public Color[] GetMips(int level)
         {
-            var index = Math.Min(MipLevels - 1, level);
+            int index = Math.Min(MipLevels - 1, level);
             return mips[index];
         }
 
@@ -69,45 +67,45 @@ namespace Twinsanity
             unkBytes = reader.ReadBytes(2);
             textureBasePointer = reader.ReadInt32();
             mipLevelsTBP = new int[6];
-            for (var i = 0; i < 6; ++i)
+            for (int i = 0; i < 6; ++i)
             {
                 mipLevelsTBP[i] = reader.ReadInt32();
             }
             textureBufferWidth = reader.ReadInt32();
             mipLevelsTBW = new int[6];
-            for (var i = 0; i < 6; ++i)
+            for (int i = 0; i < 6; ++i)
             {
                 mipLevelsTBW[i] = reader.ReadInt32();
             }
             clutBufferBasePointer = reader.ReadInt32();
             unkBytes2 = reader.ReadBytes(8);
-            reader.ReadInt32(); // Reserved, in game's code refers to an index of vifCodeBlock
-            reader.ReadInt32(); // Reserved, in game's code refers to an unknown pointer
+            _ = reader.ReadInt32(); // Reserved, in game's code refers to an index of vifCodeBlock
+            _ = reader.ReadInt32(); // Reserved, in game's code refers to an unknown pointer
             unkBytes3 = reader.ReadBytes(2);
-            reader.ReadBytes(2); // Reserved, unknown
+            _ = reader.ReadBytes(2); // Reserved, unknown
             // The rest of data
             unusedMetadata = reader.ReadBytes(32);
             vifBlock = reader.ReadBytes(96);
             // Jumping stream a tiny bit to grab the RRW and RRH from the TRXREG :^)
-            var afterVifPos = reader.BaseStream.Position;
+            long afterVifPos = reader.BaseStream.Position;
             reader.BaseStream.Position -= 96;
-            reader.ReadBytes(48);
+            _ = reader.ReadBytes(48);
             rrw = reader.ReadInt32();
             rrh = reader.ReadInt32();
 
             reader.BaseStream.Position = afterVifPos;
-            switch(PixelFormat)
+            switch (PixelFormat)
             {
                 case TexturePixelFormat.PSMCT32: // Easiest one, raw color data
                     imageData = reader.ReadBytes(texSize - 224);
                     RawData = new Color[Width * Height];
-                    var pxInd = 0;
-                    for (var i = 0; i < texSize - 224; i += 4)
+                    int pxInd = 0;
+                    for (int i = 0; i < texSize - 224; i += 4)
                     {
-                        var r = imageData[i];
-                        var g = imageData[i + 1];
-                        var b = imageData[i + 2];
-                        var a = (byte)(imageData[i + 3] << 1);
+                        byte r = imageData[i];
+                        byte g = imageData[i + 1];
+                        byte b = imageData[i + 2];
+                        byte a = (byte)(imageData[i + 3] << 1);
                         RawData[pxInd++] = Color.FromArgb(a, r, g, b);
                     }
                     break;
@@ -125,21 +123,21 @@ namespace Twinsanity
                     ez.writeTexPSMCT32(0, 1, 0, 0, rrw, rrh, imageData);
 
                     // Unswizzle main texture data
-                    var texData = new byte[Width * Height];
+                    byte[] texData = new byte[Width * Height];
                     ez.readTexPSMT8(0, textureBufferWidth, 0, 0, Width, Height, ref texData);
 
                     // Palette
                     #region Palette reading
-                    var palette = new byte[256 * 4];
+                    byte[] palette = new byte[256 * 4];
                     ez.readTexPSMCT32(clutBufferBasePointer, 1, 0, 0, 16, 16, ref palette);
                     this.palette = new Color[256];
-                    var palInd = 0;
-                    for (var i = 0; i < 256 * 4; i += 4)
+                    int palInd = 0;
+                    for (int i = 0; i < 256 * 4; i += 4)
                     {
-                        var r = palette[i];
-                        var g = palette[i + 1];
-                        var b = palette[i + 2];
-                        var a = (byte)(palette[i + 3] << 1);
+                        byte r = palette[i];
+                        byte g = palette[i + 1];
+                        byte b = palette[i + 2];
+                        byte a = (byte)(palette[i + 3] << 1);
                         this.palette[palInd++] = Color.FromArgb(a, r, g, b);
                     }
                     // Palette swapping
@@ -149,17 +147,17 @@ namespace Twinsanity
                     // Mips
                     #region Mips reading
                     mips = new Color[MipLevels][];
-                    for (var i = 0; i < MipLevels; ++i)
+                    for (int i = 0; i < MipLevels; ++i)
                     {
                         // Each mip becomes increasingly smaller. Minimum supported mip by PS2 is 8x8
-                        var mipWidth = (Width / (1 << (i + 1)));
-                        var mipHeight = (Height / (1 << (i + 1)));
-                        var mipData = new byte[mipWidth * mipHeight];
+                        int mipWidth = Width / (1 << (i + 1));
+                        int mipHeight = Height / (1 << (i + 1));
+                        byte[] mipData = new byte[mipWidth * mipHeight];
                         // Unswizzle mip data
                         ez.readTexPSMT8(mipLevelsTBP[i], mipLevelsTBW[i], 0, 0, mipWidth, mipHeight, ref mipData);
                         Flip(ref mipData, mipWidth, mipHeight);
                         mips[i] = new Color[mipWidth * mipHeight];
-                        for (var j = 0; j < mipWidth * mipHeight; ++j)
+                        for (int j = 0; j < mipWidth * mipHeight; ++j)
                         {
                             mips[i][j] = this.palette[mipData[j]];
                         }
@@ -170,7 +168,7 @@ namespace Twinsanity
                     Flip(ref texData, Width, Height);
 
                     RawData = new Color[Width * Height];
-                    for (var i = 0; i < Width * Height; ++i)
+                    for (int i = 0; i < Width * Height; ++i)
                     {
                         RawData[i] = this.palette[texData[i]];
                     }
@@ -216,12 +214,12 @@ namespace Twinsanity
             writer.Write(textureFun);
             writer.Write(unkBytes);
             writer.Write(textureBasePointer);
-            for (var i = 0; i < 6; ++i)
+            for (int i = 0; i < 6; ++i)
             {
                 writer.Write(mipLevelsTBP[i]);
             }
             writer.Write(textureBufferWidth);
-            for (var i = 0; i < 6; ++i)
+            for (int i = 0; i < 6; ++i)
             {
                 writer.Write(mipLevelsTBW[i]);
             }
@@ -242,7 +240,10 @@ namespace Twinsanity
         {
             Bitmap BMP = new Bitmap(Convert.ToInt32(Width), Convert.ToInt32(Height));
             for (int i = 0; i < RawData.Length; i++)
-                BMP.SetPixel((i % Width), (i / Width), RawData[i]);
+            {
+                BMP.SetPixel(i % Width, i / Width, RawData[i]);
+            }
+
             return BMP;
         }
 
@@ -257,11 +258,11 @@ namespace Twinsanity
             format = (byte)TexturePixelFormat.PSMCT32;
             m = 1;
             textureBufferWidth = 4;
-            for (var i = 0; i < 6; ++i)
+            for (int i = 0; i < 6; ++i)
             {
                 mipLevelsTBP[i] = 0;
             }
-            for (var i = 0; i < 6; ++i)
+            for (int i = 0; i < 6; ++i)
             {
                 mipLevelsTBW[i] = 0;
             }
@@ -298,11 +299,11 @@ namespace Twinsanity
                 case TexturePixelFormat.PSMT8:
 
                     m = 1; // no mips!!!!!
-                    for (var i = 0; i < 6; ++i)
+                    for (int i = 0; i < 6; ++i)
                     {
                         mipLevelsTBP[i] = 0;
                     }
-                    for (var i = 0; i < 6; ++i)
+                    for (int i = 0; i < 6; ++i)
                     {
                         mipLevelsTBW[i] = 0;
                     }
@@ -310,10 +311,10 @@ namespace Twinsanity
                     EzSwizzle ez = new EzSwizzle();
                     ez.cleanGs();
 
-                    var texData = new byte[Width * Height];
-                    var palette = new byte[256 * 4];
+                    byte[] texData = new byte[Width * Height];
+                    byte[] palette = new byte[256 * 4];
                     this.palette = new Color[256];
-                    var palInd = 0;
+                    int palInd = 0;
                     imageData = new byte[texSize - 224];
 
                     //Create palette, texData
@@ -335,7 +336,7 @@ namespace Twinsanity
                     Flip(ref texData, Width, Height);
 
                     SwapPalette(ref this.palette);
-                    for (var i = 0; i < 256 * 4; i += 4)
+                    for (int i = 0; i < 256 * 4; i += 4)
                     {
                         palette[i] = this.palette[palInd].R;
                         palette[i + 1] = this.palette[palInd].G;
@@ -357,7 +358,7 @@ namespace Twinsanity
                 default:
                     break;
             }
-            
+
         }
 
         #region Util
@@ -368,9 +369,7 @@ namespace Twinsanity
             {
                 for (uint x = 0; x < width; x++)
                 {
-                    byte tmp = Indexes[y * width + x];
-                    Indexes[y * width + x] = Indexes[(height - y - 1) * width + x];
-                    Indexes[(height - y - 1) * width + x] = tmp;
+                    (Indexes[((height - y - 1) * width) + x], Indexes[(y * width) + x]) = (Indexes[(y * width) + x], Indexes[((height - y - 1) * width) + x]);
                 }
             }
         }
@@ -379,15 +378,13 @@ namespace Twinsanity
         {
             for (int i = 0; i < 8; i++)
             {
-                for (int j = 8 + i * 32; j < 16 + i * 32; j++)
+                for (int j = 8 + (i * 32); j < 16 + (i * 32); j++)
                 {
-                    Color tmp = palette[j];
-                    palette[j] = palette[j + 8];
-                    palette[j + 8] = tmp;
+                    (palette[j + 8], palette[j]) = (palette[j], palette[j + 8]);
                 }
             }
         }
-        
+
         private void GenerateMips(byte[] pixels, uint Width, uint Height, ref byte[] mippixels)
         {
             throw new NotImplementedException();
@@ -406,7 +403,7 @@ namespace Twinsanity
                 if (!unique.Contains(Data[i]))
                 {
                     unique.Add(Data[i]);
-                    
+
                 }
             }
             return unique;
@@ -505,19 +502,19 @@ namespace Twinsanity
         #region Enums
         public enum TexturePixelFormat
         {
-            PSMCT32     = 0b000000,
-            PSMCT24     = 0b000001,
-            PSMCT16     = 0b000010,
-            PSMCT16S    = 0b001010,
-            PSMT8       = 0b010011,
-            PSMT4       = 0b010100,
-            PSMT8H      = 0b011011,
-            PSMT4HL     = 0b100100,
-            PSMT4HH     = 0b101100,
-            PSMZ32      = 0b110000,
-            PSMZ24      = 0b110001,
-            PSMZ16      = 0b110010,
-            PSMZ16S     = 0b111010
+            PSMCT32 = 0b000000,
+            PSMCT24 = 0b000001,
+            PSMCT16 = 0b000010,
+            PSMCT16S = 0b001010,
+            PSMT8 = 0b010011,
+            PSMT4 = 0b010100,
+            PSMT8H = 0b011011,
+            PSMT4HL = 0b100100,
+            PSMT4HH = 0b101100,
+            PSMZ32 = 0b110000,
+            PSMZ24 = 0b110001,
+            PSMZ16 = 0b110010,
+            PSMZ16S = 0b111010
         }
         public enum TextureColorComponent
         {

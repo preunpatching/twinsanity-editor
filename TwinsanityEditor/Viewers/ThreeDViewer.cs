@@ -1,7 +1,9 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using SharpFont;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -49,22 +51,23 @@ namespace TwinsanityEditor
         protected List<VertexBufferData> vtx;
 
         protected Dictionary<char, Vertex[]> charVtx;
-        private Dictionary<char, int> charVtxOffs;
+        private readonly Dictionary<char, int> charVtxOffs;
         private int charVtxBuf, charVtxBufLen;
 
         protected Vector3 pos, rot;
         private Matrix3 cam_rot_mat;
-        private float sca, range;
-        private Timer refresh;
+        private readonly float sca;
+        private float range;
+        private readonly Timer refresh;
         private bool k_w, k_a, k_s, k_d, k_e, k_q, m_l, k_shift, k_ctrl;
         private int m_x, m_y;
-        private EventHandler _inputHandle;
-        private static FontWrapper.FontService _fntService = new FontWrapper.FontService();
-        private Dictionary<char, int> textureCharMap;
-        private Dictionary<char, float> charAdvanceX;
-        private Dictionary<char, float> charBearingX;
-        private Dictionary<char, float> charBearingY;
-        private Dictionary<char, float> charHeight;
+        private readonly EventHandler _inputHandle;
+        private static readonly FontWrapper.FontService _fntService = new FontWrapper.FontService();
+        private readonly Dictionary<char, int> textureCharMap;
+        private readonly Dictionary<char, float> charAdvanceX;
+        private readonly Dictionary<char, float> charBearingX;
+        private readonly Dictionary<char, float> charBearingY;
+        private readonly Dictionary<char, float> charHeight;
         protected float size, zNear, zFar;
 
         protected long timeRenderObj = 0, timeRenderObj_min = long.MaxValue, timeRenderObj_max = 0;
@@ -103,22 +106,45 @@ namespace TwinsanityEditor
                 {
                     float speed = range / 250;
                     if (k_shift)
+                    {
                         speed *= 5f;
+                    }
                     else if (k_ctrl)
+                    {
                         speed *= 0.2f;
+                    }
+
                     int v = 0, h = 0, d = 0;
                     if (k_w)
+                    {
                         d++;
+                    }
+
                     if (k_a)
+                    {
                         h++;
+                    }
+
                     if (k_s)
+                    {
                         d--;
+                    }
+
                     if (k_d)
+                    {
                         h--;
+                    }
+
                     if (k_e)
+                    {
                         v++;
+                    }
+
                     if (k_q)
+                    {
                         v--;
+                    }
+
                     Vector3 delta = new Vector3(h, v, d) * speed;
                     cam_rot_mat = Matrix3.CreateFromAxisAngle(new Vector3(0, 1, 0), rot.X / 180 * MathHelper.Pi);
                     cam_rot_mat *= Matrix3.CreateFromAxisAngle(new Vector3(1, 0, 0), rot.Y / 180 * MathHelper.Pi);
@@ -129,13 +155,15 @@ namespace TwinsanityEditor
                     pos -= fin_delta;
 
                     if ((h | v | d) != 0)
+                    {
                         Invalidate();
+                    }
                 }
             };
 
             refresh = new Timer
             {
-                Interval = (int)Math.Floor(1.0/60*1000), //Set to ~60fps by default, TODO: Add to Preferences later
+                Interval = (int)Math.Floor(1.0 / 60 * 1000), //Set to ~60fps by default, TODO: Add to Preferences later
                 Enabled = true
             };
 
@@ -181,9 +209,9 @@ namespace TwinsanityEditor
                 case MouseButtons.Left:
                     m_l = true;
                     break;
-                //case MouseButtons.Right:
-                //    m_r = true;
-                //    break;
+                    //case MouseButtons.Right:
+                    //    m_r = true;
+                    //    break;
             }
         }
 
@@ -195,9 +223,9 @@ namespace TwinsanityEditor
                 case MouseButtons.Left:
                     m_l = false;
                     break;
-                //case MouseButtons.Right:
-                //    m_r = false;
-                //    break;
+                    //case MouseButtons.Right:
+                    //    m_r = false;
+                    //    break;
             }
         }
 
@@ -206,13 +234,18 @@ namespace TwinsanityEditor
             base.OnMouseMove(e);
             if (m_l)
             {
-                rot.X += (e.X - m_x);
-                rot.Y += (e.Y - m_y);
+                rot.X += e.X - m_x;
+                rot.Y += e.Y - m_y;
                 rot.X += rot.X > 180 ? -360 : rot.X < -180 ? 360 : 0;
                 if (rot.Y > 90)
+                {
                     rot.Y = 90;
+                }
+
                 if (rot.Y < -90)
+                {
                     rot.Y = -90;
+                }
             }
             m_x = e.X;
             m_y = e.Y;
@@ -223,9 +256,14 @@ namespace TwinsanityEditor
             base.OnMouseWheel(e);
             range -= e.Delta / 120 * 30;
             if (range > 750f)
+            {
                 range = 750f;
+            }
             else if (range < 20f)
+            {
                 range = 20f;
+            }
+
             zNear = range / 100F;
         }
 
@@ -314,19 +352,19 @@ namespace TwinsanityEditor
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            var frameWatch = System.Diagnostics.Stopwatch.StartNew();
+            Stopwatch frameWatch = System.Diagnostics.Stopwatch.StartNew();
             MakeCurrent();
             GL.Viewport(Location, Size);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.MatrixMode(MatrixMode.Projection);
-            var proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Width/Height, zNear, zFar*1.5F);
+            Matrix4 proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver3, (float)Width / Height, zNear, zFar * 1.5F);
             GL.LoadMatrix(ref proj);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadIdentity();
             GL.Scale(sca, sca, sca);
-            GL.Rotate(rot.Y,1,0,0);
-            GL.Rotate(rot.X,0,1,0);
-            GL.Rotate(rot.Z,0,0,1);
+            GL.Rotate(rot.Y, 1, 0, 0);
+            GL.Rotate(rot.X, 0, 1, 0);
+            GL.Rotate(rot.Z, 0, 0, 1);
             Vector3 delta = new Vector3(0, 0, -1) * range / 25f;
             Matrix4 rot_matrix = Matrix4.CreateFromAxisAngle(new Vector3(0, 1, 0), MathHelper.DegreesToRadians(rot.X));
             rot_matrix *= Matrix4.CreateFromAxisAngle(new Vector3(1, 0, 0), MathHelper.DegreesToRadians(rot.Y));
@@ -335,11 +373,11 @@ namespace TwinsanityEditor
             Vector3 fin_delta = new Vector3(rot_matrix * new Vector4(delta, 1f));
             GL.Translate(-pos + fin_delta);
             GL.PushMatrix();
-            GL.Translate(pos.X*2, 0, 0);
+            GL.Translate(pos.X * 2, 0, 0);
             GL.Scale(-1, 1, 1);
             DrawAxes(pos.X, pos.Y, pos.Z, 1);
             GL.PopMatrix();
-            var watch = System.Diagnostics.Stopwatch.StartNew();
+            Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
             RenderObjects();
             RenderChars();
             watch.Stop();
@@ -402,9 +440,14 @@ namespace TwinsanityEditor
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, vtx[id].ID);
             if (vtx[id].Vtx.Length > vtx[id].LastSize)
+            {
                 GL.BufferData(BufferTarget.ArrayBuffer, Vertex.SizeOf * vtx[id].Vtx.Length, vtx[id].Vtx, BufferUsageHint.StaticDraw);
+            }
             else
+            {
                 GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)0, Vertex.SizeOf * vtx[id].Vtx.Length, vtx[id].Vtx);
+            }
+
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             vtx[id].LastSize = vtx[id].Vtx.Length;
         }
@@ -433,9 +476,13 @@ namespace TwinsanityEditor
             GL.BindBuffer(BufferTarget.ArrayBuffer, charVtxBuf);
             GL.EnableClientState(ArrayCap.ColorArray);
             GL.EnableClientState(ArrayCap.TextureCoordArray);
-            foreach (var k in charVtx.Keys)
+            foreach (char k in charVtx.Keys)
             {
-                if (charVtxOffs[k] == 0) continue;
+                if (charVtxOffs[k] == 0)
+                {
+                    continue;
+                }
+
                 if (charVtxBufLen < charVtx[k].Length)
                 {
                     GL.BufferData(BufferTarget.ArrayBuffer, Vertex.SizeOf * charVtx[k].Length, charVtx[k], BufferUsageHint.DynamicDraw);
@@ -473,12 +520,14 @@ namespace TwinsanityEditor
             GL.Enable(EnableCap.DepthTest);
         }
 
-        
+
 
         protected int LoadTextTexture(ref Bitmap text, int quality = 0, bool flip_y = false)
         {
             if (flip_y)
+            {
                 text.RotateFlip(RotateFlipType.RotateNoneFlipY);
+            }
 
             GL.GenTextures(1, out int texture);
 
@@ -523,7 +572,10 @@ namespace TwinsanityEditor
                     continue;
                 }
                 if (!charAdvanceX.ContainsKey(c))
+                {
                     AddCharData(c);
+                }
+
                 x += charAdvanceX[c];
             }
             x /= -2;
@@ -539,7 +591,10 @@ namespace TwinsanityEditor
                 if (c != ' ')
                 {
                     if (!textureCharMap.ContainsKey(c))
+                    {
                         GenCharTex(c);
+                    }
+
                     GL.BindTexture(TextureTarget.Texture2D, textureCharMap[c]);
                     GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureWidth, out float w);
                     GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureHeight, out float h);
@@ -552,15 +607,15 @@ namespace TwinsanityEditor
                     }
                     else if (charVtxOffs[c] + 4 >= charVtx[c].Length)
                     {
-                        var arr = charVtx[c];
+                        Vertex[] arr = charVtx[c];
                         Array.Resize(ref arr, arr.Length * 2);
                         charVtx[c] = arr;
                     }
                     float gBearingX = charBearingX[c];
-                    charVtx[c][charVtxOffs[c]++] = new Vertex(new Vector3(x + gBearingX, y_lo, 0) * size_fac * rot_mat + off, new Vector2(0, 1), col);
-                    charVtx[c][charVtxOffs[c]++] = new Vertex(new Vector3(x + gBearingX + w, y_lo, 0) * size_fac * rot_mat + off, new Vector2(1, 1), col);
-                    charVtx[c][charVtxOffs[c]++] = new Vertex(new Vector3(x + gBearingX + w, y_hi, 0) * size_fac * rot_mat + off, new Vector2(1, 0), col);
-                    charVtx[c][charVtxOffs[c]++] = new Vertex(new Vector3(x + gBearingX, y_hi, 0) * size_fac * rot_mat + off, new Vector2(0, 0), col);
+                    charVtx[c][charVtxOffs[c]++] = new Vertex((new Vector3(x + gBearingX, y_lo, 0) * size_fac * rot_mat) + off, new Vector2(0, 1), col);
+                    charVtx[c][charVtxOffs[c]++] = new Vertex((new Vector3(x + gBearingX + w, y_lo, 0) * size_fac * rot_mat) + off, new Vector2(1, 1), col);
+                    charVtx[c][charVtxOffs[c]++] = new Vertex((new Vector3(x + gBearingX + w, y_hi, 0) * size_fac * rot_mat) + off, new Vector2(1, 0), col);
+                    charVtx[c][charVtxOffs[c]++] = new Vertex((new Vector3(x + gBearingX, y_hi, 0) * size_fac * rot_mat) + off, new Vector2(0, 0), col);
                 }
 
                 x += charAdvanceX[c];
@@ -580,16 +635,18 @@ namespace TwinsanityEditor
                     continue;
                 }
                 if (!charAdvanceX.ContainsKey(c))
+                {
                     AddCharData(c);
+                }
+
                 if (anchor == TextAnchor.TopMiddle || anchor == TextAnchor.TopRight || anchor == TextAnchor.BotMiddle || anchor == TextAnchor.BotRight)
-                    x += 0 + charAdvanceX[c] * text_size_fac;
+                {
+                    x += 0 + (charAdvanceX[c] * text_size_fac);
+                }
             }
             if (anchor == TextAnchor.TopMiddle || anchor == TextAnchor.TopRight || anchor == TextAnchor.BotMiddle || anchor == TextAnchor.BotRight)
             {
-                if (anchor == TextAnchor.BotMiddle || anchor == TextAnchor.TopMiddle)
-                    x = start_x - (x - start_x) / 2;
-                else
-                    x = start_x - (x - start_x);
+                x = anchor == TextAnchor.BotMiddle || anchor == TextAnchor.TopMiddle ? start_x - ((x - start_x) / 2) : start_x - (x - start_x);
             }
             start_x = x;
             foreach (char c in s)
@@ -603,7 +660,10 @@ namespace TwinsanityEditor
                 if (c != ' ')
                 {
                     if (!textureCharMap.ContainsKey(c))
+                    {
                         GenCharTex(c);
+                    }
+
                     GL.BindTexture(TextureTarget.Texture2D, textureCharMap[c]);
                     GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureWidth, out float w);
                     GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureHeight, out float h);
@@ -615,13 +675,13 @@ namespace TwinsanityEditor
                         case TextAnchor.TopLeft:
                         case TextAnchor.TopMiddle:
                         case TextAnchor.TopRight:
-                            y_hi = y + (size - charBearingY[c]) * text_size_fac;
+                            y_hi = y + ((size - charBearingY[c]) * text_size_fac);
                             y_lo = y_hi + h;
                             break;
                         case TextAnchor.BotLeft:
                         case TextAnchor.BotMiddle:
                         case TextAnchor.BotRight:
-                            y_lo = y + (charHeight[c] - charBearingY[c]) * text_size_fac;
+                            y_lo = y + ((charHeight[c] - charBearingY[c]) * text_size_fac);
                             y_hi = y_lo - h;
                             break;
                     }
@@ -632,7 +692,7 @@ namespace TwinsanityEditor
                     }
                     else if (charVtxOffs[c] + 4 >= charVtx[c].Length)
                     {
-                        var arr = charVtx[c];
+                        Vertex[] arr = charVtx[c];
                         Array.Resize(ref arr, arr.Length * 2);
                         charVtx[c] = arr;
                     }
@@ -656,7 +716,7 @@ namespace TwinsanityEditor
 
         private void AddCharData(char c)
         {
-            var face = _fntService.FontFace;
+            Face face = _fntService.FontFace;
             face.LoadGlyph(face.GetCharIndex(c), SharpFont.LoadFlags.Default, SharpFont.LoadTarget.Normal);
 
             charAdvanceX.Add(c, (float)face.Glyph.Advance.X);
@@ -684,7 +744,7 @@ namespace TwinsanityEditor
                 }
             }
             GL.DeleteBuffer(charVtxBuf);
-            foreach (var t in textureCharMap.Values)
+            foreach (int t in textureCharMap.Values)
             {
                 GL.DeleteTexture(t);
             }

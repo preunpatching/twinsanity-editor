@@ -53,7 +53,7 @@ namespace TwinsanityEditor
 
         public static uint ColorToABGR(Color col)
         {
-            return col.R | (uint)col.G << 8 | (uint)col.B << 16 | (uint)col.A << 24;
+            return col.R | ((uint)col.G << 8) | ((uint)col.B << 16) | ((uint)col.A << 24);
         }
 
         public static int SizeOf { get; } = Marshal.SizeOf(typeof(Vertex));

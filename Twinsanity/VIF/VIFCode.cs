@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace Twinsanity.VIF
 {
     public class VIFCode
     {
-        public Boolean Interrupt { get; set; }
+        public bool Interrupt { get; set; }
         public VIFCodeEnum OP { get; set; }
-        public Byte Amount { get; set; }
-        public UInt16 Immediate { get; set; }
+        public byte Amount { get; set; }
+        public ushort Immediate { get; set; }
         public void Read(BinaryReader reader)
         {
             SetVIF(reader.ReadUInt32());
@@ -22,22 +17,22 @@ namespace Twinsanity.VIF
             writer.Write(GetVIF());
         }
 
-        public void SetVIF(UInt32 cmd)
+        public void SetVIF(uint cmd)
         {
-            Byte CMD = (Byte)((cmd & 0xFF000000) >> 24);
-            Amount = (Byte)((cmd & 0x00FF0000) >> 16);
-            Immediate = (UInt16)((cmd & 0x0000FFFF) >> 0);
+            byte CMD = (byte)((cmd & 0xFF000000) >> 24);
+            Amount = (byte)((cmd & 0x00FF0000) >> 16);
+            Immediate = (ushort)((cmd & 0x0000FFFF) >> 0);
             OP = (VIFCodeEnum)(CMD & 0b01111111);
-            Interrupt = ((CMD & 0b10000000) != 0) ? true : false;
+            Interrupt = (CMD & 0b10000000) != 0;
         }
-        public UInt32 GetVIF()
+        public uint GetVIF()
         {
-            Byte CMD = (Byte)OP;
+            byte CMD = (byte)OP;
             if (Interrupt)
             {
                 CMD |= 0b10000000;
             }
-            return (UInt32)CMD << 24 | (UInt32)Amount << 16 | (UInt32)Immediate << 0;
+            return ((uint)CMD << 24) | ((uint)Amount << 16) | ((uint)Immediate << 0);
         }
         public bool isUnpack()
         {

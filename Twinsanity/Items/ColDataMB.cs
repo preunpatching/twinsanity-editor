@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System;
 
 namespace Twinsanity
 {
@@ -8,7 +7,7 @@ namespace Twinsanity
     {
         protected override int GetSize()
         {
-            return isEmpty ? 0 : (36 + Triggers.Count * 32 + Groups.Count * 8 + Tris.Count * 8 + Vertices.Count * 16);
+            return isEmpty ? 0 : (36 + (Triggers.Count * 32) + (Groups.Count * 8) + (Tris.Count * 8) + (Vertices.Count * 16));
         }
 
         /// <summary>
@@ -16,7 +15,11 @@ namespace Twinsanity
         /// </summary>
         public override void Save(BinaryWriter writer)
         {
-            if (isEmpty) return;
+            if (isEmpty)
+            {
+                return;
+            }
+
             throw new NotImplementedException();
         }
 
@@ -42,7 +45,7 @@ namespace Twinsanity
             uint vertexSize = areader.ReadUInt32();
             try
             {
-                areader.ReadBytes(4); // PACK
+                _ = areader.ReadBytes(4); // PACK
                 byte[] outData = InteropUCL.DecompressNRV2B(areader.ReadBytes((int)triggerSize - 4));
                 using (MemoryStream subMem = new MemoryStream(outData))
                 using (BinaryReader reader = new BinaryReader(subMem))
@@ -70,7 +73,7 @@ namespace Twinsanity
             }
             try
             {
-                areader.ReadBytes(4); // PACK
+                _ = areader.ReadBytes(4); // PACK
                 byte[] outData = InteropUCL.DecompressNRV2B(areader.ReadBytes((int)groupSize - 4));
                 using (MemoryStream subMem = new MemoryStream(outData))
                 using (BinaryReader reader = new BinaryReader(subMem))
@@ -92,7 +95,7 @@ namespace Twinsanity
             }
             try
             {
-                areader.ReadBytes(4); // PACK
+                _ = areader.ReadBytes(4); // PACK
                 byte[] outData = InteropUCL.DecompressNRV2B(areader.ReadBytes((int)triSize - 4));
                 using (MemoryStream subMem = new MemoryStream(outData))
                 using (BinaryReader reader = new BinaryReader(subMem))
@@ -102,8 +105,8 @@ namespace Twinsanity
                         ColTri tri = new ColTri();
                         ulong legacy = reader.ReadUInt64();
                         tri.Vert1 = (int)(legacy & mask);
-                        tri.Vert2 = (int)((legacy >> 18 * 1) & mask);
-                        tri.Vert3 = (int)((legacy >> 18 * 2) & mask);
+                        tri.Vert2 = (int)((legacy >> (18 * 1)) & mask);
+                        tri.Vert3 = (int)((legacy >> (18 * 2)) & mask);
                         tri.Surface = (int)(legacy >> (18 * 3));
                         Tris.Add(tri);
                     }
@@ -115,7 +118,7 @@ namespace Twinsanity
             }
             try
             {
-                areader.ReadBytes(4); // PACK
+                _ = areader.ReadBytes(4); // PACK
                 byte[] outData = InteropUCL.DecompressNRV2B(areader.ReadBytes((int)vertexSize - 4));
                 using (MemoryStream subMem = new MemoryStream(outData))
                 using (BinaryReader reader = new BinaryReader(subMem))

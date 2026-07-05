@@ -4,7 +4,7 @@ using Twinsanity;
 
 namespace TwinsanityEditor.Controllers
 {
-    class CodeModelController : ItemController
+    internal class CodeModelController : ItemController
     {
         public new CodeModel Data { get; set; }
 
@@ -15,19 +15,21 @@ namespace TwinsanityEditor.Controllers
 
         protected override void GenText()
         {
-            List<string> text = new List<string>();
-            text.Add($"ID: {Data.ID}");
-            text.Add($"Size: {Data.Size}");
-            text.Add($"Header: 0x{Data.Header:X}");
-            text.Add($"AgentLab additions: {Data.ArraySize}");
-            for (var i = 0; i < Data.ArraySize; ++i)
+            List<string> text = new List<string>
+            {
+                $"ID: {Data.ID}",
+                $"Size: {Data.Size}",
+                $"Header: 0x{Data.Header:X}",
+                $"AgentLab additions: {Data.ArraySize}"
+            };
+            for (int i = 0; i < Data.ArraySize; ++i)
             {
                 text.Add($"Addition {i} - Script ID: {(DefaultEnums.ScriptID)Data.scriptIds[i]}");
-                var agentLabAddition = Data.agentLabAdditionsList[i];
+                CodeModel.AgentLabAdditions agentLabAddition = Data.agentLabAdditionsList[i];
                 text.Add($"\tCommands amount: {agentLabAddition.scriptCommandsAmount}");
                 if (agentLabAddition.scriptCommandsAmount > 0)
                 {
-                    var command = agentLabAddition.scriptCommand;
+                    Script.MainScript.ScriptCommand command = agentLabAddition.scriptCommand;
                     do
                     {
                         if (Enum.IsDefined(typeof(DefaultEnums.CommandID), command.VTableIndex))
@@ -43,7 +45,7 @@ namespace TwinsanityEditor.Controllers
                 }
             }
             text.Add($"Unk AgentLab addition");
-            var cmd = Data.scriptCommand;
+            Script.MainScript.ScriptCommand cmd = Data.scriptCommand;
             do
             {
                 if (Enum.IsDefined(typeof(DefaultEnums.CommandID), cmd.VTableIndex))

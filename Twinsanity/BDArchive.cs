@@ -15,30 +15,35 @@ namespace Twinsanity
             string bdname = in_name, bhname = in_name;
             if (in_name.EndsWith(".BH"))
             {
-                bdname = in_name.Substring(0, in_name.Length-1) + "D";
+                bdname = in_name.Substring(0, in_name.Length - 1) + "D";
             }
             else if (in_name.EndsWith(".bh"))
             {
-                bdname = in_name.Substring(0, in_name.Length-1) + "d";
+                bdname = in_name.Substring(0, in_name.Length - 1) + "d";
             }
             else if (in_name.EndsWith(".BD"))
             {
-                bhname = in_name.Substring(0, in_name.Length-1) + "H";
+                bhname = in_name.Substring(0, in_name.Length - 1) + "H";
             }
             else if (in_name.EndsWith(".bd"))
             {
-                bhname = in_name.Substring(0, in_name.Length-1) + "h";
+                bhname = in_name.Substring(0, in_name.Length - 1) + "h";
             }
             else
             {
                 bdname += ".BD";
                 bhname += ".BH";
             }
-            
+
             if (!File.Exists(bhname))
+            {
                 throw new ArgumentException("BH file could not be found.");
+            }
+
             if (!File.Exists(bdname))
+            {
                 throw new ArgumentException("BD file could not be found.");
+            }
 
             using (BinaryReader hr = new BinaryReader(new FileStream(bhname, FileMode.Open)))
             using (BinaryReader dr = new BinaryReader(new FileStream(bdname, FileMode.Open)))
@@ -55,7 +60,7 @@ namespace Twinsanity
                     {
                         string dirs = name.Substring(0, name.LastIndexOf(System.IO.Path.DirectorySeparatorChar));
 
-                        Directory.CreateDirectory(System.IO.Path.Combine(out_dir, dirs));
+                        _ = Directory.CreateDirectory(System.IO.Path.Combine(out_dir, dirs));
                     }
 
                     using (BinaryWriter file = new BinaryWriter(new FileStream(System.IO.Path.Combine(out_dir, name), FileMode.Create, FileAccess.Write)))
@@ -102,7 +107,7 @@ namespace Twinsanity
             {
                 string filename = string.Empty;
                 DirectoryInfo di = new DirectoryInfo(out_dir);
-                Dictionary<BinaryReader,string> filemap = new Dictionary<BinaryReader,string>();
+                Dictionary<BinaryReader, string> filemap = new Dictionary<BinaryReader, string>();
 
                 foreach (DirectoryInfo dir in di.GetDirectories())
                 {
@@ -114,10 +119,13 @@ namespace Twinsanity
                 }
 
                 hw.Write(0x501);
-                foreach (var kvp in filemap)
+                foreach (KeyValuePair<BinaryReader, string> kvp in filemap)
                 {
                     if (kvp.Key.BaseStream.Length > uint.MaxValue)
+                    {
                         throw new IOException($"File {kvp.Value} is too large");
+                    }
+
                     byte[] name = Encoding.ASCII.GetBytes(kvp.Value);
                     hw.Write(name.Length);
                     hw.Write(name);
@@ -135,7 +143,7 @@ namespace Twinsanity
             }
         }
 
-        internal static void LockDirectory(string dname, DirectoryInfo di, Dictionary<BinaryReader,string> filemap)
+        internal static void LockDirectory(string dname, DirectoryInfo di, Dictionary<BinaryReader, string> filemap)
         {
             foreach (DirectoryInfo dir in di.GetDirectories())
             {
@@ -147,7 +155,7 @@ namespace Twinsanity
             }
         }
 
-        internal static void LockFile(string filename, FileInfo file, Dictionary<BinaryReader,string> filemap)
+        internal static void LockFile(string filename, FileInfo file, Dictionary<BinaryReader, string> filemap)
         {
             filemap.Add(new BinaryReader(file.Open(FileMode.Open, FileAccess.Read)), filename);
         }

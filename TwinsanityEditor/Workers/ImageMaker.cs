@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using TwinsanityEditor.Externals.PS2ImageMaker;
 using TwinsanityEditor.Properties;
 using WK.Libraries.BetterFolderBrowserNS;
 
@@ -111,9 +105,12 @@ namespace TwinsanityEditor.Workers
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (gen_state == GenerationState.PackBD) return;
+            if (gen_state == GenerationState.PackBD)
+            {
+                return;
+            }
 
-            var progress = Externals.PS2ImageMaker.PS2ImageMaker.PollProgress();
+            PS2ImageMaker.Progress progress = Externals.PS2ImageMaker.PS2ImageMaker.PollProgress();
             tspbGenerationProgress.Value = (int)(progress.ProgressPercentage * 100);
             switch (progress.ProgressS)
             {
@@ -142,7 +139,7 @@ namespace TwinsanityEditor.Workers
                     tspbGenerationProgress.Value = 0;
                     if (cbOpenOutPath.Checked)
                     { // Open output path on finish
-                        Process.Start("explorer.exe", tbOutputPath.Text);
+                        _ = Process.Start("explorer.exe", tbOutputPath.Text);
                     }
                     if (cbRun.Checked)
                     { // Open output path on finish
@@ -150,7 +147,7 @@ namespace TwinsanityEditor.Workers
                         string[] files = System.IO.Directory.GetFiles(PCSXFolder, "pcsx2.exe");
                         if (files.Length > 0)
                         {
-                            Process.Start(files[0], $"\"{Path.Combine(tbOutputPath.Text, $"{Settings.Default.ImageName}.iso")}\"");
+                            _ = Process.Start(files[0], $"\"{Path.Combine(tbOutputPath.Text, $"{Settings.Default.ImageName}.iso")}\"");
                         }
                     }
                     break;
@@ -181,7 +178,7 @@ namespace TwinsanityEditor.Workers
 
         internal void PackArchives()
         {
-            var result = BDExplorer.PackBDArchives(tbTwinsanityPath.Text + "\\" + "Crash6", ArchivesPacked);
+            bool result = BDExplorer.PackBDArchives(tbTwinsanityPath.Text + "\\" + "Crash6", ArchivesPacked);
             if (!result)
             {
                 timer1.Enabled = false;
@@ -194,7 +191,7 @@ namespace TwinsanityEditor.Workers
         internal void ArchivesPacked()
         {
             gen_state = GenerationState.ImageGeneration;
-            var progress = Externals.PS2ImageMaker.PS2ImageMaker.StartPacking(tbTwinsanityPath.Text, tbOutputPath.Text + "\\" + tbImageName.Text + ".iso");
+            PS2ImageMaker.Progress progress = Externals.PS2ImageMaker.PS2ImageMaker.StartPacking(tbTwinsanityPath.Text, tbOutputPath.Text + "\\" + tbImageName.Text + ".iso");
             tspbGenerationProgress.Value = (int)(progress.ProgressPercentage * 100);
         }
 
@@ -211,7 +208,7 @@ namespace TwinsanityEditor.Workers
                     string[] files = System.IO.Directory.GetFiles(bfb.SelectedFolder, "pcsx2.exe");
                     if (files.Length == 0)
                     {
-                        MessageBox.Show("PCSX2.EXE not found!", "PCSX2 not found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        _ = MessageBox.Show("PCSX2.EXE not found!", "PCSX2 not found", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     else
                     {

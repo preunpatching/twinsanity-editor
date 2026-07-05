@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Twinsanity;
 
 namespace TwinsanityEditor
@@ -21,19 +20,18 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            List<string> text = new List<string>();
-
-            text.Add($"ID: {Data.ID}");
-            text.Add($"Size: {Data.Size}");
-            text.Add(string.Format("Chunk Name: {0}", Data.ChunkName));
-            text.Add(string.Format("Header: {0}", Data.HeaderUnk1));
-            text.Add(string.Format("Skydome ID: {0:X8}", Data.SkydomeID));
-            text.Add(string.Format("HeaderVars: {0}; {2} SceneryType {1};", Data.HeaderUnk2, Data.HeaderUnk3, Data.HeaderUnk4));
-            text.Add(string.Format("UnkInt: {0}", Data.unkVar5));
-
-            text.Add("\n");
-
-            text.Add(string.Format("Lights: Ambient {0}; Directional {1}; Point {2}; Negative {3}", Data.LightsAmbient.Count, Data.LightsDirectional.Count, Data.LightsPoint.Count, Data.LightsNegative.Count));
+            List<string> text = new List<string>
+            {
+                $"ID: {Data.ID}",
+                $"Size: {Data.Size}",
+                string.Format("Chunk Name: {0}", Data.ChunkName),
+                string.Format("Header: {0}", Data.HeaderUnk1),
+                string.Format("Skydome ID: {0:X8}", Data.SkydomeID),
+                string.Format("HeaderVars: {0}; {2} SceneryType {1};", Data.HeaderUnk2, Data.HeaderUnk3, Data.HeaderUnk4),
+                string.Format("UnkInt: {0}", Data.unkVar5),
+                "\n",
+                string.Format("Lights: Ambient {0}; Directional {1}; Point {2}; Negative {3}", Data.LightsAmbient.Count, Data.LightsDirectional.Count, Data.LightsPoint.Count, Data.LightsNegative.Count)
+            };
             for (int i = 0; i < Data.LightsAmbient.Count; i++)
             {
                 text.Add(string.Format("Ambient Light {0}", i));
@@ -127,7 +125,7 @@ namespace TwinsanityEditor
                 //text.Add(add + $"Model {a} Matrix 1: { ptr.Models[a].ModelMatrix[0].X }; { ptr.Models[a].ModelMatrix[0].Y }; { ptr.Models[a].ModelMatrix[0].Z }; { ptr.Models[a].ModelMatrix[0].W }");
                 //text.Add(add + $"Model {a} Matrix 2: { ptr.Models[a].ModelMatrix[1].X }; { ptr.Models[a].ModelMatrix[1].Y }; { ptr.Models[a].ModelMatrix[1].Z }; { ptr.Models[a].ModelMatrix[1].W }");
                 //text.Add(add + $"Model {a} Matrix 3: { ptr.Models[a].ModelMatrix[2].X }; { ptr.Models[a].ModelMatrix[2].Y }; { ptr.Models[a].ModelMatrix[2].Z }; { ptr.Models[a].ModelMatrix[2].W }");
-                text.Add(add + $"Model {a} Matrix 4 (Position): { ptr.Models[a].ModelMatrix[3].X }; { ptr.Models[a].ModelMatrix[3].Y }; { ptr.Models[a].ModelMatrix[3].Z }; { ptr.Models[a].ModelMatrix[3].W }");
+                text.Add(add + $"Model {a} Matrix 4 (Position): {ptr.Models[a].ModelMatrix[3].X}; {ptr.Models[a].ModelMatrix[3].Y}; {ptr.Models[a].ModelMatrix[3].Z}; {ptr.Models[a].ModelMatrix[3].W}");
             }
             /*
             for (int a = 0; a < ptr.UnkPos.Length; a++)

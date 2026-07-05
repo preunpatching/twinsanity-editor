@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Twinsanity.Actions
 {
@@ -41,12 +40,12 @@ namespace Twinsanity.Actions
 
         public override void Load(Script.MainScript.ScriptCommand input)
         {
-            
+
         }
 
         public override void Save(Script.MainScript.ScriptCommand output)
         {
-            
+
         }
     }
 }

@@ -42,7 +42,7 @@ namespace Twinsanity
 
         public override void Load(BinaryReader reader, int size)
         {
-            long start_pos = reader.BaseStream.Position;
+            _ = reader.BaseStream.Position;
 
             uint rigidCount = reader.ReadUInt32();
             BlendShapeCount = reader.ReadUInt32();
@@ -64,8 +64,8 @@ namespace Twinsanity
                     Skin.BlendShapeY = reader.ReadSingle();
                     Skin.BlendShapeZ = reader.ReadSingle();
 
-                    var interpreter = VIFInterpreter.InterpretCode(Skin.VifCode);
-                    var data = interpreter.GetMem();
+                    VIFInterpreter interpreter = VIFInterpreter.InterpretCode(Skin.VifCode);
+                    List<List<Vector4>> data = interpreter.GetMem();
                     Skin.Vertexes = CalculateData(data);
 
                     Skin.BlendShapes = new BlendShape[BlendShapeCount];
@@ -76,29 +76,29 @@ namespace Twinsanity
                         BSkin.VertexesAmount = reader.ReadUInt32();
                         BSkin.Blob = reader.ReadBytes(BSize << 4);
                         BSkin.ShapeVertecies = new BlendShapeVertex[BSkin.VertexesAmount];
-                        var dma = new DMATag
+                        DMATag dma = new DMATag
                         {
                             QWC = (ushort)BSize,
-                            Extra = (0x0) | ((BSkin.VertexesAmount + 1) << 0x10) | 0x6E000000 // Unpack vectors compressed in V4_8 format
+                            Extra = 0x0 | ((BSkin.VertexesAmount + 1) << 0x10) | 0x6E000000 // Unpack vectors compressed in V4_8 format
                         };
 
-                        using (var mem = new MemoryStream())
+                        using (MemoryStream mem = new MemoryStream())
                         {
-                            using (var writer = new BinaryWriter(mem))
+                            using (BinaryWriter writer = new BinaryWriter(mem))
                             {
                                 dma.Write(writer);
                                 writer.Write(BSkin.Blob);
 
                                 mem.Position = 0;
-                                using (var memReader = new BinaryReader(mem))
+                                using (BinaryReader memReader = new BinaryReader(mem))
                                 {
-                                    var interp = VIFInterpreter.InterpretCode(memReader);
-                                    var vData = interp.GetMem();
-                                    for (var i = 0; i < BSkin.VertexesAmount; i++)
+                                    VIFInterpreter interp = VIFInterpreter.InterpretCode(memReader);
+                                    List<List<Vector4>> vData = interp.GetMem();
+                                    for (int i = 0; i < BSkin.VertexesAmount; i++)
                                     {
-                                        var x_comp = (int)vData[0][i + 1].GetBinaryX();
-                                        var y_comp = (int)vData[0][i + 1].GetBinaryY();
-                                        var z_comp = (int)vData[0][i + 1].GetBinaryZ();
+                                        int x_comp = (int)vData[0][i + 1].GetBinaryX();
+                                        int y_comp = (int)vData[0][i + 1].GetBinaryY();
+                                        int z_comp = (int)vData[0][i + 1].GetBinaryZ();
                                         BSkin.ShapeVertecies[i] = new BlendShapeVertex()
                                         {
                                             Offset = new Vector4(x_comp * Skin.BlendShapeX,
@@ -111,7 +111,7 @@ namespace Twinsanity
                                 }
                             }
                         }
-                  
+
                         Skin.BlendShapes[b] = BSkin;
                     }
 
@@ -125,25 +125,25 @@ namespace Twinsanity
 
         private List<VertexData> CalculateData(List<List<Vector4>> data)
         {
-            var vertexes = new List<VertexData>();
+            List<VertexData> vertexes = new List<VertexData>();
             const int VERT_DATA_INDEX = 3;
             for (int i = 0; i < data.Count;)
             {
 
-                var verts = (data[i][0].GetBinaryX() & 0xFF);
-                var fields = (data[i + 1][0].GetBinaryX() & 0xFF) / verts;
-                var scaleVec = data[i + 2][0];
+                uint verts = data[i][0].GetBinaryX() & 0xFF;
+                uint fields = (data[i + 1][0].GetBinaryX() & 0xFF) / verts;
+                Vector4 scaleVec = data[i + 2][0];
 
-                var vertex_batch_1 = data[i + VERT_DATA_INDEX];
-                var vertex_batch_2 = data[i + VERT_DATA_INDEX + 1];
-                var vertex_batch_3 = data[i + VERT_DATA_INDEX + 3];
-                var vertex_batch_4 = data[i + VERT_DATA_INDEX + 2];
+                List<Vector4> vertex_batch_1 = data[i + VERT_DATA_INDEX];
+                List<Vector4> vertex_batch_2 = data[i + VERT_DATA_INDEX + 1];
+                List<Vector4> vertex_batch_3 = data[i + VERT_DATA_INDEX + 3];
+                List<Vector4> vertex_batch_4 = data[i + VERT_DATA_INDEX + 2];
 
                 // Vertex conversion
                 for (int j = 0; j < verts; ++j)
                 {
-                    var v1 = new Vector4(vertex_batch_1[j]);
-                    var v2 = new Vector4(vertex_batch_2[j]);
+                    Vector4 v1 = new Vector4(vertex_batch_1[j]);
+                    Vector4 v2 = new Vector4(vertex_batch_2[j]);
                     v1.X = (int)v1.GetBinaryX();
                     v1.Y = (int)v1.GetBinaryY();
                     v1.Z = (int)v1.GetBinaryZ();
@@ -157,22 +157,22 @@ namespace Twinsanity
                     vertex_batch_1[j] = v1;
                     vertex_batch_2[j] = v2;
                 }
-                var connections = new List<bool>();
-                var jointInfos = new List<JointInfo>();
+                List<bool> connections = new List<bool>();
+                List<JointInfo> jointInfos = new List<JointInfo>();
                 for (int j = 0; j < verts; ++j)
                 {
-                    var v1 = vertex_batch_3[j];
+                    Vector4 v1 = vertex_batch_3[j];
 
-                    var unkValue = v1.GetBinaryW() & 0xFFFF;
+                    uint unkValue = v1.GetBinaryW() & 0xFFFF;
                     connections.Add((unkValue >> 8) != 128);
 
-                    var weightAmount = v1.GetBinaryW() & 0xFF;
-                    var weight1 = 0f;
-                    var weight2 = 0f;
-                    var weight3 = 0f;
-                    var jointIndex1 = 0u;
-                    var jointIndex2 = 0u;
-                    var jointIndex3 = 0u;
+                    uint weightAmount = v1.GetBinaryW() & 0xFF;
+                    float weight1 = 0f;
+                    float weight2 = 0f;
+                    float weight3 = 0f;
+                    uint jointIndex1 = 0u;
+                    uint jointIndex2 = 0u;
+                    uint jointIndex3 = 0u;
                     if (weightAmount > 0)
                     {
                         jointIndex1 = v1.GetBinaryX() & 0xFF;
@@ -195,7 +195,7 @@ namespace Twinsanity
                         weight3 = v1.Z;
                     }
 
-                    var joint = new JointInfo()
+                    JointInfo joint = new JointInfo()
                     {
                         Weight1 = weight1,
                         Weight2 = weight2,
@@ -210,17 +210,17 @@ namespace Twinsanity
 
                 for (int j = 0; j < verts; j++)
                 {
-                    var vertData = new VertexData
+                    VertexData vertData = new VertexData
                     {
                         X = vertex_batch_1[j].X,
                         Y = vertex_batch_1[j].Y,
                         Z = vertex_batch_1[j].Z,
                         U = vertex_batch_2[j].X,
                         V = vertex_batch_2[j].Y,
-                        R = (byte)(Math.Min((int)(vertex_batch_4[j].GetBinaryX() & 0xFF) + 127, 255)),
-                        G = (byte)(Math.Min((int)(vertex_batch_4[j].GetBinaryY() & 0xFF) + 127, 255)),
-                        B = (byte)(Math.Min((int)(vertex_batch_4[j].GetBinaryZ() & 0xFF) + 127, 255)),
-                        A = (byte)(Math.Min((int)(vertex_batch_4[j].GetBinaryW() & 0xFF) + 127, 255)),
+                        R = (byte)Math.Min((int)(vertex_batch_4[j].GetBinaryX() & 0xFF) + 127, 255),
+                        G = (byte)Math.Min((int)(vertex_batch_4[j].GetBinaryY() & 0xFF) + 127, 255),
+                        B = (byte)Math.Min((int)(vertex_batch_4[j].GetBinaryZ() & 0xFF) + 127, 255),
+                        A = (byte)Math.Min((int)(vertex_batch_4[j].GetBinaryW() & 0xFF) + 127, 255),
                         Joint = jointInfos[j],
                         Conn = connections[j],
                         BlendShapes = new List<BlendShapeVertex>()
@@ -276,16 +276,16 @@ namespace Twinsanity
 
         public void FillPackage(TwinsFile source, TwinsFile destination)
         {
-            var sourceMaterials = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(1);
-            var destinationMaterials = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(1);
-            foreach (var model in Models)
+            TwinsSection sourceMaterials = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(1);
+            TwinsSection destinationMaterials = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(1);
+            foreach (BlendSkinRigidModel model in Models)
             {
-                var materialId = model.MaterialID;
+                uint materialId = model.MaterialID;
                 if (destinationMaterials.HasItem(materialId))
                 {
                     continue;
                 }
-                var linkedMaterial = sourceMaterials.GetItem<Material>(materialId);
+                Material linkedMaterial = sourceMaterials.GetItem<Material>(materialId);
                 destinationMaterials.AddItem(materialId, linkedMaterial);
                 linkedMaterial.FillPackage(source, destination);
             }

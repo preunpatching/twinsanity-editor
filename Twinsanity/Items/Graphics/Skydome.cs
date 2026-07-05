@@ -12,21 +12,25 @@ namespace Twinsanity
             writer.Write(Unknown);
             writer.Write(MeshIDs.Length);
             for (int i = 0; i < MeshIDs.Length; ++i)
+            {
                 writer.Write(MeshIDs[i]);
+            }
         }
 
         public override void Load(BinaryReader reader, int size)
         {
             Unknown = reader.ReadUInt32();
-            var count = reader.ReadInt32();
+            int count = reader.ReadInt32();
             MeshIDs = new uint[count];
             for (int i = 0; i < count; ++i)
+            {
                 MeshIDs[i] = reader.ReadUInt32();
+            }
         }
 
         protected override int GetSize()
         {
-            return 8 + MeshIDs.Length * 4;
+            return 8 + (MeshIDs.Length * 4);
         }
     }
 }

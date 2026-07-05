@@ -1,5 +1,5 @@
-﻿using Twinsanity;
-using System;
+﻿using System;
+using Twinsanity;
 
 namespace TwinsanityEditor
 {
@@ -22,37 +22,19 @@ namespace TwinsanityEditor
                 obj_name = (DefaultEnums.ObjectID_MB)Data.ObjectID + "";
             }
 
-            if (obj_name != string.Empty)
-                return $"{obj_name} Instance [ID {Data.ID}]";
-            else
-                return $"Instance [ID {Data.ID}]";
+            return obj_name != string.Empty ? $"{obj_name} Instance [ID {Data.ID}]" : $"Instance [ID {Data.ID}]";
         }
 
         protected override void GenText()
         {
-            string obj_name = string.Empty; //MainFile.GetObjectName(Data.ObjectID);
             //obj_name = Utils.TextUtils.TruncateObjectName(obj_name, Data.ObjectID, "", " (Not in Objects)");
-            if (Enum.IsDefined(typeof(DefaultEnums.ObjectID_MB), Data.ObjectID))
-            {
-                obj_name = (DefaultEnums.ObjectID_MB)Data.ObjectID + "";
-            }
-            else
-            {
-                obj_name = "Unknown";
-            }
+            string obj_name = Enum.IsDefined(typeof(DefaultEnums.ObjectID_MB), Data.ObjectID) ? (DefaultEnums.ObjectID_MB)Data.ObjectID + "" : "Unknown";
 
             TextPrev = new string[6];//12 + Data.InstanceIDs.Count + Data.PositionIDs.Count + Data.PathIDs.Count + Data.UnkI321.Count + Data.UnkI322.Count + Data.UnkI323.Count];
             TextPrev[0] = $"ID: {Data.ID}";
             TextPrev[1] = $"Size: {Data.Size}";
             TextPrev[2] = $"Object ID {Data.ObjectID} - {(obj_name != string.Empty ? obj_name : string.Empty)}";
-            if (Data.ScriptID == -1)
-            {
-                TextPrev[3] = $"Script ID None";
-            }
-            else
-            {
-                TextPrev[3] = $"Script ID {Data.ScriptID}";
-            }
+            TextPrev[3] = Data.ScriptID == -1 ? $"Script ID None" : $"Script ID {Data.ScriptID}";
             TextPrev[4] = $"Position ({Data.Pos.X}, {Data.Pos.Y}, {Data.Pos.Z}, {Data.Pos.W})";
             TextPrev[5] = $"Rotation ({Data.RotX} | {Data.RotY} | {Data.RotZ})";
 

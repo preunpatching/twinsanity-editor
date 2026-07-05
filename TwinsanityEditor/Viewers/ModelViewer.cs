@@ -1,12 +1,11 @@
 ﻿using System.Windows.Forms;
-using Twinsanity;
 
 namespace TwinsanityEditor
 {
     public class ModelViewer : MeshViewer
     {
-        private RigidModelController model;
-        private FileController file;
+        private readonly RigidModelController model;
+        private readonly FileController file;
 
         public ModelViewer(RigidModelController model, Form pform) : base(model, pform)
         {

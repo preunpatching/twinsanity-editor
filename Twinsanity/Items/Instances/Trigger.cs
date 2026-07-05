@@ -1,5 +1,5 @@
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Twinsanity
 {
@@ -9,168 +9,179 @@ namespace Twinsanity
 
         public bool Arg1_Used
         {
-            get
-            {
-                return (Header >> 0xB & 0x1) != 0;
-            }
+            get => ((Header >> 0xB) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0xB;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool Arg2_Used
         {
-            get
-            {
-                return (Header >> 0x8 & 0x1) != 0;
-            }
+            get => ((Header >> 0x8) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x8;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool Arg3_Used
         {
-            get
-            {
-                return (Header >> 0x9 & 0x1) != 0;
-            }
+            get => ((Header >> 0x9) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x9;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool Arg4_Used
         {
-            get
-            {
-                return (Header >> 0xA & 0x1) != 0;
-            }
+            get => ((Header >> 0xA) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0xA;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
 
         public bool UnkFlag0
         {
-            get
-            {
-                return (Header >> 0x0 & 0x1) != 0;
-            }
+            get => ((Header >> 0x0) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x0;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag1
         {
-            get
-            {
-                return (Header >> 0x1 & 0x1) != 0;
-            }
+            get => ((Header >> 0x1) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x1;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag2
         {
-            get
-            {
-                return (Header >> 0x2 & 0x1) != 0;
-            }
+            get => ((Header >> 0x2) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x2;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag3
         {
-            get
-            {
-                return (Header >> 0x3 & 0x1) != 0;
-            }
+            get => ((Header >> 0x3) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x3;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag4
         {
-            get
-            {
-                return (Header >> 0x4 & 0x1) != 0;
-            }
+            get => ((Header >> 0x4) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x4;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag5
         {
-            get
-            {
-                return (Header >> 0x5 & 0x1) != 0;
-            }
+            get => ((Header >> 0x5) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x5;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag6
         {
-            get
-            {
-                return (Header >> 0x6 & 0x1) != 0;
-            }
+            get => ((Header >> 0x6) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x6;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
 
@@ -182,7 +193,7 @@ namespace Twinsanity
 
                 for (int i = 0; i < m.Length; i++)
                 {
-                    if ((Enabled >> i & 0x1) != 0)
+                    if (((Enabled >> i) & 0x1) != 0)
                     {
                         m[i] = true;
                     }
@@ -235,7 +246,9 @@ namespace Twinsanity
             writer.Write(Instances.Count);
             writer.Write(SectionHead);
             for (int i = 0; i < Instances.Count; ++i)
+            {
                 writer.Write(Instances[i]);
+            }
 
             writer.Write(Arg1);
             writer.Write(Arg2);
@@ -252,12 +265,15 @@ namespace Twinsanity
             {
                 Coords[i] = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
             }
-            var n = reader.ReadInt32();
-            n = reader.ReadInt32();
+
+            _ = reader.ReadInt32();
+            int n = reader.ReadInt32();
             SectionHead = reader.ReadUInt32();
             Instances = new List<ushort>(n);
             for (int i = 0; i < n; ++i)
+            {
                 Instances.Add(reader.ReadUInt16());
+            }
 
             Arg1 = reader.ReadUInt16();
             Arg2 = reader.ReadUInt16();
@@ -267,7 +283,7 @@ namespace Twinsanity
 
         protected override int GetSize()
         {
-            return 80 + Instances.Count * 2;
+            return 80 + (Instances.Count * 2);
         }
     }
 }

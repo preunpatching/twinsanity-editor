@@ -1,6 +1,6 @@
-﻿using Twinsanity;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows.Forms;
+using Twinsanity;
 using TwinsanityEditor.Controllers;
 
 namespace TwinsanityEditor
@@ -13,10 +13,10 @@ namespace TwinsanityEditor
         public FileController DefaultCont { get; set; }
         public FileController DataAuxCont { get; set; }
 
-        public string FileName { get => Data.FileName; }
-        public string SafeFileName { get => Data.SafeFileName; }
+        public string FileName => Data.FileName;
+        public string SafeFileName => Data.SafeFileName;
 
-        public SectionController MeshSection { get => GetMeshSection(); }
+        public SectionController MeshSection => GetMeshSection();
         public Dictionary<uint, string> ObjectNames { get; set; }
         public Dictionary<uint, string> MaterialNames { get; set; }
 
@@ -28,15 +28,15 @@ namespace TwinsanityEditor
         private Form editScripts;
         private Form editObjects;
         private Form editAnimations;
-        private Form editParticles;
+        private readonly Form editParticles;
         private Form editID;
-        private Form editCustomAgent;
-        private Form editMaterial;
+        private readonly Form editCustomAgent;
+        private readonly Form editMaterial;
         private Form editLod;
         private Form editSkydome;
-        private Form editScenery;
-        private Form editOGI;
-        private Form editDynScenery;
+        private readonly Form editScenery;
+        private readonly Form editOGI;
+        private readonly Form editDynScenery;
         private readonly Form[] editInstances = new Form[9], editPositions = new Form[9], editPaths = new Form[9],
             editTriggers = new Form[9], editCameras = new Form[9], editAIPositions = new Form[9], editAIPaths = new Form[9], editSurfaces = new Form[9];
 
@@ -118,7 +118,7 @@ namespace TwinsanityEditor
                         MaterialNames.Add(mat.ID, mat.Name);
                     }
                 }
-                
+
             }
         }
 
@@ -137,11 +137,9 @@ namespace TwinsanityEditor
             {
                 gfx_id = 7;
             }
-            if (Data.ContainsItem(gfx_id) && Data.GetItem<TwinsSection>(gfx_id).ContainsItem(2))
-            {
-                return GetItem<SectionController>(gfx_id).GetItem<SectionController>(2);
-            }
-            else return null;
+            return Data.ContainsItem(gfx_id) && Data.GetItem<TwinsSection>(gfx_id).ContainsItem(2)
+                ? GetItem<SectionController>(gfx_id).GetItem<SectionController>(2)
+                : null;
         }
 
         public void CloseFile()
@@ -182,77 +180,147 @@ namespace TwinsanityEditor
         public void OpenEditor(Controller c)
         {
             if (c is ChunkLinksController)
+            {
                 OpenEditor(ref editChunkLinks, Editors.ChunkLinks, c);
+            }
             else if (c is ColDataController)
+            {
                 OpenEditor(ref colForm, Editors.ColData, c);
+            }
             else if (c is PositionController)
+            {
                 OpenEditor(ref editPositions[((PositionController)c).Data.Parent.Parent.ID], Editors.Position, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is PathController)
+            {
                 OpenEditor(ref editPaths[((PathController)c).Data.Parent.Parent.ID], Editors.Path, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is InstanceController)
+            {
                 OpenEditor(ref editInstances[((InstanceController)c).Data.Parent.Parent.ID], Editors.Instance, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is InstanceDemoController)
+            {
                 OpenEditor(ref editInstances[((InstanceDemoController)c).Data.Parent.Parent.ID], Editors.InstanceDemo, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is InstanceMBController)
+            {
                 OpenEditor(ref editInstances[((InstanceMBController)c).Data.Parent.Parent.ID], Editors.InstanceMB, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is TriggerController)
+            {
                 OpenEditor(ref editTriggers[((TriggerController)c).Data.Parent.Parent.ID], Editors.Trigger, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is CameraController)
+            {
                 OpenEditor(ref editTriggers[((CameraController)c).Data.Parent.Parent.ID], Editors.Trigger, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is ScriptController)
+            {
                 OpenEditor(ref editScripts, Editors.Script, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is AnimationController)
+            {
                 OpenEditor(ref editAnimations, Editors.Animation, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is ObjectController)
+            {
                 OpenEditor(ref editObjects, Editors.Object, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is ObjectDemoController)
+            {
                 OpenEditor(ref editObjects, Editors.ObjectDemo, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is ParticleDataController)
+            {
                 OpenEditor(ref editObjects, Editors.Particles, c);
+            }
             else if (c is AIPositionController)
+            {
                 OpenEditor(ref editAIPositions[((AIPositionController)c).Data.Parent.Parent.ID], Editors.AIPosition, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is AIPathController)
+            {
                 OpenEditor(ref editAIPaths[((AIPathController)c).Data.Parent.Parent.ID], Editors.AIPath, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is CollisionSurfaceController)
+            {
                 OpenEditor(ref editSurfaces[((CollisionSurfaceController)c).Data.Parent.Parent.ID], Editors.Surface, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is LodModelController)
+            {
                 OpenEditor(ref editLod, Editors.LodModel, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is SkydomeController)
+            {
                 OpenEditor(ref editSkydome, Editors.Skydome, (Controller)c.Node.Parent.Tag);
+            }
             else if (c is SectionController s)
             {
                 if (s.Data.Type == SectionType.ObjectInstance)
+                {
                     OpenEditor(ref editInstances[s.Data.Parent.ID], Editors.Instance, c);
+                }
                 else if (s.Data.Type == SectionType.ObjectInstanceDemo)
+                {
                     OpenEditor(ref editInstances[s.Data.Parent.ID], Editors.InstanceDemo, c);
+                }
                 else if (s.Data.Type == SectionType.ObjectInstanceMB)
+                {
                     OpenEditor(ref editInstances[s.Data.Parent.ID], Editors.InstanceMB, c);
+                }
                 else if (s.Data.Type == SectionType.Position)
+                {
                     OpenEditor(ref editPositions[s.Data.Parent.ID], Editors.Position, c);
+                }
                 else if (s.Data.Type == SectionType.Path)
+                {
                     OpenEditor(ref editPaths[s.Data.Parent.ID], Editors.Path, c);
+                }
                 else if (s.Data.Type == SectionType.Trigger)
+                {
                     OpenEditor(ref editTriggers[s.Data.Parent.ID], Editors.Trigger, c);
+                }
                 else if (s.Data.Type == SectionType.Camera || s.Data.Type == SectionType.CameraDemo)
+                {
                     OpenEditor(ref editTriggers[s.Data.Parent.ID], Editors.Camera, c);
+                }
                 else if (s.Data.Type == SectionType.Script || s.Data.Type == SectionType.ScriptDemo || s.Data.Type == SectionType.ScriptX)
+                {
                     OpenEditor(ref editScripts, Editors.Script, c);
+                }
                 else if (s.Data.Type == SectionType.Object)
+                {
                     OpenEditor(ref editObjects, Editors.Object, c);
+                }
                 else if (s.Data.Type == SectionType.ObjectDemo)
+                {
                     OpenEditor(ref editObjects, Editors.ObjectDemo, c);
+                }
                 else if (s.Data.Type == SectionType.Animation)
+                {
                     OpenEditor(ref editAnimations, Editors.Animation, c);
+                }
                 else if (s.Data.Type == SectionType.AIPosition)
+                {
                     OpenEditor(ref editAIPositions[s.Data.Parent.ID], Editors.AIPosition, c);
+                }
                 else if (s.Data.Type == SectionType.AIPath)
+                {
                     OpenEditor(ref editAIPaths[s.Data.Parent.ID], Editors.AIPath, c);
+                }
                 else if (s.Data.Type == SectionType.CollisionSurface)
+                {
                     OpenEditor(ref editSurfaces[s.Data.Parent.ID], Editors.Surface, c);
+                }
                 else if (s.Data.Type == SectionType.LodModel)
+                {
                     OpenEditor(ref editLod, Editors.LodModel, c);
+                }
                 else if (s.Data.Type == SectionType.Skydome)
+                {
                     OpenEditor(ref editLod, Editors.Skydome, c);
+                }
             }
         }
 
@@ -269,8 +337,14 @@ namespace TwinsanityEditor
                             {
                                 col_section = 10;
                             }
-                            if (Data.ContainsItem(col_section)) editor_var_ptr = new ColDataEditor(Data.GetItem<ColData>(col_section)) { Tag = TopForm };
-                            else return;
+                            if (Data.ContainsItem(col_section))
+                            {
+                                editor_var_ptr = new ColDataEditor(Data.GetItem<ColData>(col_section)) { Tag = TopForm };
+                            }
+                            else
+                            {
+                                return;
+                            }
                         }
                         break;
                     case Editors.ChunkLinks: editor_var_ptr = new ChunkLinksEditor((ChunkLinksController)cont) { Tag = TopForm }; break;
@@ -297,7 +371,9 @@ namespace TwinsanityEditor
                 editor_var_ptr.Show();
             }
             else
+            {
                 editor_var_ptr.Select();
+            }
         }
 
         public void CloseEditor(Editors editor, int arg = -1)
@@ -334,13 +410,13 @@ namespace TwinsanityEditor
 
         public void OpenMeshViewer(ModelController c)
         {
-            var id = c.Data.ID;
+            uint id = c.Data.ID;
             if (!MeshViewers.ContainsKey(id))
             {
-                var f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
+                Form f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
                 f.FormClosed += delegate
                 {
-                    MeshViewers.Remove(id);
+                    _ = MeshViewers.Remove(id);
                 };
                 f.Show();
                 MeshViewer v = new MeshViewer(c, f) { Dock = DockStyle.Fill };
@@ -349,17 +425,19 @@ namespace TwinsanityEditor
                 MeshViewers.Add(id, f);
             }
             else
+            {
                 MeshViewers[id].Select();
+            }
         }
         public void OpenMeshViewer(SkinController c)
         {
-            var id = c.Data.ID;
+            uint id = c.Data.ID;
             if (!MeshViewers.ContainsKey(id))
             {
-                var f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
+                Form f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
                 f.FormClosed += delegate
                 {
-                    MeshViewers.Remove(id);
+                    _ = MeshViewers.Remove(id);
                 };
                 f.Show();
                 MeshViewer v = new MeshViewer(c, f) { Dock = DockStyle.Fill };
@@ -368,17 +446,19 @@ namespace TwinsanityEditor
                 MeshViewers.Add(id, f);
             }
             else
+            {
                 MeshViewers[id].Select();
+            }
         }
         public void OpenMeshViewer(BlendSkinController c)
         {
-            var id = c.Data.ID;
+            uint id = c.Data.ID;
             if (!MeshViewers.ContainsKey(id))
             {
-                var f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
+                Form f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
                 f.FormClosed += delegate
                 {
-                    MeshViewers.Remove(id);
+                    _ = MeshViewers.Remove(id);
                 };
                 f.Show();
                 MeshViewer v = new MeshViewer(c, f) { Dock = DockStyle.Fill };
@@ -387,17 +467,19 @@ namespace TwinsanityEditor
                 MeshViewers.Add(id, f);
             }
             else
+            {
                 MeshViewers[id].Select();
+            }
         }
         public void OpenMeshViewer(ModelXController c)
         {
-            var id = c.Data.ID;
+            uint id = c.Data.ID;
             if (!MeshViewers.ContainsKey(id))
             {
-                var f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
+                Form f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
                 f.FormClosed += delegate
                 {
-                    MeshViewers.Remove(id);
+                    _ = MeshViewers.Remove(id);
                 };
                 f.Show();
                 MeshViewer v = new MeshViewer(c, f) { Dock = DockStyle.Fill };
@@ -406,17 +488,19 @@ namespace TwinsanityEditor
                 MeshViewers.Add(id, f);
             }
             else
+            {
                 MeshViewers[id].Select();
+            }
         }
         public void OpenMeshViewer(SkinXController c)
         {
-            var id = c.Data.ID;
+            uint id = c.Data.ID;
             if (!MeshViewers.ContainsKey(id))
             {
-                var f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
+                Form f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
                 f.FormClosed += delegate
                 {
-                    MeshViewers.Remove(id);
+                    _ = MeshViewers.Remove(id);
                 };
                 f.Show();
                 MeshViewer v = new MeshViewer(c, f) { Dock = DockStyle.Fill };
@@ -425,17 +509,19 @@ namespace TwinsanityEditor
                 MeshViewers.Add(id, f);
             }
             else
+            {
                 MeshViewers[id].Select();
+            }
         }
         public void OpenMeshViewer(BlendSkinXController c)
         {
-            var id = c.Data.ID;
+            uint id = c.Data.ID;
             if (!MeshViewers.ContainsKey(id))
             {
-                var f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
+                Form f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
                 f.FormClosed += delegate
                 {
-                    MeshViewers.Remove(id);
+                    _ = MeshViewers.Remove(id);
                 };
                 f.Show();
                 MeshViewer v = new MeshViewer(c, f) { Dock = DockStyle.Fill };
@@ -444,17 +530,19 @@ namespace TwinsanityEditor
                 MeshViewers.Add(id, f);
             }
             else
+            {
                 MeshViewers[id].Select();
+            }
         }
         public void OpenMeshViewer(ModelPController c)
         {
-            var id = c.Data.ID;
+            uint id = c.Data.ID;
             if (!MeshViewers.ContainsKey(id))
             {
-                var f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
+                Form f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
                 f.FormClosed += delegate
                 {
-                    MeshViewers.Remove(id);
+                    _ = MeshViewers.Remove(id);
                 };
                 f.Show();
                 MeshViewer v = new MeshViewer(c, f) { Dock = DockStyle.Fill };
@@ -463,17 +551,19 @@ namespace TwinsanityEditor
                 MeshViewers.Add(id, f);
             }
             else
+            {
                 MeshViewers[id].Select();
+            }
         }
         public void OpenMeshViewer(GraphicsInfoController c, FileController file)
         {
-            var id = c.Data.ID;
+            uint id = c.Data.ID;
             if (!MeshViewers.ContainsKey(id))
             {
-                var f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
+                Form f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
                 f.FormClosed += delegate
                 {
-                    MeshViewers.Remove(id);
+                    _ = MeshViewers.Remove(id);
                 };
                 f.Show();
                 MeshViewer v = new MeshViewer(c, f, file) { Dock = DockStyle.Fill };
@@ -482,33 +572,27 @@ namespace TwinsanityEditor
                 MeshViewers.Add(id, f);
             }
             else
+            {
                 MeshViewers[id].Select();
+            }
         }
 
         public void OpenTextureViewer(TextureController c)
         {
             if (texViewer == null || texViewer.IsDisposed)
             {
-                texViewer = new TextureViewer();
-                texViewer.SelectedTexture = c.Data;
-                List<TwinsItem> textures = null;
-                if (c.MainFile.Data.Type == TwinsFile.FileType.SM2 || c.MainFile.Data.Type == TwinsFile.FileType.SMX || c.MainFile.Data.Type == TwinsFile.FileType.DemoSM2)
+                texViewer = new TextureViewer
                 {
-                    textures = Data.GetItem<TwinsSection>(6).GetItem<TwinsSection>(0).Records;
-                }
-                else if (c.MainFile.Data.Type == TwinsFile.FileType.MonkeyBallRM)
-                {
-                    textures = Data.GetItem<TwinsSection>(12).GetItem<TwinsSection>(0).Records;
-                }
-                else if (c.MainFile.Data.Type == TwinsFile.FileType.MonkeyBallSM)
-                {
-                    textures = Data.GetItem<TwinsSection>(7).GetItem<TwinsSection>(0).Records;
-                }
-                else
-                {
-                    textures = Data.GetItem<TwinsSection>(11).GetItem<TwinsSection>(0).Records;
-                }
-                for (var i = 0; i < textures.Count; ++i)
+                    SelectedTexture = c.Data
+                };
+                List<TwinsItem> textures = c.MainFile.Data.Type == TwinsFile.FileType.SM2 || c.MainFile.Data.Type == TwinsFile.FileType.SMX || c.MainFile.Data.Type == TwinsFile.FileType.DemoSM2
+                    ? Data.GetItem<TwinsSection>(6).GetItem<TwinsSection>(0).Records
+                    : c.MainFile.Data.Type == TwinsFile.FileType.MonkeyBallRM
+                        ? Data.GetItem<TwinsSection>(12).GetItem<TwinsSection>(0).Records
+                        : c.MainFile.Data.Type == TwinsFile.FileType.MonkeyBallSM
+                        ? Data.GetItem<TwinsSection>(7).GetItem<TwinsSection>(0).Records
+                        : Data.GetItem<TwinsSection>(11).GetItem<TwinsSection>(0).Records;
+                for (int i = 0; i < textures.Count; ++i)
                 {
                     texViewer.Textures.Add((Texture)textures[i]);
                     if ((Texture)textures[i] == c.Data)
@@ -533,18 +617,14 @@ namespace TwinsanityEditor
         {
             if (texViewer == null || texViewer.IsDisposed)
             {
-                texViewer = new TextureViewer();
-                texViewer.SelectedTextureX = c.Data;
-                List<TwinsItem> textures = null;
-                if (c.MainFile.FileName.EndsWith(".smx"))
+                texViewer = new TextureViewer
                 {
-                    textures = Data.GetItem<TwinsSection>(6).GetItem<TwinsSection>(0).Records;
-                }
-                else
-                {
-                    textures = Data.GetItem<TwinsSection>(11).GetItem<TwinsSection>(0).Records;
-                }
-                for (var i = 0; i < textures.Count; ++i)
+                    SelectedTextureX = c.Data
+                };
+                List<TwinsItem> textures = c.MainFile.FileName.EndsWith(".smx")
+                    ? Data.GetItem<TwinsSection>(6).GetItem<TwinsSection>(0).Records
+                    : Data.GetItem<TwinsSection>(11).GetItem<TwinsSection>(0).Records;
+                for (int i = 0; i < textures.Count; ++i)
                 {
                     texViewer.TexturesX.Add((TextureX)textures[i]);
                     if ((TextureX)textures[i] == c.Data)
@@ -569,18 +649,14 @@ namespace TwinsanityEditor
         {
             if (texViewer == null || texViewer.IsDisposed)
             {
-                texViewer = new TextureViewer();
-                texViewer.SelectedTextureP = c.Data;
-                List<TwinsItem> textures = null;
-                if (c.MainFile.FileName.EndsWith(".sm"))
+                texViewer = new TextureViewer
                 {
-                    textures = Data.GetItem<TwinsSection>(7).GetItem<TwinsSection>(0).Records;
-                }
-                else
-                {
-                    textures = Data.GetItem<TwinsSection>(12).GetItem<TwinsSection>(0).Records;
-                }
-                for (var i = 0; i < textures.Count; ++i)
+                    SelectedTextureP = c.Data
+                };
+                List<TwinsItem> textures = c.MainFile.FileName.EndsWith(".sm")
+                    ? Data.GetItem<TwinsSection>(7).GetItem<TwinsSection>(0).Records
+                    : Data.GetItem<TwinsSection>(12).GetItem<TwinsSection>(0).Records;
+                for (int i = 0; i < textures.Count; ++i)
                 {
                     texViewer.TexturesP.Add((TextureP)textures[i]);
                     if ((TextureP)textures[i] == c.Data)
@@ -603,16 +679,16 @@ namespace TwinsanityEditor
 
         public void CloseMeshViewer(uint mesh_id)
         {
-            var f = MeshViewers[mesh_id];
+            Form f = MeshViewers[mesh_id];
             CloseForm(f);
-            MeshViewers.Remove(mesh_id);
+            _ = MeshViewers.Remove(mesh_id);
         }
 
         public void CloseAllMeshViewers()
         {
-            var a = new uint[MeshViewers.Count];
+            uint[] a = new uint[MeshViewers.Count];
             MeshViewers.Keys.CopyTo(a, 0);
-            foreach (var p in a)
+            foreach (uint p in a)
             {
                 CloseMeshViewer(p);
             }
@@ -620,13 +696,13 @@ namespace TwinsanityEditor
 
         public void OpenModelViewer(RigidModelController c)
         {
-            var id = c.Data.ID;
+            uint id = c.Data.ID;
             if (!ModelViewers.ContainsKey(id))
             {
-                var f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
+                Form f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
                 f.FormClosed += delegate
                 {
-                    ModelViewers.Remove(id);
+                    _ = ModelViewers.Remove(id);
                 };
                 f.Show();
                 ModelViewer v = new ModelViewer(c, f) { Dock = DockStyle.Fill };
@@ -635,22 +711,28 @@ namespace TwinsanityEditor
                 ModelViewers.Add(id, f);
             }
             else
+            {
                 ModelViewers[id].Select();
+            }
         }
         public void OpenModelViewer(LodModelController spec)
         {
             SectionController model_sec = GetItem<SectionController>(6).GetItem<SectionController>(6);
             uint LODcount = spec.Data.ModelsAmount;
             int targetLOD = LODcount == 1 ? 0 : 1;
-            if (spec.Data.LODModelIDs[targetLOD] == 0xDDDDDDDD) return;
+            if (spec.Data.LODModelIDs[targetLOD] == 0xDDDDDDDD)
+            {
+                return;
+            }
+
             RigidModelController c = model_sec.GetItem<RigidModelController>(spec.Data.LODModelIDs[targetLOD]);
-            var id = c.Data.ID;
+            uint id = c.Data.ID;
             if (!ModelViewers.ContainsKey(id))
             {
-                var f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
+                Form f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
                 f.FormClosed += delegate
                 {
-                    ModelViewers.Remove(id);
+                    _ = ModelViewers.Remove(id);
                 };
                 f.Show();
                 ModelViewer v = new ModelViewer(c, f) { Dock = DockStyle.Fill };
@@ -659,19 +741,21 @@ namespace TwinsanityEditor
                 ModelViewers.Add(id, f);
             }
             else
+            {
                 ModelViewers[id].Select();
+            }
         }
 
         public void CloseModelViewer(uint id)
         {
-            var f = ModelViewers[id];
+            Form f = ModelViewers[id];
             CloseForm(f);
-            ModelViewers.Remove(id);
+            _ = ModelViewers.Remove(id);
         }
 
         public void OpenSkydomeViewer(SkydomeController c)
         {
-            var id = c.Data.ID;
+            uint id = c.Data.ID;
             if (skyViewer == null || skyViewer.Sky.Data.ID != c.Data.ID)
             {
                 Form f = new Form { Size = new System.Drawing.Size(480, 480), Text = "Initializing viewer..." };
@@ -685,21 +769,27 @@ namespace TwinsanityEditor
                 f.Text = "SkydomeViewer";
             }
             else
+            {
                 skyViewer.ParentForm.Select();
+            }
         }
 
         public void CloseSkydomeViewer()
         {
-            if (skyViewer == null) return;
-            var f = skyViewer.ParentForm;
+            if (skyViewer == null)
+            {
+                return;
+            }
+
+            Form f = skyViewer.ParentForm;
             CloseForm(f);
         }
 
         public void CloseAllModelViewers()
         {
-            var a = new uint[ModelViewers.Count];
+            uint[] a = new uint[ModelViewers.Count];
             ModelViewers.Keys.CopyTo(a, 0);
-            foreach (var p in a)
+            foreach (uint p in a)
             {
                 CloseModelViewer(p);
             }
@@ -720,7 +810,9 @@ namespace TwinsanityEditor
                 f.Text = "RMViewer";
             }
             else
+            {
                 rmViewer.ParentForm.Select();
+            }
         }
 
         public void OpenSMViewer()
@@ -738,25 +830,24 @@ namespace TwinsanityEditor
                 f.Text = "SMViewer";
             }
             else
+            {
                 smViewer.ParentForm.Select();
+            }
         }
 
         public void RMViewer_LoadInstances()
         {
-            if (rmViewer != null)
-                rmViewer.LoadInstances();
+            rmViewer?.LoadInstances();
         }
 
         public void RMViewer_LoadPositions()
         {
-            if (rmViewer != null)
-                rmViewer.LoadPositions();
+            rmViewer?.LoadPositions();
         }
 
         public void RMViewer_LoadParticles()
         {
-            if (rmViewer != null)
-                rmViewer.LoadParticles();
+            rmViewer?.LoadParticles();
         }
 
         public Pos RMViewer_GetPos(Pos pos_in)
@@ -777,34 +868,45 @@ namespace TwinsanityEditor
             if (form != null && !form.IsDisposed)
             {
                 form.Close();
-                form = null;
             }
         }
 
         public void CloseRMViewer()
         {
-            if (rmViewer == null) return;
-            var f = rmViewer.ParentForm;
+            if (rmViewer == null)
+            {
+                return;
+            }
+
+            Form f = rmViewer.ParentForm;
             CloseForm(f);
         }
 
         public void CloseSMViewer()
         {
-            if (smViewer == null) return;
-            var f = smViewer.ParentForm;
+            if (smViewer == null)
+            {
+                return;
+            }
+
+            Form f = smViewer.ParentForm;
             CloseForm(f);
         }
 
         public void CloseTextureViewer()
         {
-            if (texViewer == null) return;
-            var f = texViewer.ParentForm;
+            if (texViewer == null)
+            {
+                return;
+            }
+
+            Form f = texViewer.ParentForm;
             CloseForm(f);
         }
 
         public void SelectItem(TwinsItem item, int arg = -1)
         {
-            var prev_item = SelectedItem;
+            TwinsItem prev_item = SelectedItem;
             SelectedItem = item;
             SelectedItemArg = arg;
             if (rmViewer != null)
@@ -812,21 +914,32 @@ namespace TwinsanityEditor
                 if (item == null && prev_item != null)
                 {
                     if (prev_item is Instance)
+                    {
                         rmViewer.LoadInstances();
+                    }
+
                     if (prev_item is InstanceDemo)
+                    {
                         rmViewer.LoadInstances();
+                    }
                     else if (prev_item is InstanceMB)
+                    {
                         rmViewer.LoadInstances();
+                    }
                     else if (prev_item is Position)
+                    {
                         rmViewer.LoadPositions();
+                    }
                 }
                 else
+                {
                     rmViewer.UpdateSelected();
+                }
             }
         }
         public void SelectParticle(ParticleData part, ParticleData.ParticleSystemInstance item, int arg = -1)
         {
-            var prev_item = SelectedItem;
+            TwinsItem prev_item = SelectedItem;
             SelectedItem = part;
             SelectedItemArg = arg;
             if (rmViewer != null)
@@ -834,31 +947,38 @@ namespace TwinsanityEditor
                 if (item == null && prev_item != null)
                 {
                     if (prev_item is Instance)
+                    {
                         rmViewer.LoadInstances();
+                    }
+
                     if (prev_item is InstanceDemo)
+                    {
                         rmViewer.LoadInstances();
+                    }
                     else if (prev_item is InstanceMB)
+                    {
                         rmViewer.LoadInstances();
+                    }
                     else if (prev_item is Position)
+                    {
                         rmViewer.LoadPositions();
+                    }
                 }
                 else
+                {
                     rmViewer.UpdateSelectedPos(-item.Position.X, item.Position.Y, item.Position.Z);
+                }
             }
         }
 
         public string GetMaterialName(uint id)
         {
-            if (MaterialNames.ContainsKey(id))
-                return MaterialNames[id].Replace('\0', ' ');
-            else return string.Empty;
+            return MaterialNames.ContainsKey(id) ? MaterialNames[id].Replace('\0', ' ') : string.Empty;
         }
 
         public string GetObjectName(uint id)
         {
-            if (ObjectNames.ContainsKey(id))
-                return ObjectNames[id];
-            else return string.Empty;
+            return ObjectNames.ContainsKey(id) ? ObjectNames[id] : string.Empty;
         }
 
         public string GetScriptName(uint id)
@@ -884,9 +1004,14 @@ namespace TwinsanityEditor
                     return null;
                 }
                 else
+                {
                     return null;
+                }
             }
-            else throw new System.ArgumentException("The requested section does not have an object instance section.");
+            else
+            {
+                throw new System.ArgumentException("The requested section does not have an object instance section.");
+            }
         }
         public Pos GetInstancePos(uint sector, uint id)
         {
@@ -905,9 +1030,14 @@ namespace TwinsanityEditor
                     return null;
                 }
                 else
+                {
                     return null;
+                }
             }
-            else throw new System.ArgumentException("The requested section does not have an object instance section.");
+            else
+            {
+                throw new System.ArgumentException("The requested section does not have an object instance section.");
+            }
         }
 
         public AIPosition GetAIPos(uint sector, uint id)
@@ -921,12 +1051,14 @@ namespace TwinsanityEditor
                 //        return j;
                 //}
                 //throw new System.ArgumentException("The requested section does not have an instance in the specified position.");
-                if (id < Data.GetItem<TwinsSection>(sector).GetItem<TwinsSection>(1).Records.Count)
-                    return (AIPosition)Data.GetItem<TwinsSection>(sector).GetItem<TwinsSection>(1).Records[(int)id];
-                else
-                    return null;
+                return id < Data.GetItem<TwinsSection>(sector).GetItem<TwinsSection>(1).Records.Count
+                    ? (AIPosition)Data.GetItem<TwinsSection>(sector).GetItem<TwinsSection>(1).Records[(int)id]
+                    : null;
             }
-            else throw new System.ArgumentException("The requested section does not have an object instance section.");
+            else
+            {
+                throw new System.ArgumentException("The requested section does not have an object instance section.");
+            }
         }
 
         public void OpenIDEditor(ItemController c)

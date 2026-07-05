@@ -7,7 +7,7 @@ namespace TwinsanityEditor
     {
         public new Texture Data { get; set; }
 
-        public TextureController(MainForm topform, Texture item) : base (topform, item)
+        public TextureController(MainForm topform, Texture item) : base(topform, item)
         {
             Data = item;
             if (Data.RawData != null)
@@ -23,15 +23,17 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            List<string> text = new List<string>();
-            text.Add(string.Format("ID: {0:X8}", Data.ID));
-            text.Add($"Size: {Data.Size}");
-            text.Add($"Resolution: {Data.Width}x{Data.Height}");
-            text.Add($"Mip levels: {Data.MipLevels}");
-            text.Add($"Texture format: {Data.PixelFormat}");
-            text.Add($"VRAM storage format: {Data.DestinationPixelFormat}");
-            text.Add($"Texture function: {Data.TexFun}");
-            text.Add($"Color component: {Data.ColorComponent}");
+            List<string> text = new List<string>
+            {
+                string.Format("ID: {0:X8}", Data.ID),
+                $"Size: {Data.Size}",
+                $"Resolution: {Data.Width}x{Data.Height}",
+                $"Mip levels: {Data.MipLevels}",
+                $"Texture format: {Data.PixelFormat}",
+                $"VRAM storage format: {Data.DestinationPixelFormat}",
+                $"Texture function: {Data.TexFun}",
+                $"Color component: {Data.ColorComponent}"
+            };
             TextPrev = text.ToArray();
         }
 

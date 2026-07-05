@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System;
 
 namespace Twinsanity
 {
@@ -266,7 +265,7 @@ namespace Twinsanity
             HeaderUnk2 = reader.ReadUInt32();
             if (IsMonkeyBall)
             {
-                reader.ReadBytes(3);
+                _ = reader.ReadBytes(3);
             }
             HeaderUnk3 = reader.ReadUInt32();
             HeaderUnk4 = reader.ReadByte();
@@ -283,8 +282,7 @@ namespace Twinsanity
             if ((HeaderUnk1 & 0x20000) != 0)
             {
                 HeaderBuffer = reader.ReadBytes(0x400);
-
-                uint LightsNum = reader.ReadUInt32();
+                _ = reader.ReadUInt32();
 
                 uint LightAmbientNum = reader.ReadUInt32();
                 uint LightDirectionalNum = reader.ReadUInt32();
@@ -295,17 +293,18 @@ namespace Twinsanity
                 {
                     for (int i = 0; i < LightAmbientNum; i++)
                     {
-                        LightAmbient light = new LightAmbient();
-
-                        light.Flags = reader.ReadBytes(4);
-                        light.Radius = reader.ReadSingle();
-                        light.Color_R = reader.ReadSingle();
-                        light.Color_G = reader.ReadSingle();
-                        light.Color_B = reader.ReadSingle();
-                        light.Color_Unk = reader.ReadSingle();
-                        light.Position = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                        light.Vector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                        light.Vector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                        LightAmbient light = new LightAmbient
+                        {
+                            Flags = reader.ReadBytes(4),
+                            Radius = reader.ReadSingle(),
+                            Color_R = reader.ReadSingle(),
+                            Color_G = reader.ReadSingle(),
+                            Color_B = reader.ReadSingle(),
+                            Color_Unk = reader.ReadSingle(),
+                            Position = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                            Vector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                            Vector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle())
+                        };
 
                         LightsAmbient.Add(light);
                     }
@@ -314,20 +313,21 @@ namespace Twinsanity
                 {
                     for (int i = 0; i < LightDirectionalNum; i++)
                     {
-                        LightDirectional light = new LightDirectional();
+                        LightDirectional light = new LightDirectional
+                        {
+                            Flags = reader.ReadBytes(4),
+                            Radius = reader.ReadSingle(),
+                            Color_R = reader.ReadSingle(),
+                            Color_G = reader.ReadSingle(),
+                            Color_B = reader.ReadSingle(),
+                            Color_Unk = reader.ReadSingle(),
+                            Position = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                            Vector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                            Vector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
 
-                        light.Flags = reader.ReadBytes(4);
-                        light.Radius = reader.ReadSingle();
-                        light.Color_R = reader.ReadSingle();
-                        light.Color_G = reader.ReadSingle();
-                        light.Color_B = reader.ReadSingle();
-                        light.Color_Unk = reader.ReadSingle();
-                        light.Position = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                        light.Vector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                        light.Vector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-
-                        light.Vector3 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                        light.unkShort = reader.ReadUInt16();
+                            Vector3 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                            unkShort = reader.ReadUInt16()
+                        };
 
                         LightsDirectional.Add(light);
                     }
@@ -336,19 +336,20 @@ namespace Twinsanity
                 {
                     for (int i = 0; i < LightPointNum; i++)
                     {
-                        LightPoint light = new LightPoint();
+                        LightPoint light = new LightPoint
+                        {
+                            Flags = reader.ReadBytes(4),
+                            Radius = reader.ReadSingle(),
+                            Color_R = reader.ReadSingle(),
+                            Color_G = reader.ReadSingle(),
+                            Color_B = reader.ReadSingle(),
+                            Color_Unk = reader.ReadSingle(),
+                            Position = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                            Vector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                            Vector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
 
-                        light.Flags = reader.ReadBytes(4);
-                        light.Radius = reader.ReadSingle();
-                        light.Color_R = reader.ReadSingle();
-                        light.Color_G = reader.ReadSingle();
-                        light.Color_B = reader.ReadSingle();
-                        light.Color_Unk = reader.ReadSingle();
-                        light.Position = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                        light.Vector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                        light.Vector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-
-                        light.unkShort = reader.ReadUInt16();
+                            unkShort = reader.ReadUInt16()
+                        };
 
                         LightsPoint.Add(light);
                     }
@@ -357,25 +358,26 @@ namespace Twinsanity
                 {
                     for (int i = 0; i < LightNegativeNum; i++)
                     {
-                        LightNegative light = new LightNegative();
+                        LightNegative light = new LightNegative
+                        {
+                            Flags = reader.ReadBytes(4),
+                            Radius = reader.ReadSingle(),
+                            Color_R = reader.ReadSingle(),
+                            Color_G = reader.ReadSingle(),
+                            Color_B = reader.ReadSingle(),
+                            Color_Unk = reader.ReadSingle(),
+                            Position = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                            Vector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                            Vector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
 
-                        light.Flags = reader.ReadBytes(4);
-                        light.Radius = reader.ReadSingle();
-                        light.Color_R = reader.ReadSingle();
-                        light.Color_G = reader.ReadSingle();
-                        light.Color_B = reader.ReadSingle();
-                        light.Color_Unk = reader.ReadSingle();
-                        light.Position = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                        light.Vector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                        light.Vector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-
-                        light.Vector3 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                        light.unkFloat1 = reader.ReadSingle();
-                        light.unkFloat2 = reader.ReadSingle();
-                        light.unkUInt1 = reader.ReadUInt32();
-                        light.unkUInt2 = reader.ReadUInt32();
-                        light.unkUShort1 = reader.ReadUInt16();
-                        light.unkUShort2 = reader.ReadUInt16();
+                            Vector3 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                            unkFloat1 = reader.ReadSingle(),
+                            unkFloat2 = reader.ReadSingle(),
+                            unkUInt1 = reader.ReadUInt32(),
+                            unkUInt2 = reader.ReadUInt32(),
+                            unkUShort1 = reader.ReadUInt16(),
+                            unkUShort2 = reader.ReadUInt16()
+                        };
 
                         LightsNegative.Add(light);
                     }
@@ -398,9 +400,11 @@ namespace Twinsanity
 
         private SceneryModelStruct LoadSceneryModel(BinaryReader reader)
         {
-            SceneryModelStruct scenery = new SceneryModelStruct();
-            scenery.Header = reader.ReadUInt32();
-            scenery.Models = new List<ScenerySubModel>();
+            SceneryModelStruct scenery = new SceneryModelStruct
+            {
+                Header = reader.ReadUInt32(),
+                Models = new List<ScenerySubModel>()
+            };
             if (scenery.Header == 0x1613)
             {
                 ushort modelCount = reader.ReadUInt16();
@@ -410,10 +414,12 @@ namespace Twinsanity
                 {
                     for (int i = 0; i < modelCount + specialModelCount; i++)
                     {
-                        ScenerySubModel newModel = new ScenerySubModel();
-                        newModel.ModelMatrix = new Pos[4];
-                        newModel.ModelBoundingBoxVector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                        newModel.ModelBoundingBoxVector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                        ScenerySubModel newModel = new ScenerySubModel
+                        {
+                            ModelMatrix = new Pos[4],
+                            ModelBoundingBoxVector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                            ModelBoundingBoxVector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle())
+                        };
                         scenery.Models.Add(newModel);
                     }
                     for (int i = 0; i < modelCount + specialModelCount; i++)

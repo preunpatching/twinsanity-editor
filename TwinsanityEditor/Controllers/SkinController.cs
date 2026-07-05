@@ -34,19 +34,19 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            var text = new List<string>
+            List<string> text = new List<string>
             {
                 $"ID: {Data.ID}",
                 $"SubModels {Data.SubModels.Count}"
             };
 
-            var index = 0;
-            foreach (var model in Data.SubModels)
+            int index = 0;
+            foreach (Skin.SubModel model in Data.SubModels)
             {
                 text.Add($"SubModel {index}");
                 text.Add($"MaterialID {model.MaterialID}/0x{model.MaterialID:X}");
                 text.Add($"Vertexes {model.Vertexes.Count}");
-                for (var i = 0; i < model.Vertexes.Count; ++i)
+                for (int i = 0; i < model.Vertexes.Count; ++i)
                 {
                     text.Add($"Vertex #{i}:");
                     text.Add($"\tJoint index 1 {model.Vertexes[i].Joint.JointIndex1}; Weight 1 {model.Vertexes[i].Joint.Weight1}");
@@ -66,19 +66,21 @@ namespace TwinsanityEditor
             TposeVertices.Clear();
             JointInfos.Clear();
 
-            var refIndex = 0U;
-            var offset = 0;
+            uint refIndex = 0U;
+            int offset = 0;
 
-            var isSpyroModel = false;
+            bool isSpyroModel = false;
             if (DefaultHashes.Hash_Skins.ContainsKey(Data.ID) && DefaultHashes.Hash_Skins[Data.ID] == "Spyro")
+            {
                 isSpyroModel = true;
+            }
 
-            foreach (var model in Data.SubModels)
+            foreach (Skin.SubModel model in Data.SubModels)
             {
                 List<Vertex> vtx = new List<Vertex>();
                 List<uint> idx = new List<uint>();
                 List<Skin.JointInfo> jointInfos = new List<Skin.JointInfo>();
-                for (var j = 0; j < model.Vertexes.Count; ++j)
+                for (int j = 0; j < model.Vertexes.Count; ++j)
                 {
                     if (j < model.Vertexes.Count - 2)
                     {
@@ -119,13 +121,13 @@ namespace TwinsanityEditor
 
                 for (int i = 0; i < idx.Count; i += 3)
                 {
-                    var n1 = idx[i];
-                    var n2 = idx[i + 1];
-                    var n3 = idx[i + 2];
-                    var v1 = vtx[(int)n1];
-                    var v2 = vtx[(int)n2];
-                    var v3 = vtx[(int)n3];
-                    var normal = VectorFuncs.CalcNormal(v1.Pos, v2.Pos, v3.Pos);
+                    uint n1 = idx[i];
+                    uint n2 = idx[i + 1];
+                    uint n3 = idx[i + 2];
+                    Vertex v1 = vtx[(int)n1];
+                    Vertex v2 = vtx[(int)n2];
+                    Vertex v3 = vtx[(int)n3];
+                    Vector3 normal = VectorFuncs.CalcNormal(v1.Pos, v2.Pos, v3.Pos);
                     v1.Nor += normal;
                     v2.Nor += normal;
                     v3.Nor += normal;

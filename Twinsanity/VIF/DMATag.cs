@@ -1,41 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace Twinsanity.VIF
 {
     public class DMATag
     {
-        public UInt16 QWC;
-        public Byte PCE;
-        public Byte ID;
-        public Byte IRQ;
-        public UInt32 ADDR;
-        public Byte SPR;
-        public UInt64 Extra;
+        public ushort QWC;
+        public byte PCE;
+        public byte ID;
+        public byte IRQ;
+        public uint ADDR;
+        public byte SPR;
+        public ulong Extra;
         public void Read(BinaryReader reader)
         {
-            var low = reader.ReadUInt64();
-            QWC = (UInt16)(low & 0xFFFF);
-            PCE = (Byte)(low >> 26 & 0b11);
-            ID = (Byte)(low >> 28 & 0b111);
-            IRQ = (Byte)(low >> 31 & 0b1);
-            ADDR = (UInt32)(low >> 32 & 0x7FFFFFFF);
-            SPR = (Byte)(low >> 63 & 0b1);
+            ulong low = reader.ReadUInt64();
+            QWC = (ushort)(low & 0xFFFF);
+            PCE = (byte)((low >> 26) & 0b11);
+            ID = (byte)((low >> 28) & 0b111);
+            IRQ = (byte)((low >> 31) & 0b1);
+            ADDR = (uint)((low >> 32) & 0x7FFFFFFF);
+            SPR = (byte)((low >> 63) & 0b1);
             Extra = reader.ReadUInt64();
         }
 
         public void Write(BinaryWriter writer)
         {
-            UInt64 low = QWC;
-            low |= (UInt64)PCE << 26;
-            low |= (UInt64)ID << 28;
-            low |= (UInt64)IRQ << 31;
-            low |= (UInt64)ADDR << 32;
-            low |= (UInt64)SPR << 63;
+            ulong low = QWC;
+            low |= (ulong)PCE << 26;
+            low |= (ulong)ID << 28;
+            low |= (ulong)IRQ << 31;
+            low |= (ulong)ADDR << 32;
+            low |= (ulong)SPR << 63;
             writer.Write(low);
             writer.Write(Extra);
         }

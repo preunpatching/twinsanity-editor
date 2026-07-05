@@ -6,7 +6,7 @@ namespace TwinsanityEditor
     {
         public new Path Data { get; set; }
 
-        public PathController(MainForm topform, Path item) : base (topform, item)
+        public PathController(MainForm topform, Path item) : base(topform, item)
         {
             Data = item;
             AddMenu("Open editor", Menu_OpenEditor);

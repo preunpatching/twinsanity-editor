@@ -15,7 +15,7 @@ namespace TwinsanityEditor
 
         private int LastFilterIndex;
 
-        public SectionController(MainForm topform, TwinsSection item) : base (topform)
+        public SectionController(MainForm topform, TwinsSection item) : base(topform)
         {
             MainFile = TopForm.CurCont;
             Data = item;
@@ -25,6 +25,11 @@ namespace TwinsanityEditor
                 {
                     AddMenu("Add remaining instance sections", Menu_FileFillInstanceSections);
                     AddMenu("Import object package (RM2)", Menu_ImportPackage);
+                }
+                if (f.Type == TwinsFile.FileType.RMX)
+                {
+                    AddMenu("Add remaining instance sections", Menu_FileFillInstanceSections);
+                    AddMenu("Import object package (RMX)", Menu_ImportPackageXbox);
                 }
                 else if (f.Type == TwinsFile.FileType.DemoRM2)
                 {
@@ -56,7 +61,7 @@ namespace TwinsanityEditor
                     AddMenu("Extract extra data", Menu_ExtractExtraData);
                 }
             }
-            
+
         }
 
         protected override string GetName()
@@ -71,7 +76,9 @@ namespace TwinsanityEditor
             TextPrev[1] = $"Size: {Data.Size}";
             TextPrev[2] = $"ContentSize: {Data.ContentSize} Element Count: {Data.Records.Count}";
             if (Data.ExtraData != null)
+            {
                 TextPrev[3] = $"ExtraDataSize: {Data.ExtraData.Length}";
+            }
         }
 
         public void AddItem(uint id, TwinsItem item)
@@ -97,10 +104,13 @@ namespace TwinsanityEditor
         public void ChangeID(uint old_id, uint new_id)
         {
             if (Data.ContainsItem(new_id))
+            {
                 throw new System.ArgumentException("New ID already exists.");
-            var index = Data.RecordIDs[old_id];
+            }
+
+            int index = Data.RecordIDs[old_id];
             Data.GetItem<TwinsItem>(old_id).ID = new_id;
-            Data.RecordIDs.Remove(old_id);
+            _ = Data.RecordIDs.Remove(old_id);
             Data.RecordIDs.Add(new_id, index);
         }
 
@@ -125,7 +135,7 @@ namespace TwinsanityEditor
                 case SectionType.TextureP: break;
                 case SectionType.Material: newItem = new Material(); break;
                 case SectionType.MaterialD: newItem = new MaterialDemo(); break;
-                case SectionType.Model:  break;
+                case SectionType.Model: break;
                 case SectionType.ModelX: break;
                 case SectionType.ModelP: break;
                 case SectionType.RigidModel: newItem = new RigidModel(); break;
@@ -187,24 +197,29 @@ namespace TwinsanityEditor
 
             if (newItem == null)
             {
-                MessageBox.Show("Adding this item type is unsupported.");
+                _ = MessageBox.Show("Adding this item type is unsupported.");
             }
             else
             {
                 uint newId = 0;
                 if (Data.RecordIDs.Count != 0)
+                {
                     newId = Data.RecordIDs.Keys.Max() + 1;
+                }
+
                 newItem.ID = newId;
                 newItem.Parent = Data;
                 AddItem(newId, newItem);
             }
-            
+
         }
 
         private void Menu_ExtractExtraData()
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.FileName = GetName().Replace(":", string.Empty);
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                FileName = GetName().Replace(":", string.Empty)
+            };
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 FileStream file = new FileStream(sfd.FileName, FileMode.Create, FileAccess.Write);
@@ -305,13 +320,41 @@ namespace TwinsanityEditor
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     LastFilterIndex = ofd.FilterIndex;
-                    var package = new TwinsFile();
+                    TwinsFile package = new TwinsFile();
                     package.LoadFile(ofd.FileName, TwinsFile.FileType.RM2);
                     TopForm.CurCont.Data.Merge(package);
-                    
+
                     Node.TreeView.BeginUpdate();
                     Node.Nodes.Clear();
-                    foreach (var i in Data.RecordIDs)
+                    foreach (KeyValuePair<uint, int> i in Data.RecordIDs)
+                    {
+                        TopForm.GenTreeNode(Data.Records[i.Value], this);
+                    }
+                    Node.TreeView.EndUpdate();
+                }
+            }
+        }
+
+        public void Menu_ImportPackageXbox()
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog
+            {
+                InitialDirectory = Settings.Default.ChunkFilePath,
+                Filter = "RMX file|*.rmx",
+                FilterIndex = LastFilterIndex,
+            })
+            {
+                ofd.FilterIndex = LastFilterIndex;
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    LastFilterIndex = ofd.FilterIndex;
+                    TwinsFile package = new TwinsFile();
+                    package.LoadFile(ofd.FileName, TwinsFile.FileType.RMX);
+                    TopForm.CurCont.Data.MergeXbox(package);
+
+                    Node.TreeView.BeginUpdate();
+                    Node.Nodes.Clear();
+                    foreach (KeyValuePair<uint, int> i in Data.RecordIDs)
                     {
                         TopForm.GenTreeNode(Data.Records[i.Value], this);
                     }
@@ -333,13 +376,13 @@ namespace TwinsanityEditor
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     LastFilterIndex = ofd.FilterIndex;
-                    var package = new TwinsFile();
+                    TwinsFile package = new TwinsFile();
                     package.LoadFile(ofd.FileName, TwinsFile.FileType.DemoRM2);
                     TopForm.CurCont.Data.MergeDemo(package);
 
                     Node.TreeView.BeginUpdate();
                     Node.Nodes.Clear();
-                    foreach (var i in Data.RecordIDs)
+                    foreach (KeyValuePair<uint, int> i in Data.RecordIDs)
                     {
                         TopForm.GenTreeNode(Data.Records[i.Value], this);
                     }
@@ -366,7 +409,7 @@ namespace TwinsanityEditor
             Node.Nodes.Clear();
             SortedDictionary<uint, int> sdic = new SortedDictionary<uint, int>(Data.RecordIDs);
             List<TwinsItem> slist = new List<TwinsItem>();
-            foreach (var i in sdic)
+            foreach (KeyValuePair<uint, int> i in sdic)
             {
                 slist.Add(Data.Records[i.Value]);
                 TopForm.GenTreeNode(Data.Records[i.Value], this);
@@ -392,10 +435,13 @@ namespace TwinsanityEditor
             Node.TreeView.BeginUpdate();
             Node.Nodes.Clear();
             SortedDictionary<uint, int> sdic = new SortedDictionary<uint, int>(new Utils.DescendingComparer<uint>());
-            foreach (var i in Data.RecordIDs)
+            foreach (KeyValuePair<uint, int> i in Data.RecordIDs)
+            {
                 sdic.Add(i.Key, i.Value);
+            }
+
             List<TwinsItem> slist = new List<TwinsItem>();
-            foreach (var i in sdic)
+            foreach (KeyValuePair<uint, int> i in sdic)
             {
                 slist.Add(Data.Records[i.Value]);
                 TopForm.GenTreeNode(Data.Records[i.Value], this);
@@ -461,8 +507,14 @@ namespace TwinsanityEditor
         private void Menu_ExportAllPLY()
         {
             if (Data.Type == SectionType.RigidModel || Data.Type == SectionType.Mesh)
-                if (MessageBox.Show("PLY export is experimental, material and texture information will not be exported. Continue anyway?", "Export Warning", MessageBoxButtons.YesNo) == DialogResult.No) return;
-            var fdbSave = new CommonOpenFileDialog { IsFolderPicker = true };
+            {
+                if (MessageBox.Show("PLY export is experimental, material and texture information will not be exported. Continue anyway?", "Export Warning", MessageBoxButtons.YesNo) == DialogResult.No)
+                {
+                    return;
+                }
+            }
+
+            CommonOpenFileDialog fdbSave = new CommonOpenFileDialog { IsFolderPicker = true };
             if (fdbSave.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 foreach (TreeNode n in Node.Nodes)

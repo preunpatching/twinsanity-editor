@@ -1,5 +1,5 @@
-﻿using System.Windows.Forms;
-using System;
+﻿using System;
+using System.Windows.Forms;
 
 namespace TwinsanityEditor
 {
@@ -12,7 +12,7 @@ namespace TwinsanityEditor
         public string[] TextPrev { get; set; }
         public TreeNode Node { get; set; }
         public ContextMenu ContextMenu { get; set; }
-        
+
         public Controller(MainForm topform)
         {
             TopForm = topform;
@@ -22,7 +22,7 @@ namespace TwinsanityEditor
 
         public void AddNode(Controller controller)
         {
-            Node.Nodes.Add(controller.Node);
+            _ = Node.Nodes.Add(controller.Node);
         }
 
         protected void AddMenu(string text, ControllerAddMenuDelegate func)
@@ -31,7 +31,7 @@ namespace TwinsanityEditor
             {
                 func();
             }
-            ContextMenu.MenuItems.Add(text, handler);
+            _ = ContextMenu.MenuItems.Add(text, handler);
         }
 
         protected abstract string GetName();
@@ -42,21 +42,27 @@ namespace TwinsanityEditor
             GenText();
             Node.Text = GetName();
             if (Selected)
+            {
                 TopForm.ControllerNodeSelect(this);
+            }
         }
 
         public void UpdateTextBox()
         {
             GenText();
             if (Selected)
+            {
                 TopForm.ControllerNodeSelect(this);
+            }
         }
 
         public void UpdateName()
         {
             Node.Text = GetName();
             if (Selected)
+            {
                 TopForm.ControllerNodeSelect(this);
+            }
         }
     }
 }

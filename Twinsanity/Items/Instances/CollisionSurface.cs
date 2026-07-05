@@ -80,7 +80,7 @@ namespace Twinsanity
             Particle_3 = reader.ReadUInt16();
             Sound_5 = reader.ReadUInt16();
             Sound_6 = reader.ReadUInt16();
-            reader.ReadUInt16(); // not stored by the game, just skipped
+            _ = reader.ReadUInt16(); // not stored by the game, just skipped
             UnkFloat1 = reader.ReadSingle();
             UnkFloat2 = reader.ReadSingle();
             UnkFloat3 = reader.ReadSingle();

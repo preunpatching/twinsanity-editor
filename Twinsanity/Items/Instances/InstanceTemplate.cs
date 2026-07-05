@@ -63,8 +63,7 @@ namespace Twinsanity
 
         public override void Load(BinaryReader reader, int size)
         {
-
-            long startPos = reader.BaseStream.Position;
+            _ = reader.BaseStream.Position;
 
             uint len = reader.ReadUInt32();
 

@@ -12,7 +12,7 @@ namespace TwinsanityEditor
         public byte[] SoundData { get; set; }
         private bool Loaded;
 
-        private static SoundPlayer player = new SoundPlayer();
+        private static readonly SoundPlayer player = new SoundPlayer();
 
         public SoundXboxController(MainForm topform, SoundEffectX item) : base(topform, item)
         {
@@ -39,7 +39,11 @@ namespace TwinsanityEditor
 
         public void LoadSoundData()
         {
-            if (Loaded) return;
+            if (Loaded)
+            {
+                return;
+            }
+
             Loaded = true;
             try
             {
@@ -62,9 +66,11 @@ namespace TwinsanityEditor
         private void Menu_ExportWAV()
         {
             LoadSoundData();
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "WAV|*.wav";
-            sfd.FileName = Data.ID.ToString();
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "WAV|*.wav",
+                FileName = Data.ID.ToString()
+            };
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 FileStream file = new FileStream(sfd.FileName, FileMode.Create, FileAccess.Write);
@@ -76,9 +82,11 @@ namespace TwinsanityEditor
 
         private void Menu_ExportVAG()
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "VAG|*.vag";
-            var id_str = Data.ID.ToString();
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "VAG|*.vag"
+            };
+            string id_str = Data.ID.ToString();
             sfd.FileName = id_str;
             if (sfd.ShowDialog() == DialogResult.OK)
             {
@@ -101,25 +109,27 @@ namespace TwinsanityEditor
 
         private void Menu_ReplaceSoundWav()
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "WAV|*.wav";
-            ofd.FileName = Data.ID.ToString();
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Filter = "WAV|*.wav",
+                FileName = Data.ID.ToString()
+            };
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 using (FileStream file = new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read))
                 using (BinaryReader reader = new BinaryReader(file))
                 {
                     file.Position = 0x16;
-                    UInt16 channels = reader.ReadUInt16();
-                    UInt32 frequency = reader.ReadUInt32();
+                    ushort channels = reader.ReadUInt16();
+                    uint frequency = reader.ReadUInt32();
                     file.Position = 0x28;
                     int len = reader.ReadInt32();
-                    Byte[] PCM = reader.ReadBytes(len);
+                    byte[] PCM = reader.ReadBytes(len);
                     if (channels == 1)
                     {
                         Data.Freq = (ushort)frequency;
                         //Byte[] newData = ADPCM.FromPCMMono(PCM);
-                        UInt32 newSize = (uint)PCM.Length;
+                        uint newSize = (uint)PCM.Length;
                         Data.SoundData = PCM;
                         Data.UnkInt = (int)newSize;
                     }

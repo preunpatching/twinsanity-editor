@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System;
-using System.IO;
+﻿using System.IO;
 
 namespace Twinsanity
 {
@@ -20,7 +18,7 @@ namespace Twinsanity
 
         protected override int GetSize()
         {
-            return 25 + LODModelIDs.Length * 4;
+            return 25 + (LODModelIDs.Length * 4);
         }
 
         /// <summary>

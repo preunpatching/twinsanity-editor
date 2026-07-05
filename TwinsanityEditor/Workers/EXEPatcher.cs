@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Windows.Forms;
 using System.IO;
+using System.Windows.Forms;
 using TwinsanityEditor.Properties;
 
 namespace TwinsanityEditor
 {
     public partial class EXEPatcher : Form
     {
-        private string fileName;
+        private readonly string fileName;
 
         internal struct ExecutablePatchInfo
         {
@@ -66,7 +66,9 @@ namespace TwinsanityEditor
                 Show();
             }
             else
+            {
                 Close();
+            }
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
@@ -86,7 +88,7 @@ namespace TwinsanityEditor
             textBox1.MaxLength = executable.ArchiveSize;
             textBox2.MaxLength = executable.LevelSize;
             reader.BaseStream.Position = executable.ArchiveOff;
-            char ch = '\0';
+            char ch;
             do
             {
                 ch = reader.ReadChar();
@@ -112,7 +114,10 @@ namespace TwinsanityEditor
             {
                 writer.BaseStream.Position = executable.ArchiveOff;
                 while (writer.BaseStream.Position < executable.ArchiveOff + executable.ArchiveSize)
+                {
                     writer.Write((byte)0);
+                }
+
                 writer.BaseStream.Position = executable.ArchiveOff;
                 for (int i = 0; i < executable.ArchiveSize && writer.BaseStream.Position < executable.ArchiveOff + executable.ArchiveSize && i < textBox1.Text.Length; ++i)
                 {
@@ -123,7 +128,10 @@ namespace TwinsanityEditor
             {
                 writer.BaseStream.Position = executable.LevelOff;
                 while (writer.BaseStream.Position < executable.LevelOff + executable.LevelSize)
+                {
                     writer.Write((byte)0);
+                }
+
                 writer.BaseStream.Position = executable.LevelOff;
                 for (int i = 0; i < executable.LevelSize && writer.BaseStream.Position < executable.LevelOff + executable.LevelSize && i < textBox2.Text.Length; ++i)
                 {

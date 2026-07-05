@@ -1,17 +1,17 @@
-﻿using System.Windows.Forms;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Windows.Forms;
 using Twinsanity;
 
 namespace TwinsanityEditor
 {
     public partial class PathEditor : Form
     {
-        private SectionController controller;
+        private readonly SectionController controller;
         private Path path;
 
         private FileController File { get; set; }
-        private TwinsFile FileData { get => File.Data; }
-        private Controller CurPathCont { get => (Controller)controller.Node.Nodes[controller.Data.RecordIDs[path.ID]].Tag; }
+        private TwinsFile FileData => File.Data;
+        private Controller CurPathCont => (Controller)controller.Node.Nodes[controller.Data.RecordIDs[path.ID]].Tag;
 
         private bool ignore_value_change;
         private int pos_i, par_i;
@@ -36,13 +36,16 @@ namespace TwinsanityEditor
             listBox1.Items.Clear();
             foreach (Path i in controller.Data.Records)
             {
-                listBox1.Items.Add($"ID {i.ID}");
+                _ = listBox1.Items.Add($"ID {i.ID}");
             }
         }
 
         private void listBox1_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            if (listBox1.SelectedIndex == -1) return;
+            if (listBox1.SelectedIndex == -1)
+            {
+                return;
+            }
 
             this.SuspendDrawing();
 
@@ -122,34 +125,47 @@ namespace TwinsanityEditor
 
         private void numericUpDown1_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             path.Positions[pos_i].X = (float)numericUpDown1.Value;
             CurPathCont.UpdateTextBox();
         }
 
         private void addToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
-            if (controller.Data.RecordIDs.Count >= ushort.MaxValue) return;
+            if (controller.Data.RecordIDs.Count >= ushort.MaxValue)
+            {
+                return;
+            }
+
             uint id;
             for (id = 0; id < uint.MaxValue; ++id)
             {
                 if (!controller.Data.ContainsItem(id))
+                {
                     break;
+                }
             }
             Path new_path = new Path { ID = id, Positions = new List<Pos>(), Params = new List<Path.PathParam>() };
             controller.Data.AddItem(id, new_path);
             ((MainForm)Tag).GenTreeNode(new_path, controller);
             path = new_path;
-            listBox1.Items.Add($"ID {path.ID}");
+            _ = listBox1.Items.Add($"ID {path.ID}");
             controller.UpdateTextBox();
             CurPathCont.UpdateText();
         }
 
         private void removeToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
-            var sel_i = listBox1.SelectedIndex;
+            int sel_i = listBox1.SelectedIndex;
             if (sel_i == -1)
+            {
                 return;
+            }
+
             controller.RemoveItem(path.ID);
             listBox1.BeginUpdate();
             listBox1.Items.RemoveAt(sel_i);
@@ -163,52 +179,83 @@ namespace TwinsanityEditor
                     ((Controller)controller.Node.Nodes[i].Tag).UpdateText();
                 }
             }
-            if (sel_i >= listBox1.Items.Count) sel_i = listBox1.Items.Count - 1;
+            if (sel_i >= listBox1.Items.Count)
+            {
+                sel_i = listBox1.Items.Count - 1;
+            }
+
             listBox1.SelectedIndex = sel_i;
             listBox1.EndUpdate();
             if (listBox1.Items.Count == 0)
+            {
                 splitContainer1.Panel2.Enabled = false;
+            }
+
             controller.UpdateTextBox();
         }
 
         private void numericUpDown2_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             path.Positions[pos_i].Y = (float)numericUpDown2.Value;
             CurPathCont.UpdateTextBox();
         }
 
         private void numericUpDown3_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             path.Positions[pos_i].Z = (float)numericUpDown3.Value;
             CurPathCont.UpdateTextBox();
         }
 
         private void numericUpDown4_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             path.Positions[pos_i].W = (float)numericUpDown4.Value;
             CurPathCont.UpdateTextBox();
         }
 
         private void numericUpDown7_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             path.Params[par_i].P1 = (float)numericUpDown7.Value;
             CurPathCont.UpdateTextBox();
         }
 
         private void numericUpDown8_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             path.Params[par_i].P2 = (float)numericUpDown8.Value;
             CurPathCont.UpdateTextBox();
         }
 
         private void numericUpDown6_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             pos_i = (int)numericUpDown6.Value - 1;
             File.SelectItem(path, pos_i);
             UpdatePosition();
@@ -216,7 +263,11 @@ namespace TwinsanityEditor
 
         private void numericUpDown9_ValueChanged(object sender, System.EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             par_i = (int)numericUpDown9.Value - 1;
             UpdateParam();
         }
@@ -237,7 +288,7 @@ namespace TwinsanityEditor
 
         private void button4_Click(object sender, System.EventArgs e)
         {
-            path.Params.Add(new Path.PathParam() { P1 = (float)numericUpDown7.Value, P2 = (float)numericUpDown8.Value } );
+            path.Params.Add(new Path.PathParam() { P1 = (float)numericUpDown7.Value, P2 = (float)numericUpDown8.Value });
             label8.Text = $"/ {path.Params.Count}";
             numericUpDown9.Maximum = path.Params.Count;
             if (path.Params.Count == 1)

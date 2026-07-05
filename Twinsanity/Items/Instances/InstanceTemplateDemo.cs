@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 
 namespace Twinsanity
 {
@@ -42,7 +41,7 @@ namespace Twinsanity
             writer.Write((byte)Ints.Length);
             writer.Write((byte)0);
             writer.Write(Properties);
-            
+
             if (Flags.Length > 0)
             {
                 for (int i = 0; i < Flags.Length; i++)
@@ -68,7 +67,7 @@ namespace Twinsanity
 
         public override void Load(BinaryReader reader, int size)
         {
-            long startPos = reader.BaseStream.Position;
+            _ = reader.BaseStream.Position;
 
             uint len = reader.ReadUInt32();
 
@@ -96,7 +95,7 @@ namespace Twinsanity
             uint FlagLen = reader.ReadByte();
             uint FloatLen = reader.ReadByte();
             uint IntLen = reader.ReadByte();
-            reader.ReadByte();
+            _ = reader.ReadByte();
 
             Properties = reader.ReadUInt32();
 

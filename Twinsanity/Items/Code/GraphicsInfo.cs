@@ -75,11 +75,11 @@ namespace Twinsanity
 
             if (ModelIDs.Count > 0)
             {
-                foreach (var pair in ModelIDs)
+                foreach (KeyValuePair<int, ModelLink> pair in ModelIDs)
                 {
                     writer.Write((byte)pair.Value.JointIndex);
                 }
-                foreach (var pair in ModelIDs)
+                foreach (KeyValuePair<int, ModelLink> pair in ModelIDs)
                 {
                     writer.Write(pair.Value.ModelID);
                 }
@@ -106,7 +106,7 @@ namespace Twinsanity
             {
                 for (int a = 0; a < CollisionData.Length; a++)
                 {
-                    for (var i = 0; i < 11; ++i)
+                    for (int i = 0; i < 11; ++i)
                     {
                         writer.Write(CollisionData[a].Header[i]);
                     }
@@ -126,17 +126,17 @@ namespace Twinsanity
 
         public override void Load(BinaryReader reader, int size)
         {
-            long pre_pos = reader.BaseStream.Position;
+            _ = reader.BaseStream.Position;
 
             HeaderVars = new byte[0x10];
             HeaderVars = reader.ReadBytes(0x10);
 
             uint jointsAmt = HeaderVars[0];
             uint exitPointsAmt = HeaderVars[1];
-            uint reactJointsAmt = HeaderVars[2]; // These joints rotate and react to camera movement
+            _ = HeaderVars[2]; // These joints rotate and react to camera movement
             uint Model_Size = HeaderVars[5];
-            uint SkinFlag = HeaderVars[6];
-            uint BlendSkinFlag = HeaderVars[7];
+            _ = HeaderVars[6];
+            _ = HeaderVars[7];
             int collisionDataAmount = HeaderVars[8];
 
             Coord1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
@@ -212,7 +212,7 @@ namespace Twinsanity
                 }
                 for (int i = 0; i < Model_Size; i++)
                 {
-                    var modelLink = new ModelLink()
+                    ModelLink modelLink = new ModelLink()
                     {
                         JointIndex = IDs[i],
                         ModelID = IDs_m[i]
@@ -254,7 +254,7 @@ namespace Twinsanity
                 for (int a = 0; a < collisionDataAmount; a++)
                 {
                     ushort[] header = new ushort[11];
-                    for (var i = 0; i < 11; ++i)
+                    for (int i = 0; i < 11; ++i)
                     {
                         header[i] = reader.ReadUInt16();
                     }
@@ -265,21 +265,21 @@ namespace Twinsanity
                     {
                         using (BinaryReader blobReader = new BinaryReader(memoryStream))
                         {
-                            var firstBlockElemAmt = header[0];
-                            var secondBlockElemAmt = header[1];
-                            var thirdBlockElemAmt = header[2];
-                            var fourthBlockElemAmt = header[3];
-                            var fifthBlockElemAmt = header[4];
-                            var sixthBlockElemAmt = header[10] - header[9];
-                            var seventhBlockElemAmt = blobSize - header[10];
-                            var secondBlockPos = header[5];
-                            var thirdBlockPos = header[6];
-                            var fourthBlockPos = header[7];
-                            var fifthBlockPos = header[8];
-                            var sixthBlockPos = header[9];
-                            var seventhBlockPos = header[10];
+                            ushort firstBlockElemAmt = header[0];
+                            ushort secondBlockElemAmt = header[1];
+                            ushort thirdBlockElemAmt = header[2];
+                            ushort fourthBlockElemAmt = header[3];
+                            ushort fifthBlockElemAmt = header[4];
+                            int sixthBlockElemAmt = header[10] - header[9];
+                            int seventhBlockElemAmt = blobSize - header[10];
+                            ushort secondBlockPos = header[5];
+                            ushort thirdBlockPos = header[6];
+                            ushort fourthBlockPos = header[7];
+                            ushort fifthBlockPos = header[8];
+                            ushort sixthBlockPos = header[9];
+                            ushort seventhBlockPos = header[10];
                             CollisionData[a].UnkVectors1 = new TwinsVector4[firstBlockElemAmt];
-                            for (var i = 0; i < firstBlockElemAmt; ++i)
+                            for (int i = 0; i < firstBlockElemAmt; ++i)
                             {
                                 CollisionData[a].UnkVectors1[i] = new TwinsVector4();
                                 CollisionData[a].UnkVectors1[i].Load(blobReader, 16);
@@ -309,18 +309,18 @@ namespace Twinsanity
 
             for (int i = 1; i < Joints.Length; i++)
             {
-                var joint = Joints[i];
-                var node = new JointNode(joint);
+                Joint joint = Joints[i];
+                JointNode node = new JointNode(joint);
                 Skeleton.Nodes.Add((int)joint.JointIndex, node);
                 if (Skeleton.Nodes.ContainsKey((int)joint.ParentJointIndex))
                 {
-                    var parent = Skeleton.Nodes[(int)joint.ParentJointIndex];
+                    JointNode parent = Skeleton.Nodes[(int)joint.ParentJointIndex];
                     parent.Children.Add(node);
                 }
             }
 
             // Children amount validation
-            foreach (var node in Skeleton.Nodes)
+            foreach (KeyValuePair<int, JointNode> node in Skeleton.Nodes)
             {
                 if (node.Value.Joint.ChildJointAmount != node.Value.Children.Count)
                 {
@@ -430,31 +430,63 @@ namespace Twinsanity
 
         public void FillPackage(TwinsFile source, TwinsFile destination)
         {
-            var sourceModels = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(3);
-            var destinationModels = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(3);
-            var sourceSkins = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(4);
-            var destinationSkins = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(4);
-            var sourceBlend = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(5);
-            var destinationBlend = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(5);
-            foreach (var modelID in ModelIDs)
+            TwinsSection sourceModels = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(3);
+            TwinsSection destinationModels = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(3);
+            TwinsSection sourceSkins = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(4);
+            TwinsSection destinationSkins = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(4);
+            TwinsSection sourceBlend = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(5);
+            TwinsSection destinationBlend = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(5);
+            foreach (KeyValuePair<int, ModelLink> modelID in ModelIDs)
             {
                 if (destinationModels.HasItem(modelID.Value.ModelID))
                 {
                     continue;
                 }
-                var linkedModel = sourceModels.GetItem<RigidModel>(modelID.Value.ModelID);
+                RigidModel linkedModel = sourceModels.GetItem<RigidModel>(modelID.Value.ModelID);
                 destinationModels.AddItem(modelID.Value.ModelID, linkedModel);
                 linkedModel.FillPackage(source, destination);
             }
             if (sourceSkins.HasItem(SkinID))
             {
-                var linkedSkin = sourceSkins.GetItem<Skin>(SkinID);
+                Skin linkedSkin = sourceSkins.GetItem<Skin>(SkinID);
                 destinationSkins.AddItem(SkinID, linkedSkin);
                 linkedSkin.FillPackage(source, destination);
             }
             if (sourceBlend.HasItem(BlendSkinID))
             {
-                var linkedBlend = sourceBlend.GetItem<BlendSkin>(BlendSkinID);
+                BlendSkin linkedBlend = sourceBlend.GetItem<BlendSkin>(BlendSkinID);
+                destinationBlend.AddItem(BlendSkinID, linkedBlend);
+                linkedBlend.FillPackage(source, destination);
+            }
+        }
+
+        public void FillPackageXbox(TwinsFile source, TwinsFile destination)
+        {
+            TwinsSection sourceModels = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(3);
+            TwinsSection destinationModels = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(3);
+            TwinsSection sourceSkins = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(4);
+            TwinsSection destinationSkins = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(4);
+            TwinsSection sourceBlend = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(5);
+            TwinsSection destinationBlend = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(5);
+            foreach (KeyValuePair<int, ModelLink> modelID in ModelIDs)
+            {
+                if (destinationModels.HasItem(modelID.Value.ModelID))
+                {
+                    continue;
+                }
+                RigidModel linkedModel = sourceModels.GetItem<RigidModel>(modelID.Value.ModelID);
+                destinationModels.AddItem(modelID.Value.ModelID, linkedModel);
+                linkedModel.FillPackageXbox(source, destination);
+            }
+            if (sourceSkins.HasItem(SkinID))
+            {
+                SkinX linkedSkin = sourceSkins.GetItem<SkinX>(SkinID);
+                destinationSkins.AddItem(SkinID, linkedSkin);
+                linkedSkin.FillPackage(source, destination);
+            }
+            if (sourceBlend.HasItem(BlendSkinID))
+            {
+                BlendSkinX linkedBlend = sourceBlend.GetItem<BlendSkinX>(BlendSkinID);
                 destinationBlend.AddItem(BlendSkinID, linkedBlend);
                 linkedBlend.FillPackage(source, destination);
             }
@@ -462,31 +494,31 @@ namespace Twinsanity
 
         public void FillPackageDemo(TwinsFile source, TwinsFile destination)
         {
-            var sourceModels = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(3);
-            var destinationModels = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(3);
-            var sourceSkins = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(4);
-            var destinationSkins = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(4);
-            var sourceBlend = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(5);
-            var destinationBlend = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(5);
-            foreach (var modelID in ModelIDs)
+            TwinsSection sourceModels = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(3);
+            TwinsSection destinationModels = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(3);
+            TwinsSection sourceSkins = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(4);
+            TwinsSection destinationSkins = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(4);
+            TwinsSection sourceBlend = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(5);
+            TwinsSection destinationBlend = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(5);
+            foreach (KeyValuePair<int, ModelLink> modelID in ModelIDs)
             {
                 if (destinationModels.HasItem(modelID.Value.ModelID))
                 {
                     continue;
                 }
-                var linkedModel = sourceModels.GetItem<RigidModel>(modelID.Value.ModelID);
+                RigidModel linkedModel = sourceModels.GetItem<RigidModel>(modelID.Value.ModelID);
                 destinationModels.AddItem(modelID.Value.ModelID, linkedModel);
                 linkedModel.FillPackageDemo(source, destination);
             }
             if (sourceSkins.HasItem(SkinID))
             {
-                var linkedSkin = sourceSkins.GetItem<Skin>(SkinID);
+                Skin linkedSkin = sourceSkins.GetItem<Skin>(SkinID);
                 destinationSkins.AddItem(SkinID, linkedSkin);
                 linkedSkin.FillPackage(source, destination);
             }
             if (sourceBlend.HasItem(BlendSkinID))
             {
-                var linkedBlend = sourceBlend.GetItem<BlendSkin>(BlendSkinID);
+                BlendSkin linkedBlend = sourceBlend.GetItem<BlendSkin>(BlendSkinID);
                 destinationBlend.AddItem(BlendSkinID, linkedBlend);
                 linkedBlend.FillPackage(source, destination);
             }

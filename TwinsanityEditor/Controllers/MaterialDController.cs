@@ -1,6 +1,5 @@
-﻿using Twinsanity;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Twinsanity;
 
 namespace TwinsanityEditor
 {
@@ -20,14 +19,14 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            var text = new List<string>
+            List<string> text = new List<string>
             {
                 string.Format("ID: {0:X8}", Data.ID),
                 $"Size: {Data.Size}",
                 $"Name: {Data.Name.Substring(0, Data.Name.Length - 1)}",
                 $"Shaders: {Data.Shaders.Count}"
             };
-            foreach (var shd in Data.Shaders)
+            foreach (TwinsShader shd in Data.Shaders)
             {
                 text.Add($"Shader Type {shd.ShaderType}");
                 text.Add($"\tBound texture: {shd.TextureId:X}");

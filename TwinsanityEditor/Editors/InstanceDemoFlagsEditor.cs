@@ -8,7 +8,7 @@ namespace TwinsanityEditor
     {
         private InstanceDemo inst;
         private GameObjectDemo agent;
-        private NumericUpDown flagscontrol;
+        private readonly NumericUpDown flagscontrol;
 
 
         public InstanceDemo Instance
@@ -20,7 +20,7 @@ namespace TwinsanityEditor
             set { agent = value; UpdateCheckBoxes(); }
         }
 
-        private CheckBox[] checkboxes;
+        private readonly CheckBox[] checkboxes;
         internal static string[] flagtext = new string[32] {
             "Inactive", // 0
             "Collidable", // 1
@@ -58,8 +58,7 @@ namespace TwinsanityEditor
 
         internal string GetFlagText(int id)
         {
-            if (string.IsNullOrEmpty(flagtext[id])) return id.ToString();
-            else return $"{id}: {flagtext[id]}";
+            return string.IsNullOrEmpty(flagtext[id]) ? id.ToString() : $"{id}: {flagtext[id]}";
         }
 
         public void UpdateCheckBoxes()
@@ -67,12 +66,16 @@ namespace TwinsanityEditor
             if (inst != null)
             {
                 foreach (CheckBox checkbox in checkboxes)
+                {
                     checkbox.Checked = ((uint)checkbox.Tag & inst.Flags) != 0;
+                }
             }
             else
             {
                 foreach (CheckBox checkbox in checkboxes)
+                {
                     checkbox.Checked = ((uint)checkbox.Tag & agent.PUI32) != 0;
+                }
             }
         }
 
@@ -84,12 +87,14 @@ namespace TwinsanityEditor
             checkboxes = new CheckBox[32];
             for (int i = 0; i < 32; ++i)
             {
-                checkboxes[i] = new CheckBox() {
-                    Location = new System.Drawing.Point(i/16*203 + 12, i%16*23 + 12),
+                checkboxes[i] = new CheckBox()
+                {
+                    Location = new System.Drawing.Point((i / 16 * 203) + 12, (i % 16 * 23) + 12),
                     Size = new System.Drawing.Size(200, 20),
                     Text = GetFlagText(i),
                     TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
-                    Tag = (uint)(1 << i) };
+                    Tag = (uint)(1 << i)
+                };
                 checkboxes[i].CheckedChanged += cbFlag_CheckChanged;
                 Controls.Add(checkboxes[i]);
             }
@@ -105,7 +110,7 @@ namespace TwinsanityEditor
             {
                 checkboxes[i] = new CheckBox()
                 {
-                    Location = new System.Drawing.Point(i / 16 * 203 + 12, i % 16 * 23 + 12),
+                    Location = new System.Drawing.Point((i / 16 * 203) + 12, (i % 16 * 23) + 12),
                     Size = new System.Drawing.Size(200, 20),
                     Text = GetFlagText(i),
                     TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
@@ -145,7 +150,7 @@ namespace TwinsanityEditor
                 }
                 flagscontrol.Value = agent.PUI32;
             }
-            
+
         }
     }
 }

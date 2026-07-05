@@ -7,33 +7,32 @@ namespace TwinsanityEditor
 {
     public class SkydomeViewer : ThreeDViewer
     {
-        private SkydomeController sky;
-        private FileController file;
+        private readonly FileController file;
 
         private bool lighting, wire;
 
-        public SkydomeController Sky { get => sky; }
+        public SkydomeController Sky { get; }
 
         public SkydomeViewer(SkydomeController sky, Form pform)
         {
             //initialize variables here
-            this.sky = sky;
+            Sky = sky;
             file = sky.MainFile;
             zFar = 100F;
-            var vbos = 0;
+            int vbos = 0;
             uint gfx_section = 6;
             if (file.Data.Type == TwinsFile.FileType.MonkeyBallSM)
             {
                 gfx_section = 7;
             }
             SectionController mesh_sec = file.GetItem<SectionController>(gfx_section).GetItem<SectionController>(6);
-            for (var i = 0; i < sky.Data.MeshIDs.Length; i++)
+            for (int i = 0; i < sky.Data.MeshIDs.Length; i++)
             {
                 foreach (RigidModel mod in mesh_sec.Data.Records)
                 {
                     if (mod.ID == sky.Data.MeshIDs[i])
                     {
-                        var m = mesh_sec.GetItem<RigidModelController>(sky.Data.MeshIDs[i]);
+                        RigidModelController m = mesh_sec.GetItem<RigidModelController>(sky.Data.MeshIDs[i]);
                         vbos += m.Data.MaterialIDs.Length;
                         break;
                     }
@@ -55,13 +54,23 @@ namespace TwinsanityEditor
             //put all object rendering code here
             for (int i = 0; i < vtx.Count; ++i)
             {
-                if (vtx[i].Vtx == null) continue;
-                var flags = lighting ? BufferPointerFlags.Normal : BufferPointerFlags.Default;
+                if (vtx[i].Vtx == null)
+                {
+                    continue;
+                }
+
+                BufferPointerFlags flags = lighting ? BufferPointerFlags.Normal : BufferPointerFlags.Default;
                 if (lighting)
+                {
                     GL.Enable(EnableCap.Lighting);
+                }
+
                 vtx[i].DrawAllElements(PrimitiveType.Triangles, flags);
                 if (lighting)
+                {
                     GL.Disable(EnableCap.Lighting);
+                }
+
                 if (wire)
                 {
                     GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -108,18 +117,21 @@ namespace TwinsanityEditor
             SectionController mesh_sec = file.GetItem<SectionController>(gfx_section).GetItem<SectionController>(2);
             SectionController model_sec = file.GetItem<SectionController>(gfx_section).GetItem<SectionController>(6);
             SectionController special_sec = file.GetItem<SectionController>(gfx_section).GetItem<SectionController>(7);
-            var vtxIndex = 0;
+            int vtxIndex = 0;
             if (mesh_sec.Data.Type == SectionType.ModelX)
             {
-                for (int i = 0; i < sky.Data.MeshIDs.Length; ++i)
+                for (int i = 0; i < Sky.Data.MeshIDs.Length; ++i)
                 {
-                    if (special_sec.Data.ContainsItem(sky.Data.MeshIDs[i]))
-                        continue;
-                    ModelXController mesh = mesh_sec.GetItem<ModelXController>(model_sec.GetItem<RigidModelController>(sky.Data.MeshIDs[i]).Data.MeshID);
-                    mesh.LoadMeshData();
-                    foreach (var list in mesh.Vertices)
+                    if (special_sec.Data.ContainsItem(Sky.Data.MeshIDs[i]))
                     {
-                        foreach (var v in list)
+                        continue;
+                    }
+
+                    ModelXController mesh = mesh_sec.GetItem<ModelXController>(model_sec.GetItem<RigidModelController>(Sky.Data.MeshIDs[i]).Data.MeshID);
+                    mesh.LoadMeshData();
+                    foreach (Vertex[] list in mesh.Vertices)
+                    {
+                        foreach (Vertex v in list)
                         {
                             min_x = Math.Min(min_x, v.Pos.X);
                             min_y = Math.Min(min_y, v.Pos.Y);
@@ -133,7 +145,7 @@ namespace TwinsanityEditor
                     {
                         vtx[vtxIndex].Vtx = mesh.Vertices[j];
                         vtx[vtxIndex].VtxInd = mesh.Indices[j];
-                        Utils.TextUtils.LoadTexture(model_sec.GetItem<RigidModelController>(sky.Data.MeshIDs[i]).Data.MaterialIDs, file, vtx[vtxIndex], j);
+                        Utils.TextUtils.LoadTexture(model_sec.GetItem<RigidModelController>(Sky.Data.MeshIDs[i]).Data.MaterialIDs, file, vtx[vtxIndex], j);
                         UpdateVBO(vtxIndex);
                         vtxIndex++;
                     }
@@ -143,15 +155,18 @@ namespace TwinsanityEditor
             }
             else
             {
-                for (int i = 0; i < sky.Data.MeshIDs.Length; ++i)
+                for (int i = 0; i < Sky.Data.MeshIDs.Length; ++i)
                 {
-                    if (special_sec.Data.ContainsItem(sky.Data.MeshIDs[i]))
-                        continue;
-                    ModelController mesh = mesh_sec.GetItem<ModelController>(model_sec.GetItem<RigidModelController>(sky.Data.MeshIDs[i]).Data.MeshID);
-                    mesh.LoadMeshData();
-                    foreach (var list in mesh.Vertices)
+                    if (special_sec.Data.ContainsItem(Sky.Data.MeshIDs[i]))
                     {
-                        foreach (var v in list)
+                        continue;
+                    }
+
+                    ModelController mesh = mesh_sec.GetItem<ModelController>(model_sec.GetItem<RigidModelController>(Sky.Data.MeshIDs[i]).Data.MeshID);
+                    mesh.LoadMeshData();
+                    foreach (Vertex[] list in mesh.Vertices)
+                    {
+                        foreach (Vertex v in list)
                         {
                             min_x = Math.Min(min_x, v.Pos.X);
                             min_y = Math.Min(min_y, v.Pos.Y);
@@ -165,7 +180,7 @@ namespace TwinsanityEditor
                     {
                         vtx[vtxIndex].Vtx = mesh.Vertices[j];
                         vtx[vtxIndex].VtxInd = mesh.Indices[j];
-                        Utils.TextUtils.LoadTexture(model_sec.GetItem<RigidModelController>(sky.Data.MeshIDs[i]).Data.MaterialIDs, file, vtx[vtxIndex], j);
+                        Utils.TextUtils.LoadTexture(model_sec.GetItem<RigidModelController>(Sky.Data.MeshIDs[i]).Data.MaterialIDs, file, vtx[vtxIndex], j);
                         UpdateVBO(vtxIndex);
                         vtxIndex++;
                     }
@@ -173,7 +188,7 @@ namespace TwinsanityEditor
 
                 }
             }
-            
+
             zFar = Math.Max(zFar, Math.Max(max_x - min_x, Math.Max(max_y - min_y, max_z - min_z)));
         }
 

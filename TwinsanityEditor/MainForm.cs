@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
+using Twinsanity;
 using TwinsanityEditor.Controllers;
 using TwinsanityEditor.Properties;
 using TwinsanityEditor.Workers;
-using Twinsanity;
 
 namespace TwinsanityEditor
 {
@@ -15,9 +15,9 @@ namespace TwinsanityEditor
         private int LastFilterIndex;
 
         //private List<FileController> FilesOpened { get; }
-        public FileController FilesController { get => (FileController)Tag; }
-        public FileController CurCont { get => FilesController; } //get currently selected file controller
-        public TwinsFile CurFile { get => CurCont.Data; } //get currently selected file
+        public FileController FilesController => (FileController)Tag;
+        public FileController CurCont => FilesController;  //get currently selected file controller
+        public TwinsFile CurFile => CurCont.Data;  //get currently selected file
         //public FileController DefaultCont { get; private set; }
         //public TwinsFile DefaultFile { get => DefaultCont.Data; }
 
@@ -33,13 +33,12 @@ namespace TwinsanityEditor
         {
             nodeLastSelected = null;
             treeView1.BeginUpdate();
-            if (ColDataController.importer != null)
-                ColDataController.importer.Close();
+            ColDataController.importer?.Close();
             treeView1.Nodes.Clear();
             CurCont.UpdateText();
-            treeView1.Nodes.Add(CurCont.Node);
+            _ = treeView1.Nodes.Add(CurCont.Node);
             treeView1.Select();
-            foreach (var i in CurFile.Records)
+            foreach (TwinsItem i in CurFile.Records)
             {
                 GenTreeNode(i, CurCont);
             }
@@ -50,9 +49,15 @@ namespace TwinsanityEditor
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (nodeLastSelected != null && nodeLastSelected.Tag is Controller c1)
+            {
                 c1.Selected = false;
+            }
+
             if (e.Node.Tag is Controller c2)
+            {
                 ControllerNodeSelect(c2);
+            }
+
             nodeLastSelected = e.Node;
         }
 
@@ -68,100 +73,178 @@ namespace TwinsanityEditor
             if (a is TwinsSection)
             {
                 c = new SectionController(this, (TwinsSection)a);
-                foreach (var i in ((TwinsSection)a).Records)
+                foreach (TwinsItem i in ((TwinsSection)a).Records)
                 {
                     GenTreeNode(i, c, cached);
                 }
             }
             else if (a is Texture)
+            {
                 c = new TextureController(this, (Texture)a);
+            }
             else if (a is TextureX)
+            {
                 c = new TextureXController(this, (TextureX)a);
+            }
             else if (a is Material)
+            {
                 c = new MaterialController(this, (Material)a);
+            }
             else if (a is Model)
+            {
                 c = new ModelController(this, (Model)a);
+            }
             else if (a is ModelX)
+            {
                 c = new ModelXController(this, (ModelX)a);
+            }
             else if (a is RigidModel)
+            {
                 c = new RigidModelController(this, (RigidModel)a);
+            }
             else if (a is Skydome)
+            {
                 c = new SkydomeController(this, (Skydome)a);
+            }
             else if (a is GameObject)
+            {
                 c = new ObjectController(this, (GameObject)a);
+            }
             else if (a is CodeModel)
+            {
                 c = new CodeModelController(this, (CodeModel)a);
+            }
             else if (a is Script)
+            {
                 c = new ScriptController(this, (Script)a);
+            }
             else if (a is Animation)
+            {
                 c = new AnimationController(this, (Animation)a);
+            }
             else if (a is SoundEffect)
+            {
                 c = new SEController(this, (SoundEffect)a);
+            }
             else if (a is SoundEffectX)
+            {
                 c = new SoundXboxController(this, (SoundEffectX)a);
+            }
             else if (a is AIPosition)
+            {
                 c = new AIPositionController(this, (AIPosition)a);
+            }
             else if (a is AIPath)
+            {
                 c = new AIPathController(this, (AIPath)a);
+            }
             else if (a is Position)
+            {
                 c = new PositionController(this, (Position)a);
+            }
             else if (a is Path)
+            {
                 c = new PathController(this, (Path)a);
+            }
             else if (a is Instance)
+            {
                 c = new InstanceController(this, (Instance)a);
+            }
             else if (a is InstanceMB)
+            {
                 c = new InstanceMBController(this, (InstanceMB)a);
+            }
             else if (a is Trigger)
+            {
                 c = new TriggerController(this, (Trigger)a);
+            }
             else if (a is ColData)
+            {
                 c = new ColDataController(this, (ColData)a);
+            }
             else if (a is ChunkLinks)
+            {
                 c = new ChunkLinksController(this, (ChunkLinks)a);
+            }
             else if (a is GraphicsInfo)
+            {
                 c = new GraphicsInfoController(this, (GraphicsInfo)a);
+            }
             else if (a is Skin)
+            {
                 c = new SkinController(this, (Skin)a);
+            }
             else if (a is SkinX)
+            {
                 c = new SkinXController(this, (SkinX)a);
+            }
             else if (a is MaterialDemo)
+            {
                 c = new MaterialDController(this, (MaterialDemo)a);
+            }
             else if (a is SceneryData)
+            {
                 c = new SceneryDataController(this, (SceneryData)a);
+            }
             else if (a is LodModel)
+            {
                 c = new LodModelController(this, (LodModel)a);
+            }
             else if (a is ParticleData)
+            {
                 c = new ParticleDataController(this, (ParticleData)a);
+            }
             else if (a is DynamicSceneryData)
+            {
                 c = new DynamicSceneryDataController(this, (DynamicSceneryData)a);
+            }
             else if (a is DynamicSceneryDataMB)
+            {
                 c = new DynamicSceneryDataMBController(this, (DynamicSceneryDataMB)a);
+            }
             else if (a is CollisionSurface)
+            {
                 c = new CollisionSurfaceController(this, (CollisionSurface)a);
+            }
             else if (a is Camera)
+            {
                 c = new CameraController(this, (Camera)a);
+            }
             else if (a is InstanceTemplate)
+            {
                 c = new InstaceTemplateController(this, (InstanceTemplate)a);
+            }
             else if (a is InstanceTemplateDemo)
+            {
                 c = new InstaceTemplateDemoController(this, (InstanceTemplateDemo)a);
+            }
             else if (a is InstanceDemo)
+            {
                 c = new InstanceDemoController(this, (InstanceDemo)a);
+            }
             else if (a is GameObjectDemo)
+            {
                 c = new ObjectDemoController(this, (GameObjectDemo)a);
+            }
             else if (a is BlendSkin)
+            {
                 c = new BlendSkinController(this, (BlendSkin)a);
-            else if (a is BlendSkinX)
-                c = new BlendSkinXController(this, (BlendSkinX)a);
-            else if (a is GraphicsInfoMB)
-                c = new GraphicsInfoMBController(this, (GraphicsInfoMB)a);
-            else if (a is TextureP)
-                c = new TexturePController(this, (TextureP)a);
-            else if (a is ModelP)
-                c = new ModelPController(this, (ModelP)a);
+            }
             else
-                c = new ItemController(this, a);
+            {
+                c = a is BlendSkinX
+                    ? new BlendSkinXController(this, (BlendSkinX)a)
+                    : a is GraphicsInfoMB
+                    ? new GraphicsInfoMBController(this, (GraphicsInfoMB)a)
+                    : a is TextureP
+                    ? new TexturePController(this, (TextureP)a)
+                    : a is ModelP ? new ModelPController(this, (ModelP)a) : (Controller)new ItemController(this, a);
+            }
 
             if (!cached)
+            {
                 c.UpdateText();
+            }
 
             if (DefaultHashes.DefaultNames)
             {
@@ -170,7 +253,7 @@ namespace TwinsanityEditor
                     item.Node.Text = DefaultHashes.ToName(item.Data.ParentType, item.Data.ID);
                 }
             }
-            
+
             controller.AddNode(c);
         }
 
@@ -178,23 +261,25 @@ namespace TwinsanityEditor
         {
             TreeView tree = (TreeView)sender;
             if (e.KeyCode == Keys.Enter && tree.SelectedNode != null && tree.SelectedNode.Tag is Controller c)
+            {
                 CurCont.OpenEditor(c);
+            }
         }
 
         public void OpenEXETool()
         {
-           if (exeForm == null || exeForm.IsDisposed)
-           {
+            if (exeForm == null || exeForm.IsDisposed)
+            {
                 exeForm = new EXEPatcher();
                 exeForm.FormClosed += delegate
                 {
                     exeForm = null;
                 };
-           }
-           else
-           {
+            }
+            else
+            {
                 exeForm.Select();
-           }
+            }
         }
 
         public void OpenMHTool()
@@ -208,7 +293,9 @@ namespace TwinsanityEditor
                 };
             }
             else
+            {
                 mhForm.Select();
+            }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -220,12 +307,12 @@ namespace TwinsanityEditor
         {
             if (MessageBox.Show("Overwrite original file?", "Save", MessageBoxButtons.OKCancel) == DialogResult.OK)
             {
-                var originalFileName = CurCont.FileName;
-                var backups = 5;
-                for (var i = backups; i >= 1; --i)
+                string originalFileName = CurCont.FileName;
+                int backups = 5;
+                for (int i = backups; i >= 1; --i)
                 {
-                    var backupPath = $"{originalFileName}.back{i}";
-                    var newBackupPath = $"{originalFileName}.back{i + 1}";
+                    string backupPath = $"{originalFileName}.back{i}";
+                    string newBackupPath = $"{originalFileName}.back{i + 1}";
                     if (System.IO.File.Exists(backupPath))
                     {
                         if (i == backups)
@@ -240,12 +327,12 @@ namespace TwinsanityEditor
                 }
                 System.IO.File.Move(originalFileName, originalFileName + ".back1");
                 CurFile.SaveFile(CurCont.FileName);
-            } 
+            }
         }
 
         private void buttonAbout_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Twinsanity Editor + API " + Program.EditorVersion + "\nDeveloped by Neo_Kesha, Smartkin, ManDude, BetaM\nA fork by preunpatching\nUI modifications by AtomicalSloths\nSpecial thanks to Marko and SuperMoe\nSource code available at: https://github.com/preunpatching/twinsanity-editor", "About", MessageBoxButtons.OK);
+            _ = MessageBox.Show("Twinsanity Editor + API v" + Program.EditorVersion + "\nDeveloped by Neo_Kesha, Smartkin, ManDude, BetaM\nA fork by preunpatching\nUI modifications by AtomicalSloths\nSpecial thanks to Marko and SuperMoe\nSource code available at: https://github.com/preunpatching/twinsanity-editor", "About", MessageBoxButtons.OK);
         }
 
         private void buttonOpen_Click(object sender, EventArgs e)
@@ -335,7 +422,9 @@ namespace TwinsanityEditor
                         case 3:
                         case 4:
                             if (IsScenery)
+                            {
                                 file.LoadFile(ofd.FileName, TwinsFile.FileType.DemoSM2);
+                            }
                             else
                             {
                                 file.LoadFile(ofd.FileName, TwinsFile.FileType.DemoRM2);
@@ -360,7 +449,7 @@ namespace TwinsanityEditor
 
 
                         ((FileController)Tag).DataAuxCont = new FileController(this, aux_file);
-                        foreach (var r in ((FileController)Tag).DataAux.Records)
+                        foreach (TwinsItem r in ((FileController)Tag).DataAux.Records)
                         {
                             GenTreeNode(r, ((FileController)Tag).DataAuxCont, true);
                         }
@@ -369,7 +458,7 @@ namespace TwinsanityEditor
                     if (default_file != null)
                     {
                         ((FileController)Tag).DefaultCont = new FileController(this, default_file);
-                        foreach (var i in ((FileController)Tag).DataDefault.Records)
+                        foreach (TwinsItem i in ((FileController)Tag).DataDefault.Records)
                         {
                             GenTreeNode(i, ((FileController)Tag).DefaultCont, true);
                         }
@@ -382,7 +471,10 @@ namespace TwinsanityEditor
 
         private void buttonRM2Viewer_Click(object sender, EventArgs e)
         {
-            if (CurCont == null) return;
+            if (CurCont == null)
+            {
+                return;
+            }
 
             switch (CurFile.Type)
             {
@@ -418,8 +510,10 @@ namespace TwinsanityEditor
 
         private void buttonSaveAs_Click(object sender, EventArgs e)
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "RM2/RMX files|*.rm*|SM2/SMX files|*.sm*";
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                Filter = "RM2/RMX files|*.rm*|SM2/SMX files|*.sm*"
+            };
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 CurFile.SaveFile(sfd.FileName);
@@ -452,7 +546,7 @@ namespace TwinsanityEditor
             {
                 bdForm.Select();
             }
-                
+
         }
 
         public void OpenImageMaker()
@@ -464,7 +558,8 @@ namespace TwinsanityEditor
                 {
                     imageMakerForm = null;
                 };
-            } else
+            }
+            else
             {
                 imageMakerForm.Select();
             }

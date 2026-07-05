@@ -6,7 +6,7 @@ namespace TwinsanityEditor
     {
         public new Skydome Data { get; set; }
 
-        public SkydomeController(MainForm topform, Skydome item) : base (topform, item)
+        public SkydomeController(MainForm topform, Skydome item) : base(topform, item)
         {
             Data = item;
             AddMenu("Open editor", Menu_OpenEditor);
@@ -25,7 +25,9 @@ namespace TwinsanityEditor
             TextPrev[1] = $"Size: {Data.Size}";
             TextPrev[2] = $"Unknown: {Data.Unknown} MeshCount: {Data.MeshIDs.Length}";
             for (int i = 0; i < Data.MeshIDs.Length; ++i)
+            {
                 TextPrev[3 + i] = string.Format("{0:X8}", Data.MeshIDs[i]);
+            }
         }
 
         private void Menu_OpenViewer()

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
-using TwinsanityEditor.Properties;
 using Twinsanity.Items;
+using TwinsanityEditor.Properties;
 using WK.Libraries.BetterFolderBrowserNS;
 
 namespace TwinsanityEditor
@@ -45,7 +45,7 @@ namespace TwinsanityEditor
         {
             archiveContentsTree.BeginUpdate();
             archiveContentsTree.Nodes.Clear();
-            archiveContentsTree.Nodes.Add(new TreeNode(name));
+            _ = archiveContentsTree.Nodes.Add(new TreeNode(name));
             foreach (BH_Record record in data.FileList)
             {
                 AddNode(record);
@@ -60,23 +60,16 @@ namespace TwinsanityEditor
             TreeNode node = archiveContentsTree.TopNode;
             foreach (string dir in directories)
             {
-                if (node.Nodes.ContainsKey(dir))
-                {
-                    node = node.Nodes.Find(dir, false)[0];
-                }
-                else
-                {
-                    node = node.Nodes.Add(dir, dir);
-                }
+                node = node.Nodes.ContainsKey(dir) ? node.Nodes.Find(dir, false)[0] : node.Nodes.Add(dir, dir);
             }
             node = node.Nodes.Add(name);
             if (name.EndsWith("psm") || name.EndsWith("ptc") || name.EndsWith("psf"))
             {
-                var viewMenu = new MenuItem("View");
+                MenuItem viewMenu = new MenuItem("View");
                 viewMenu.Click += PSViewer_OnClick;
                 viewMenu.Tag = record;
                 node.ContextMenu = new ContextMenu();
-                node.ContextMenu.MenuItems.Add(viewMenu);
+                _ = node.ContextMenu.MenuItems.Add(viewMenu);
             }
             node.Tag = record;
         }
@@ -90,10 +83,10 @@ namespace TwinsanityEditor
                 GC.Collect(); // Collect all created references instantly just in case to avoid more memory leaks than we already have
             }
             viewer = new PTCViewer();
-            var menu = (MenuItem)sender;
-            var record = (BH_Record)menu.Tag;
+            MenuItem menu = (MenuItem)sender;
+            BH_Record record = (BH_Record)menu.Tag;
             string name = Path.GetFileName(record.Path);
-            var bdPath = $"{path}\\{this.name}.BD";
+            string bdPath = $"{path}\\{this.name}.BD";
             using (FileStream fileStream = new FileStream(bdPath, FileMode.Open, FileAccess.Read))
             using (BinaryReader reader = new BinaryReader(fileStream))
             {
@@ -172,7 +165,11 @@ namespace TwinsanityEditor
         {
             public BH_Record(string root, string fileName, int offset)
             {
-                if (!root.EndsWith("\\")) root += "\\";
+                if (!root.EndsWith("\\"))
+                {
+                    root += "\\";
+                }
+
                 Path = fileName.Replace(root, "");
                 FileInfo info = new FileInfo(fileName);
                 Length = (int)info.Length;
@@ -185,11 +182,11 @@ namespace TwinsanityEditor
                 Offset = reader.ReadInt32();
                 Length = reader.ReadInt32();
             }
-            
+
             public string Path { get; private set; }
             public int Offset { get; private set; }
             public int Length { get; private set; }
-            
+
             public void WriteDataBH(BinaryWriter writer, Action<string> callback)
             {
                 callback.Invoke(string.Format("Writing Header: {0}", Path));
@@ -202,7 +199,7 @@ namespace TwinsanityEditor
             public void WriteDataBD(string source, BinaryWriter writer, Action<string> callback)
             {
                 callback.Invoke(string.Format("Writing Data: {0}", Path));
-                using (FileStream fileStream = new FileStream(System.IO.Path.Combine(source,Path), FileMode.Open, FileAccess.Read))
+                using (FileStream fileStream = new FileStream(System.IO.Path.Combine(source, Path), FileMode.Open, FileAccess.Read))
                 using (BinaryReader reader = new BinaryReader(fileStream))
                 {
                     writer.BaseStream.Position = Offset;
@@ -230,7 +227,7 @@ namespace TwinsanityEditor
         internal void ExtractRecord(BinaryReader source, BH_Record record, string extractionPath)
         {
             string fullPath = Path.Combine(extractionPath, record.Path);
-            Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+            _ = Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
             using (FileStream fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write))
             using (BinaryWriter writer = new BinaryWriter(fileStream))
             {
@@ -242,7 +239,7 @@ namespace TwinsanityEditor
 
         internal void ShowError(string msg)
         {
-            MessageBox.Show(string.Format("Unhandled exception.\nMessage: {0}", msg), "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _ = MessageBox.Show(string.Format("Unhandled exception.\nMessage: {0}", msg), "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         internal void PackArchive(string source, string destination, string name, Action callback = null)
@@ -260,10 +257,7 @@ namespace TwinsanityEditor
             {
                 data.WriteDataBD(source, writer, CallBack);
             }
-            if (callback != null)
-            {
-                callback.Invoke();
-            }
+            callback?.Invoke();
         }
 
         internal void CallBack(string message)
@@ -305,7 +299,7 @@ namespace TwinsanityEditor
         {
             panel1.Enabled = true;
         }
-        
+
         private void buttonOpen_Click(object sender, EventArgs e)
         {
             try
@@ -316,7 +310,7 @@ namespace TwinsanityEditor
                     ofd.Filter = "Bandicoot Header|*.BH";
                     if (DialogResult.OK == ofd.ShowDialog())
                     {
-                        var file = ofd.FileName;
+                        string file = ofd.FileName;
                         path = Path.GetDirectoryName(file);
                         name = Path.GetFileNameWithoutExtension(file);
                         Settings.Default.BDFilePath = file.Substring(0, file.LastIndexOf(Path.DirectorySeparatorChar));
@@ -427,7 +421,7 @@ namespace TwinsanityEditor
                 ShowError(ex.Message);
             }
             CallBack("Ready");
-        
+
         }
 
         private void buttonExtractSelected_Click(object sender, EventArgs e)

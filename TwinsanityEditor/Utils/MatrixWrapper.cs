@@ -1,5 +1,5 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
+using System;
 
 namespace TwinsanityEditor.Utils
 {
@@ -32,9 +32,9 @@ namespace TwinsanityEditor.Utils
             pos.Z = m.M34;
 
             //scale
-            double sca_x = Math.Sqrt(m.M11 * m.M11 + m.M21 * m.M21 + m.M31 * m.M31);
-            double sca_y = Math.Sqrt(m.M12 * m.M12 + m.M22 * m.M22 + m.M32 * m.M32);
-            double sca_z = Math.Sqrt(m.M13 * m.M13 + m.M23 * m.M23 + m.M33 * m.M33);
+            double sca_x = Math.Sqrt((m.M11 * m.M11) + (m.M21 * m.M21) + (m.M31 * m.M31));
+            double sca_y = Math.Sqrt((m.M12 * m.M12) + (m.M22 * m.M22) + (m.M32 * m.M32));
+            double sca_z = Math.Sqrt((m.M13 * m.M13) + (m.M23 * m.M23) + (m.M33 * m.M33));
 
             sca.X = (float)sca_x;
             sca.Y = (float)sca_y;

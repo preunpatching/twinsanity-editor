@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using System;
 
 namespace Twinsanity
 {
@@ -12,7 +11,7 @@ namespace Twinsanity
         public override void Save(BinaryWriter writer)
         {
             writer.Write(Links.Count);
-            foreach (var i in Links)
+            foreach (ChunkLink i in Links)
             {
                 writer.Write(i.Type);
                 writer.Write(i.Path.Length);
@@ -52,7 +51,7 @@ namespace Twinsanity
         public override void Load(BinaryReader reader, int size)
         {
             Links.Clear();
-            var count = reader.ReadInt32();
+            int count = reader.ReadInt32();
             for (int i = 0; i < count; ++i)
             {
                 ChunkLink link = new ChunkLink(reader.ReadInt32(), new string(reader.ReadChars(reader.ReadInt32())), reader.ReadUInt32());
@@ -88,12 +87,13 @@ namespace Twinsanity
                 return null;
             }
 
-            ChunkLink.LinkTree Node = new ChunkLink.LinkTree {
+            ChunkLink.LinkTree Node = new ChunkLink.LinkTree
+            {
                 Header = reader.ReadInt32()
             };
 
             ushort[] header = new ushort[11];
-            for (var i = 0; i < 11; ++i)
+            for (int i = 0; i < 11; ++i)
             {
                 header[i] = reader.ReadUInt16();
             }
@@ -122,7 +122,7 @@ namespace Twinsanity
         private void SaveTree(BinaryWriter writer, ChunkLink.LinkTree node)
         {
             writer.Write(node.Header);
-            for (var i = 0; i < 11; ++i)
+            for (int i = 0; i < 11; ++i)
             {
                 writer.Write(node.GI_Type.Header[i]);
             }
@@ -161,11 +161,14 @@ namespace Twinsanity
         protected override int GetSize()
         {
             int size = 4;
-            foreach (var i in Links)
+            foreach (ChunkLink i in Links)
             {
                 size += i.Path.Length + 8 + 132;
                 if ((i.Flags & 0x80000) != 0)
+                {
                     size += 64;
+                }
+
                 if (i.TreeRoot != null)
                 {
                     CountTree(i.TreeRoot, ref size);

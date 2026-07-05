@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Twinsanity;
 
@@ -12,29 +9,51 @@ namespace TwinsanityEditor.Utils
     //Toughest of choices require strongest of will.
     public class ListManipulatorUInt16
     {
-        List<UInt16> list;
-        ListBox listBox;
-        TextBox source;
-        bool update;
+        private List<ushort> list;
+        private readonly ListBox listBox;
+        private readonly TextBox source;
+        private bool update;
         public ListManipulatorUInt16(Button addBtn, Button delBtn, Button setBtn, Button upBtn, Button downBtn, ListBox listBox, TextBox source)
         {
 
             this.source = source;
             this.listBox = listBox;
-            if (listBox != null) listBox.SelectedIndexChanged += UpdateSource;
-            if (addBtn != null) addBtn.Click += Add;
-            if (delBtn != null) delBtn.Click += Remove;
-            if (setBtn != null) setBtn.Click += Set;
-            if (upBtn != null) upBtn.Click += MoveUp;
-            if (downBtn != null) downBtn.Click += MoveDown;
+            if (listBox != null)
+            {
+                listBox.SelectedIndexChanged += UpdateSource;
+            }
 
+            if (addBtn != null)
+            {
+                addBtn.Click += Add;
+            }
+
+            if (delBtn != null)
+            {
+                delBtn.Click += Remove;
+            }
+
+            if (setBtn != null)
+            {
+                setBtn.Click += Set;
+            }
+
+            if (upBtn != null)
+            {
+                upBtn.Click += MoveUp;
+            }
+
+            if (downBtn != null)
+            {
+                downBtn.Click += MoveDown;
+            }
         }
-        public void SetSource(List<UInt16> list)
+        public void SetSource(List<ushort> list)
         {
             this.list = list;
             update = true;
         }
-        public void UpdateSource(Object sender, EventArgs args)
+        public void UpdateSource(object sender, EventArgs args)
         {
             if (update)
             {
@@ -46,9 +65,9 @@ namespace TwinsanityEditor.Utils
             listBox.BeginUpdate();
             listBox.Items.Clear();
             int i = 0;
-            foreach (UInt16 e in list)
+            foreach (ushort e in list)
             {
-                listBox.Items.Add(GenerateText(i, e));
+                _ = listBox.Items.Add(GenerateText(i, e));
                 ++i;
             }
             listBox.EndUpdate();
@@ -58,13 +77,13 @@ namespace TwinsanityEditor.Utils
             return $"{i:000}: {e}";
         }
 
-        public void MoveUp(Object sender, EventArgs args)
+        public void MoveUp(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex > 0)
             {
                 int index = listBox.SelectedIndex;
-                UInt16 val1 = list[index];
-                UInt16 val2 = list[index - 1];
+                ushort val1 = list[index];
+                ushort val2 = list[index - 1];
                 list[index - 1] = val1;
                 list[index] = val2;
                 DisableUpdate();
@@ -75,13 +94,13 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void MoveDown(Object sender, EventArgs args)
+        public void MoveDown(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex < listBox.Items.Count - 1)
             {
                 int index = listBox.SelectedIndex;
-                UInt16 val1 = list[index];
-                UInt16 val2 = list[index + 1];
+                ushort val1 = list[index];
+                ushort val2 = list[index + 1];
                 list[index + 1] = val1;
                 list[index] = val2;
                 DisableUpdate();
@@ -92,7 +111,7 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void Remove(Object sender, EventArgs args)
+        public void Remove(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex >= 0)
             {
@@ -105,16 +124,15 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void Add(Object sender, EventArgs args)
+        public void Add(object sender, EventArgs args)
         {
             int index = listBox.SelectedIndex;
             if (index < 0)
             {
                 index = 0;
             }
-            UInt16 val;
-            Boolean success;
-            success = UInt16.TryParse(source.Text, out val);
+            bool success;
+            success = ushort.TryParse(source.Text, out ushort val);
             if (success)
             {
                 list.Insert(index, val);
@@ -125,13 +143,12 @@ namespace TwinsanityEditor.Utils
             }
 
         }
-        public void Set(Object sender, EventArgs args)
+        public void Set(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex >= 0)
             {
-                UInt16 val;
-                Boolean success;
-                success = UInt16.TryParse(source.Text, out val);
+                bool success;
+                success = ushort.TryParse(source.Text, out ushort val);
                 if (success)
                 {
                     list[listBox.SelectedIndex] = val;
@@ -155,29 +172,51 @@ namespace TwinsanityEditor.Utils
 
     public class ListManipulatorUInt32
     {
-        List<UInt32> list;
-        ListBox listBox;
-        TextBox source;
-        bool update;
+        private List<uint> list;
+        private readonly ListBox listBox;
+        private readonly TextBox source;
+        private bool update;
         public ListManipulatorUInt32(Button addBtn, Button delBtn, Button setBtn, Button upBtn, Button downBtn, ListBox listBox, TextBox source)
         {
 
             this.source = source;
             this.listBox = listBox;
-            if (listBox != null) listBox.SelectedIndexChanged += UpdateSource;
-            if (addBtn != null) addBtn.Click += Add;
-            if (delBtn != null) delBtn.Click += Remove;
-            if (setBtn != null) setBtn.Click += Set;
-            if (upBtn != null) upBtn.Click += MoveUp;
-            if (downBtn != null) downBtn.Click += MoveDown;
+            if (listBox != null)
+            {
+                listBox.SelectedIndexChanged += UpdateSource;
+            }
 
+            if (addBtn != null)
+            {
+                addBtn.Click += Add;
+            }
+
+            if (delBtn != null)
+            {
+                delBtn.Click += Remove;
+            }
+
+            if (setBtn != null)
+            {
+                setBtn.Click += Set;
+            }
+
+            if (upBtn != null)
+            {
+                upBtn.Click += MoveUp;
+            }
+
+            if (downBtn != null)
+            {
+                downBtn.Click += MoveDown;
+            }
         }
-        public void SetSource(List<UInt32> list)
+        public void SetSource(List<uint> list)
         {
             this.list = list;
             update = true;
         }
-        public void UpdateSource(Object sender, EventArgs args)
+        public void UpdateSource(object sender, EventArgs args)
         {
             if (update)
             {
@@ -189,9 +228,9 @@ namespace TwinsanityEditor.Utils
             listBox.BeginUpdate();
             listBox.Items.Clear();
             int i = 0;
-            foreach (UInt32 e in list)
+            foreach (uint e in list)
             {
-                listBox.Items.Add(GenerateText(i, e));
+                _ = listBox.Items.Add(GenerateText(i, e));
                 ++i;
             }
             listBox.EndUpdate();
@@ -201,13 +240,13 @@ namespace TwinsanityEditor.Utils
             return $"{i:000}: {e}";
         }
 
-        public void MoveUp(Object sender, EventArgs args)
+        public void MoveUp(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex > 0)
             {
                 int index = listBox.SelectedIndex;
-                UInt32 val1 = list[index];
-                UInt32 val2 = list[index - 1];
+                uint val1 = list[index];
+                uint val2 = list[index - 1];
                 list[index - 1] = val1;
                 list[index] = val2;
                 DisableUpdate();
@@ -218,13 +257,13 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void MoveDown(Object sender, EventArgs args)
+        public void MoveDown(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex < listBox.Items.Count - 1)
             {
                 int index = listBox.SelectedIndex;
-                UInt32 val1 = list[index];
-                UInt32 val2 = list[index + 1];
+                uint val1 = list[index];
+                uint val2 = list[index + 1];
                 list[index + 1] = val1;
                 list[index] = val2;
                 DisableUpdate();
@@ -235,7 +274,7 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void Remove(Object sender, EventArgs args)
+        public void Remove(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex >= 0)
             {
@@ -248,16 +287,15 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void Add(Object sender, EventArgs args)
+        public void Add(object sender, EventArgs args)
         {
             int index = listBox.SelectedIndex;
             if (index < 0)
             {
                 index = 0;
             }
-            UInt32 val;
-            Boolean success;
-            success = UInt32.TryParse(source.Text, out val);
+            bool success;
+            success = uint.TryParse(source.Text, out uint val);
             if (success)
             {
                 list.Insert(index, val);
@@ -268,13 +306,12 @@ namespace TwinsanityEditor.Utils
             }
 
         }
-        public void Set(Object sender, EventArgs args)
+        public void Set(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex >= 0)
             {
-                UInt32 val;
-                Boolean success;
-                success = UInt32.TryParse(source.Text, out val);
+                bool success;
+                success = uint.TryParse(source.Text, out uint val);
                 if (success)
                 {
                     list[listBox.SelectedIndex] = val;
@@ -297,29 +334,51 @@ namespace TwinsanityEditor.Utils
     }
     public class ListManipulatorSingle
     {
-        List<Single> list;
-        ListBox listBox;
-        TextBox source;
-        bool update;
+        private List<float> list;
+        private readonly ListBox listBox;
+        private readonly TextBox source;
+        private bool update;
         public ListManipulatorSingle(Button addBtn, Button delBtn, Button setBtn, Button upBtn, Button downBtn, ListBox listBox, TextBox source)
         {
 
             this.source = source;
             this.listBox = listBox;
-            if (listBox != null) listBox.SelectedIndexChanged += UpdateSource;
-            if (addBtn != null) addBtn.Click += Add;
-            if (delBtn != null) delBtn.Click += Remove;
-            if (setBtn != null) setBtn.Click += Set;
-            if (upBtn != null) upBtn.Click += MoveUp;
-            if (downBtn != null) downBtn.Click += MoveDown;
+            if (listBox != null)
+            {
+                listBox.SelectedIndexChanged += UpdateSource;
+            }
 
+            if (addBtn != null)
+            {
+                addBtn.Click += Add;
+            }
+
+            if (delBtn != null)
+            {
+                delBtn.Click += Remove;
+            }
+
+            if (setBtn != null)
+            {
+                setBtn.Click += Set;
+            }
+
+            if (upBtn != null)
+            {
+                upBtn.Click += MoveUp;
+            }
+
+            if (downBtn != null)
+            {
+                downBtn.Click += MoveDown;
+            }
         }
-        public void SetSource(List<Single> list)
+        public void SetSource(List<float> list)
         {
             this.list = list;
             update = true;
         }
-        public void UpdateSource(Object sender, EventArgs args)
+        public void UpdateSource(object sender, EventArgs args)
         {
             if (update)
             {
@@ -331,9 +390,9 @@ namespace TwinsanityEditor.Utils
             listBox.BeginUpdate();
             listBox.Items.Clear();
             int i = 0;
-            foreach (Single e in list)
+            foreach (float e in list)
             {
-                listBox.Items.Add(GenerateText(i, e));
+                _ = listBox.Items.Add(GenerateText(i, e));
                 ++i;
             }
             listBox.EndUpdate();
@@ -343,13 +402,13 @@ namespace TwinsanityEditor.Utils
             return $"{i:000}: {e}";
         }
 
-        public void MoveUp(Object sender, EventArgs args)
+        public void MoveUp(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex > 0)
             {
                 int index = listBox.SelectedIndex;
-                Single val1 = list[index];
-                Single val2 = list[index - 1];
+                float val1 = list[index];
+                float val2 = list[index - 1];
                 list[index - 1] = val1;
                 list[index] = val2;
                 DisableUpdate();
@@ -360,13 +419,13 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void MoveDown(Object sender, EventArgs args)
+        public void MoveDown(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex < listBox.Items.Count - 1)
             {
                 int index = listBox.SelectedIndex;
-                Single val1 = list[index];
-                Single val2 = list[index + 1];
+                float val1 = list[index];
+                float val2 = list[index + 1];
                 list[index + 1] = val1;
                 list[index] = val2;
                 DisableUpdate();
@@ -377,7 +436,7 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void Remove(Object sender, EventArgs args)
+        public void Remove(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex >= 0)
             {
@@ -390,16 +449,15 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void Add(Object sender, EventArgs args)
+        public void Add(object sender, EventArgs args)
         {
             int index = listBox.SelectedIndex;
             if (index < 0)
             {
                 index = 0;
             }
-            Single val;
-            Boolean success;
-            success = Single.TryParse(source.Text, out val);
+            bool success;
+            success = float.TryParse(source.Text, out float val);
             if (success)
             {
                 list.Insert(index, val);
@@ -410,13 +468,12 @@ namespace TwinsanityEditor.Utils
             }
 
         }
-        public void Set(Object sender, EventArgs args)
+        public void Set(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex >= 0)
             {
-                Single val;
-                Boolean success;
-                success = Single.TryParse(source.Text, out val);
+                bool success;
+                success = float.TryParse(source.Text, out float val);
                 if (success)
                 {
                     list[listBox.SelectedIndex] = val;
@@ -439,29 +496,51 @@ namespace TwinsanityEditor.Utils
     }
     public class ListManipulatorByte
     {
-        List<Byte> list;
-        ListBox listBox;
-        TextBox source;
-        bool update;
+        private List<byte> list;
+        private readonly ListBox listBox;
+        private readonly TextBox source;
+        private bool update;
         public ListManipulatorByte(Button addBtn, Button delBtn, Button setBtn, Button upBtn, Button downBtn, ListBox listBox, TextBox source)
         {
 
             this.source = source;
             this.listBox = listBox;
-            if (listBox != null) listBox.SelectedIndexChanged += UpdateSource;
-            if (addBtn != null) addBtn.Click += Add;
-            if (delBtn != null) delBtn.Click += Remove;
-            if (setBtn != null) setBtn.Click += Set;
-            if (upBtn != null) upBtn.Click += MoveUp;
-            if (downBtn != null) downBtn.Click += MoveDown;
+            if (listBox != null)
+            {
+                listBox.SelectedIndexChanged += UpdateSource;
+            }
 
+            if (addBtn != null)
+            {
+                addBtn.Click += Add;
+            }
+
+            if (delBtn != null)
+            {
+                delBtn.Click += Remove;
+            }
+
+            if (setBtn != null)
+            {
+                setBtn.Click += Set;
+            }
+
+            if (upBtn != null)
+            {
+                upBtn.Click += MoveUp;
+            }
+
+            if (downBtn != null)
+            {
+                downBtn.Click += MoveDown;
+            }
         }
-        public void SetSource(List<Byte> list)
+        public void SetSource(List<byte> list)
         {
             this.list = list;
             update = true;
         }
-        public void UpdateSource(Object sender, EventArgs args)
+        public void UpdateSource(object sender, EventArgs args)
         {
             if (update)
             {
@@ -473,25 +552,25 @@ namespace TwinsanityEditor.Utils
             listBox.BeginUpdate();
             listBox.Items.Clear();
             int i = 0;
-            foreach (Byte e in list)
+            foreach (byte e in list)
             {
-                listBox.Items.Add(GenerateText(i, e));
+                _ = listBox.Items.Add(GenerateText(i, e));
                 ++i;
             }
             listBox.EndUpdate();
         }
-        private string GenerateText(int i, Byte e)
+        private string GenerateText(int i, byte e)
         {
             return $"{i:000}: {e}";
         }
 
-        public void MoveUp(Object sender, EventArgs args)
+        public void MoveUp(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex > 0)
             {
                 int index = listBox.SelectedIndex;
-                Byte val1 = list[index];
-                Byte val2 = list[index - 1];
+                byte val1 = list[index];
+                byte val2 = list[index - 1];
                 list[index - 1] = val1;
                 list[index] = val2;
                 DisableUpdate();
@@ -502,13 +581,13 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void MoveDown(Object sender, EventArgs args)
+        public void MoveDown(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex < listBox.Items.Count - 1)
             {
                 int index = listBox.SelectedIndex;
-                Byte val1 = list[index];
-                Byte val2 = list[index + 1];
+                byte val1 = list[index];
+                byte val2 = list[index + 1];
                 list[index + 1] = val1;
                 list[index] = val2;
                 DisableUpdate();
@@ -519,7 +598,7 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void Remove(Object sender, EventArgs args)
+        public void Remove(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex >= 0)
             {
@@ -532,16 +611,15 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void Add(Object sender, EventArgs args)
+        public void Add(object sender, EventArgs args)
         {
             int index = listBox.SelectedIndex;
             if (index < 0)
             {
                 index = 0;
             }
-            Byte val;
-            Boolean success;
-            success = Byte.TryParse(source.Text, out val);
+            bool success;
+            success = byte.TryParse(source.Text, out byte val);
             if (success)
             {
                 list.Insert(index, val);
@@ -552,13 +630,12 @@ namespace TwinsanityEditor.Utils
             }
 
         }
-        public void Set(Object sender, EventArgs args)
+        public void Set(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex >= 0)
             {
-                Byte val;
-                Boolean success;
-                success = Byte.TryParse(source.Text, out val);
+                bool success;
+                success = byte.TryParse(source.Text, out byte val);
                 if (success)
                 {
                     list[listBox.SelectedIndex] = val;
@@ -583,36 +660,58 @@ namespace TwinsanityEditor.Utils
 
     public class ListManipulatorEvent
     {
-        List<UInt32> list;
-        ListBox listBox;
-        TextBox source;
-        TextBox source_caller;
-        TextBox source_script;
-        TextBox source_argument;
-        bool update;
+        private List<uint> list;
+        private readonly ListBox listBox;
+        private readonly TextBox source;
+        private readonly TextBox source_caller;
+        private readonly TextBox source_script;
+        private readonly TextBox source_argument;
+        private bool update;
         public ListManipulatorEvent(Button addBtn, Button delBtn, Button setBtn, Button upBtn, Button downBtn, ListBox listBox, TextBox source, TextBox caller, TextBox script, TextBox argument)
         {
 
             this.source = source;
             this.listBox = listBox;
-            this.source_caller = caller;
-            this.source_script = script;
-            this.source_argument = argument;
+            source_caller = caller;
+            source_script = script;
+            source_argument = argument;
 
-            if (listBox != null) listBox.SelectedIndexChanged += UpdateSource;
-            if (addBtn != null) addBtn.Click += Add;
-            if (delBtn != null) delBtn.Click += Remove;
-            if (setBtn != null) setBtn.Click += Set;
-            if (upBtn != null) upBtn.Click += MoveUp;
-            if (downBtn != null) downBtn.Click += MoveDown;
+            if (listBox != null)
+            {
+                listBox.SelectedIndexChanged += UpdateSource;
+            }
 
+            if (addBtn != null)
+            {
+                addBtn.Click += Add;
+            }
+
+            if (delBtn != null)
+            {
+                delBtn.Click += Remove;
+            }
+
+            if (setBtn != null)
+            {
+                setBtn.Click += Set;
+            }
+
+            if (upBtn != null)
+            {
+                upBtn.Click += MoveUp;
+            }
+
+            if (downBtn != null)
+            {
+                downBtn.Click += MoveDown;
+            }
         }
-        public void SetSource(List<UInt32> list)
+        public void SetSource(List<uint> list)
         {
             this.list = list;
             update = true;
         }
-        public void UpdateSource(Object sender, EventArgs args)
+        public void UpdateSource(object sender, EventArgs args)
         {
             if (update)
             {
@@ -620,7 +719,7 @@ namespace TwinsanityEditor.Utils
                 source.Text = val.ToString();
                 ushort script = (ushort)((val >> 0xA) & 0x3FFF);
                 ushort arg = (ushort)(val & 0x3FF);
-                ushort caller = (ushort)((val >> 0x18 & 0x1));
+                ushort caller = (ushort)((val >> 0x18) & 0x1);
                 source_caller.Text = caller.ToString();
                 source_script.Text = script.ToString();
                 source_argument.Text = arg.ToString();
@@ -631,9 +730,9 @@ namespace TwinsanityEditor.Utils
             listBox.BeginUpdate();
             listBox.Items.Clear();
             int i = 0;
-            foreach (UInt32 e in list)
+            foreach (uint e in list)
             {
-                listBox.Items.Add(GenerateText(i));
+                _ = listBox.Items.Add(GenerateText(i));
                 ++i;
             }
             listBox.EndUpdate();
@@ -643,7 +742,7 @@ namespace TwinsanityEditor.Utils
             uint val = list[i];
             ushort script = (ushort)((val >> 0xA) & 0x3FFF);
             ushort arg = (ushort)(val & 0x3FF);
-            ushort caller = (ushort)((val >> 0x18 & 0x1));
+            ushort caller = (ushort)((val >> 0x18) & 0x1);
             string scrTxt = script.ToString();
 
             if (Enum.IsDefined(typeof(DefaultEnums.ScriptID), script))
@@ -654,13 +753,13 @@ namespace TwinsanityEditor.Utils
             return $"{i:000}: Arg {arg}: Script {scrTxt} (Channel {caller})";
         }
 
-        public void MoveUp(Object sender, EventArgs args)
+        public void MoveUp(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex > 0)
             {
                 int index = listBox.SelectedIndex;
-                UInt32 val1 = list[index];
-                UInt32 val2 = list[index - 1];
+                uint val1 = list[index];
+                uint val2 = list[index - 1];
                 list[index - 1] = val1;
                 list[index] = val2;
                 DisableUpdate();
@@ -671,13 +770,13 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void MoveDown(Object sender, EventArgs args)
+        public void MoveDown(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex < listBox.Items.Count - 1)
             {
                 int index = listBox.SelectedIndex;
-                UInt32 val1 = list[index];
-                UInt32 val2 = list[index + 1];
+                uint val1 = list[index];
+                uint val2 = list[index + 1];
                 list[index + 1] = val1;
                 list[index] = val2;
                 DisableUpdate();
@@ -688,7 +787,7 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void Remove(Object sender, EventArgs args)
+        public void Remove(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex >= 0)
             {
@@ -701,16 +800,15 @@ namespace TwinsanityEditor.Utils
                 EnableUpdate();
             }
         }
-        public void Add(Object sender, EventArgs args)
+        public void Add(object sender, EventArgs args)
         {
             int index = listBox.SelectedIndex;
             if (index < 0)
             {
                 index = 0;
             }
-            UInt32 val;
-            Boolean success;
-            success = UInt32.TryParse(source.Text, out val);
+            bool success;
+            success = uint.TryParse(source.Text, out uint val);
             if (success)
             {
                 list.Insert(index, val);
@@ -721,31 +819,29 @@ namespace TwinsanityEditor.Utils
             }
 
         }
-        public void Set(Object sender, EventArgs args)
+        public void Set(object sender, EventArgs args)
         {
             if (listBox.SelectedIndex >= 0)
             {
-                UInt32 val;
-                ushort scr;
-                ushort arg;
-                ushort caller;
-                Boolean success;
-                success = UInt32.TryParse(source.Text, out val);
-                success = UInt16.TryParse(source_script.Text, out scr);
-                success = UInt16.TryParse(source_argument.Text, out arg);
-                success = UInt16.TryParse(source_caller.Text, out caller);
+                bool success;
+                _ = uint.TryParse(source.Text, out uint val);
+                _ = ushort.TryParse(source_script.Text, out ushort scr);
+                _ = ushort.TryParse(source_argument.Text, out ushort arg);
+                success = ushort.TryParse(source_caller.Text, out ushort caller);
                 if (success)
                 {
                     for (int i = 0; i < 0xA + 0xE + 0x1; i++)
                     {
-                         val &= ~(uint)(1 << i);
+                        val &= ~(uint)(1 << i);
                     }
-                    val |= ((uint)arg & 0x3FF);
-                    val |= (((uint)scr << 0xA));
+                    val |= (uint)arg & 0x3FF;
+                    val |= (uint)scr << 0xA;
 
                     uint mask = 1 << 0x18;
                     if (caller != 0)
+                    {
                         val |= mask;
+                    }
 
                     list[listBox.SelectedIndex] = val;
                     int index = listBox.SelectedIndex;

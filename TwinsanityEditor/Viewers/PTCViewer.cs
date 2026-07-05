@@ -1,11 +1,10 @@
-using System.Drawing;
-using System.Windows.Forms;
-using System;
-using Twinsanity;
 using OpenTK.Graphics.OpenGL;
+using System;
 using System.Collections.Generic;
-using Twinsanity.Items;
+using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
+using Twinsanity.Items;
 
 namespace TwinsanityEditor
 {
@@ -28,10 +27,8 @@ namespace TwinsanityEditor
                 lblTextureIndex.Text = (value + 1).ToString() + "/" + PTCs.Count;
                 texInd = value;
             }
-            get
-            {
-                return texInd;
-            }
+
+            get => texInd;
         }
         public List<TwinsPTC> PTCs = new List<TwinsPTC>();
 
@@ -67,16 +64,16 @@ namespace TwinsanityEditor
             GL.Begin(PrimitiveType.Points);
             if (cbViewFullPSM.Enabled && cbViewFullPSM.Checked)
             {
-                var widthOffset = 0;
-                var heighOffset = 0;
-                var maxWidth = PTCs.Max(p => p.Texture.Width);
-                var maxHeight = PTCs.Max(p => p.Texture.Height);
+                int widthOffset = 0;
+                int heighOffset = 0;
+                int maxWidth = PTCs.Max(p => p.Texture.Width);
+                int maxHeight = PTCs.Max(p => p.Texture.Height);
                 for (int i = 0; i < PTCs.Count; ++i)
                 {
                     for (int j = 0; j < PTCs[i].Texture.RawData.Length; ++j)
                     {
                         GL.Color4(PTCs[i].Texture.RawData[j]);
-                        GL.Vertex2(widthOffset + (j % (PTCs[i].Texture.Width)), heighOffset + (j / (PTCs[i].Texture.Width)));
+                        GL.Vertex2(widthOffset + (j % PTCs[i].Texture.Width), heighOffset + (j / PTCs[i].Texture.Width));
                     }
                     widthOffset += maxWidth;
                     if ((i + 1) % 4 == 0)
@@ -91,7 +88,7 @@ namespace TwinsanityEditor
                 for (int i = 0; i < SelectedPTC.Texture.RawData.Length; i++)
                 {
                     GL.Color4(SelectedPTC.Texture.RawData[i]);
-                    GL.Vertex2(i % (SelectedPTC.Texture.Width), i / (SelectedPTC.Texture.Width));
+                    GL.Vertex2(i % SelectedPTC.Texture.Width, i / SelectedPTC.Texture.Width);
                 }
             }
             GL.End();
@@ -107,16 +104,16 @@ namespace TwinsanityEditor
                 if (cbViewFullPSM.Enabled && cbViewFullPSM.Checked)
                 {
                     Bitmap BMP = new Bitmap(PTCs.Max(p => p.Texture.Width) * 4, PTCs.Max(p => p.Texture.Height) * (PTCs.Count / 4));
-                    var widthOffset = 0;
-                    var heighOffset = 0;
-                    var maxWidth = PTCs.Max(p => p.Texture.Width);
-                    var maxHeight = PTCs.Max(p => p.Texture.Height);
+                    int widthOffset = 0;
+                    int heighOffset = 0;
+                    int maxWidth = PTCs.Max(p => p.Texture.Width);
+                    int maxHeight = PTCs.Max(p => p.Texture.Height);
                     for (int i = 0; i < PTCs.Count; ++i)
                     {
                         for (int j = 0; j < PTCs[i].Texture.RawData.Length; ++j)
                         {
-                            BMP.SetPixel(widthOffset + (j % (PTCs[i].Texture.Width)),
-                                heighOffset + (j / (PTCs[i].Texture.Width)), PTCs[i].Texture.RawData[j]);
+                            BMP.SetPixel(widthOffset + (j % PTCs[i].Texture.Width),
+                                heighOffset + (j / PTCs[i].Texture.Width), PTCs[i].Texture.RawData[j]);
                         }
                         widthOffset += maxWidth;
                         if ((i + 1) % 4 == 0)
@@ -131,7 +128,10 @@ namespace TwinsanityEditor
                 {
                     Bitmap BMP = new Bitmap(SelectedPTC.Texture.Width, SelectedPTC.Texture.Height);
                     for (int i = 0; i < SelectedPTC.Texture.RawData.Length; i++)
-                        BMP.SetPixel((i % SelectedPTC.Texture.Width), (i / SelectedPTC.Texture.Width), SelectedPTC.Texture.RawData[i]);
+                    {
+                        BMP.SetPixel(i % SelectedPTC.Texture.Width, i / SelectedPTC.Texture.Width, SelectedPTC.Texture.RawData[i]);
+                    }
+
                     BMP.Save(SavePNG.FileName, System.Drawing.Imaging.ImageFormat.Png);
                 }
             }

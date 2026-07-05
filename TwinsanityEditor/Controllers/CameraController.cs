@@ -1,6 +1,6 @@
-﻿using Twinsanity;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using Twinsanity;
 
 namespace TwinsanityEditor
 {
@@ -21,16 +21,16 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            List<string> text = new List<string>();
-
-            text.Add(string.Format("ID: {0:X8}", Data.ID));
-            text.Add($"Size: {Data.Size}");
-            text.Add($"Rotation ({Data.Coords[0].X}, {Data.Coords[0].Y}, {Data.Coords[0].Z}, {Data.Coords[0].W})");
-            text.Add($"Position ({Data.Coords[1].X}, {Data.Coords[1].Y}, {Data.Coords[1].Z}, {Data.Coords[1].W})");
-            text.Add($"Size ({Data.Coords[2].X}, {Data.Coords[2].Y}, {Data.Coords[2].Z}, {Data.Coords[2].W})");
-            text.Add($"Header: {Data.Header} Mask: {Data.Enabled} SomeFloat: {Data.SomeFloat} SectionHead: {Data.SectionHead}");
-
-            text.Add($"Instances: {Data.Instances.Count}");
+            List<string> text = new List<string>
+            {
+                string.Format("ID: {0:X8}", Data.ID),
+                $"Size: {Data.Size}",
+                $"Rotation ({Data.Coords[0].X}, {Data.Coords[0].Y}, {Data.Coords[0].Z}, {Data.Coords[0].W})",
+                $"Position ({Data.Coords[1].X}, {Data.Coords[1].Y}, {Data.Coords[1].Z}, {Data.Coords[1].W})",
+                $"Size ({Data.Coords[2].X}, {Data.Coords[2].Y}, {Data.Coords[2].Z}, {Data.Coords[2].W})",
+                $"Header: {Data.Header} Mask: {Data.Enabled} SomeFloat: {Data.SomeFloat} SectionHead: {Data.SectionHead}",
+                $"Instances: {Data.Instances.Count}"
+            };
             for (int i = 0; i < Data.Instances.Count; ++i)
             {
                 string obj_name = MainFile.GetObjectName((ushort)MainFile.GetInstanceID(Data.Parent.Parent.ID, Data.Instances[i]));
@@ -172,14 +172,13 @@ namespace TwinsanityEditor
                     }
 
                     text.Add($"Int2 {Camera4.unkInt2}");
-                    for (int i = 0; i < Camera4.unkData.Length - 7; i = i + 8)
+                    for (int i = 0; i < Camera4.unkData.Length - 7; i += 8)
                     {
                         text.Add($"Data Bytes {i / 8}: {Camera4.unkData[i + 0]}; {Camera4.unkData[i + 1]}; {Camera4.unkData[i + 2]}; {Camera4.unkData[i + 3]}; {Camera4.unkData[i + 4]}; {Camera4.unkData[i + 5]}; {Camera4.unkData[i + 6]}; {Camera4.unkData[i + 7]}; ");
                     }
 
                     break;
                 case 0x1C05:
-                    Camera.Camera_0x1C05 Camera5 = (Camera.Camera_0x1C05)cam;
                     text.Add($"NULL Camera");
 
                     break;
@@ -246,7 +245,6 @@ namespace TwinsanityEditor
 
                     break;
                 case 0x1C0E:
-                    Camera.Camera_0x1C0E Camera11 = (Camera.Camera_0x1C0E)cam;
                     text.Add($"EMPTY Camera");
 
                     break;

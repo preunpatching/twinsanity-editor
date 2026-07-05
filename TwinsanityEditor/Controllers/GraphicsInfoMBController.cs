@@ -1,5 +1,4 @@
 ﻿using Twinsanity;
-using System.Collections.Generic;
 
 namespace TwinsanityEditor
 {

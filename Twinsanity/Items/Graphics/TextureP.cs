@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.IO;
 using System.Drawing;
-using System.Drawing.Imaging;
+using System.IO;
 
 namespace Twinsanity
 {
@@ -26,16 +24,16 @@ namespace Twinsanity
         private int[] mipLevelsTBW;
         private int clutBufferBasePointer;
         private byte[] unkBytes2 = new byte[8];
-        private byte[] unkBytes3 = new byte[2];
-        private byte[] unusedMetadata = new byte[32]; // This metadata is read but discarded afterwards in game's code
-        private byte[] vifBlock = new byte[96]; // This holds a VIF code block, which does some basic texture setup, we don't care about it
+        private readonly byte[] unkBytes3 = new byte[2];
+        private readonly byte[] unusedMetadata = new byte[32]; // This metadata is read but discarded afterwards in game's code
+        private readonly byte[] vifBlock = new byte[96]; // This holds a VIF code block, which does some basic texture setup, we don't care about it
         private byte[] imageData;
 
-        public int Width { get => 1 << w; }
-        public int Height { get => 1 << h; }
-        public int MipLevels { get => m - 1; }
+        public int Width => 1 << w;
+        public int Height => 1 << h;
+        public int MipLevels => m - 1;
         public Color[] RawData { get; set; }
-        public int TextureBufferWidth { get => textureBufferWidth * 64; }
+        public int TextureBufferWidth => textureBufferWidth * 64;
 
         public byte[] HeaderAdd;
         public uint TextureType;
@@ -64,13 +62,13 @@ namespace Twinsanity
             unkBytes = reader.ReadBytes(2);
             textureBasePointer = reader.ReadInt32();
             mipLevelsTBP = new int[6];
-            for (var i = 0; i < 6; ++i)
+            for (int i = 0; i < 6; ++i)
             {
                 mipLevelsTBP[i] = reader.ReadInt32();
             }
             textureBufferWidth = reader.ReadInt32();
             mipLevelsTBW = new int[6];
-            for (var i = 0; i < 6; ++i)
+            for (int i = 0; i < 6; ++i)
             {
                 mipLevelsTBW[i] = reader.ReadInt32();
             }
@@ -82,7 +80,7 @@ namespace Twinsanity
 
             // PSP texture
             imageData = reader.ReadBytes(Width * Height);
-            var Palette = new List<Color>();
+            List<Color> Palette = new List<Color>();
             for (int i = 0; i < 256; i++)
             {
                 byte R = reader.ReadByte();
@@ -92,8 +90,8 @@ namespace Twinsanity
                 Palette.Add(Color.FromArgb(A, R, G, B));
             }
 
-            byte[] Decompressed = new byte[imageData.Length * 4];
-            Decompressed = PSP_UnSwizzle(Width, Height, 8, imageData);
+            _ = new byte[imageData.Length * 4];
+            byte[] Decompressed = PSP_UnSwizzle(Width, Height, 8, imageData);
 
             RawData = new Color[Width * Height];
             int c = 0;
@@ -115,7 +113,10 @@ namespace Twinsanity
         {
             Bitmap BMP = new Bitmap(Convert.ToInt32(Width), Convert.ToInt32(Height));
             for (int i = 0; i < RawData.Length; i++)
-                BMP.SetPixel((i % Width), (i / Width), RawData[i]);
+            {
+                BMP.SetPixel(i % Width, i / Width, RawData[i]);
+            }
+
             return BMP;
         }
 
@@ -129,7 +130,7 @@ namespace Twinsanity
             int offset = 0;
             int width = (inwidth * bpp) >> 3;
             byte[] destination = new byte[width * height];
-            int rowblocks = (width / 16);
+            int rowblocks = width / 16;
             int magicNumber = 8;
 
             for (int y = 0; y < height; y++)
@@ -139,10 +140,10 @@ namespace Twinsanity
                     int blockX = x / 16;
                     int blockY = y / magicNumber;
 
-                    int blockIndex = blockX + ((blockY) * rowblocks);
+                    int blockIndex = blockX + (blockY * rowblocks);
                     int blockAddress = blockIndex * 16 * magicNumber;
 
-                    int destinationOffset = blockAddress + (x - blockX * 16) + ((y - blockY * magicNumber) * 16);
+                    int destinationOffset = blockAddress + (x - (blockX * 16)) + ((y - (blockY * magicNumber)) * 16);
 
                     destination[destinationOffset] = texData[offset];
                     offset++;
@@ -157,7 +158,7 @@ namespace Twinsanity
             int destinationOffset = 0;
             int width = (inwidth * bpp) >> 3;
             byte[] destination = new byte[width * height];
-            int rowblocks = (width / 16);
+            int rowblocks = width / 16;
             int magicNumber = 8;
 
             for (int y = 0; y < height; y++)
@@ -167,9 +168,9 @@ namespace Twinsanity
                     int blockX = x / 16;
                     int blockY = y / magicNumber;
 
-                    int blockIndex = blockX + ((blockY) * rowblocks);
+                    int blockIndex = blockX + (blockY * rowblocks);
                     int blockAddress = blockIndex * 16 * magicNumber;
-                    int offset = blockAddress + (x - blockX * 16) + ((y - blockY * magicNumber) * 16);
+                    int offset = blockAddress + (x - (blockX * 16)) + ((y - (blockY * magicNumber)) * 16);
                     destination[destinationOffset] = texData[offset];
                     destinationOffset++;
                 }

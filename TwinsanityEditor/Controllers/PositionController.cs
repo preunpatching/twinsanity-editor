@@ -6,7 +6,7 @@ namespace TwinsanityEditor
     {
         public new Position Data { get; set; }
 
-        public PositionController(MainForm topform, Position item) : base (topform, item)
+        public PositionController(MainForm topform, Position item) : base(topform, item)
         {
             Data = item;
             AddMenu("Open editor", Menu_OpenEditor);

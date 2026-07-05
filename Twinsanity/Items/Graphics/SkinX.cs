@@ -1,5 +1,5 @@
-﻿using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Twinsanity
 {
@@ -69,17 +69,18 @@ namespace Twinsanity
 
         public override void Load(BinaryReader reader, int size)
         {
-            var count = reader.ReadInt32();
+            int count = reader.ReadInt32();
 
             SubModels.Clear();
             for (int i = 0; i < count; i++)
             {
-                SubModel sub = new SubModel();
-                sub.MaterialID = reader.ReadUInt32();
-                uint DataSize = reader.ReadUInt32(); // vertex count * 0x30
+                SubModel sub = new SubModel
+                {
+                    MaterialID = reader.ReadUInt32()
+                };
+                _ = reader.ReadUInt32(); // vertex count * 0x30
                 int VertexCount = reader.ReadInt32();
-
-                uint GroupJointCount = reader.ReadUInt32(); // Total number of group joints
+                _ = reader.ReadUInt32(); // Total number of group joints
                 uint GroupCount = reader.ReadUInt32();
                 sub.GroupList = new List<uint>();
                 for (int c = 0; c < GroupCount; c++)
@@ -105,24 +106,26 @@ namespace Twinsanity
                 sub.VData = new List<VertexData>();
                 for (int c = 0; c < VertexCount; c++)
                 {
-                    VertexData v = new VertexData();
-                    v.X = reader.ReadSingle();
-                    v.Y = reader.ReadSingle();
-                    v.Z = reader.ReadSingle();
-                    v.Weight1 = reader.ReadSingle();
-                    v.Weight2 = reader.ReadSingle();
-                    v.Weight3 = reader.ReadSingle();
-                    v.Joint1 = reader.ReadUInt16();
-                    v.Joint2 = reader.ReadUInt16();
-                    v.Joint3 = reader.ReadUInt16();
-                    v.UnkShort4 = reader.ReadUInt16();
-                    v.PackedNormals = reader.ReadUInt32();
-                    v.R = reader.ReadByte();
-                    v.G = reader.ReadByte();
-                    v.B = reader.ReadByte();
-                    v.A = reader.ReadByte();
-                    v.UV_X = reader.ReadSingle();
-                    v.UV_Y = reader.ReadSingle();
+                    VertexData v = new VertexData
+                    {
+                        X = reader.ReadSingle(),
+                        Y = reader.ReadSingle(),
+                        Z = reader.ReadSingle(),
+                        Weight1 = reader.ReadSingle(),
+                        Weight2 = reader.ReadSingle(),
+                        Weight3 = reader.ReadSingle(),
+                        Joint1 = reader.ReadUInt16(),
+                        Joint2 = reader.ReadUInt16(),
+                        Joint3 = reader.ReadUInt16(),
+                        UnkShort4 = reader.ReadUInt16(),
+                        PackedNormals = reader.ReadUInt32(),
+                        R = reader.ReadByte(),
+                        G = reader.ReadByte(),
+                        B = reader.ReadByte(),
+                        A = reader.ReadByte(),
+                        UV_X = reader.ReadSingle(),
+                        UV_Y = reader.ReadSingle()
+                    };
                     sub.VData.Add(v);
                 }
                 SubModels.Add(sub);
@@ -143,6 +146,22 @@ namespace Twinsanity
                 Size += SubModels[i].VData.Count * 0x30;
             }
             return Size;
+        }
+
+        internal void FillPackage(TwinsFile source, TwinsFile destination)
+        {
+            TwinsSection sourceMaterials = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(1);
+            TwinsSection destinationMaterials = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(1);
+            foreach (SubModel model in SubModels)
+            {
+                if (destinationMaterials.HasItem(model.MaterialID))
+                {
+                    continue;
+                }
+                Material linkedMaterial = sourceMaterials.GetItem<Material>(model.MaterialID);
+                destinationMaterials.AddItem(model.MaterialID, linkedMaterial);
+                linkedMaterial.FillPackageXbox(source, destination);
+            }
         }
 
         #region STRUCTURES
@@ -268,7 +287,7 @@ namespace Twinsanity
                         ply.WriteLine("property list uchar int vertex_indices");
                     }
                     ply.WriteLine("end_header");
-                    foreach (var s in SubModels)
+                    foreach (SubModel s in SubModels)
                     {
                         for (int i = 0; i < s.VData.Count; i++)
                         {
@@ -282,7 +301,7 @@ namespace Twinsanity
                         }
                     }
                     vertexcount = 0;
-                    foreach (var s in SubModels) //polys
+                    foreach (SubModel s in SubModels) //polys
                     {
                         for (int g = 0; g < s.GroupList.Count; g++)
                         {
@@ -305,7 +324,7 @@ namespace Twinsanity
                 using (StreamWriter obj = new StreamWriter(stream))
                 {
                     obj.WriteLine("# Vertices");
-                    foreach (var s in SubModels)
+                    foreach (SubModel s in SubModels)
                     {
                         for (int i = 0; i < s.VData.Count; i++)
                         {
@@ -318,7 +337,7 @@ namespace Twinsanity
                             obj.WriteLine(Line);
                         }
                     }
-                    foreach (var s in SubModels)
+                    foreach (SubModel s in SubModels)
                     {
                         for (int i = 0; i < s.VData.Count; i++)
                         {

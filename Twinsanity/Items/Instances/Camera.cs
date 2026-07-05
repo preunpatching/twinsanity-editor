@@ -1,6 +1,6 @@
-using System.IO;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Twinsanity
 {
@@ -69,7 +69,7 @@ namespace Twinsanity
 
                 for (int i = 0; i < m.Length; i++)
                 {
-                    if ((Enabled >> i & 0x1) != 0)
+                    if (((Enabled >> i) & 0x1) != 0)
                     {
                         m[i] = true;
                     }
@@ -93,137 +93,146 @@ namespace Twinsanity
 
         public bool UnkFlag0
         {
-            get
-            {
-                return (Header >> 0x0 & 0x1) != 0;
-            }
+            get => ((Header >> 0x0) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x0;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag1
         {
-            get
-            {
-                return (Header >> 0x1 & 0x1) != 0;
-            }
+            get => ((Header >> 0x1) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x1;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag2
         {
-            get
-            {
-                return (Header >> 0x2 & 0x1) != 0;
-            }
+            get => ((Header >> 0x2) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x2;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag3
         {
-            get
-            {
-                return (Header >> 0x3 & 0x1) != 0;
-            }
+            get => ((Header >> 0x3) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x3;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag4
         {
-            get
-            {
-                return (Header >> 0x4 & 0x1) != 0;
-            }
+            get => ((Header >> 0x4) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x4;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag5
         {
-            get
-            {
-                return (Header >> 0x5 & 0x1) != 0;
-            }
+            get => ((Header >> 0x5) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x5;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag6
         {
-            get
-            {
-                return (Header >> 0x6 & 0x1) != 0;
-            }
+            get => ((Header >> 0x6) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x6;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag18
         {
-            get
-            {
-                return (Header >> 0x12 & 0x1) != 0;
-            }
+            get => ((Header >> 0x12) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x12;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
         public bool UnkFlag20
         {
-            get
-            {
-                return (Header >> 0x14 & 0x1) != 0;
-            }
+            get => ((Header >> 0x14) & 0x1) != 0;
             set
             {
                 uint mask = 1 << 0x14;
                 if (value)
+                {
                     Header |= mask;
+                }
                 else
+                {
                     Header &= ~mask;
+                }
             }
         }
 
@@ -243,7 +252,9 @@ namespace Twinsanity
             writer.Write(Instances.Count);
             writer.Write(SectionHead);
             for (int i = 0; i < Instances.Count; ++i)
+            {
                 writer.Write(Instances[i]);
+            }
 
             writer.Write(CamHeader);
             if (ParentType != SectionType.CameraDemo)
@@ -305,22 +316,18 @@ namespace Twinsanity
             {
                 Coords[i] = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
             }
-            var n = reader.ReadInt32();
-            n = reader.ReadInt32();
+
+            _ = reader.ReadInt32();
+            int n = reader.ReadInt32();
             SectionHead = reader.ReadUInt32();
             Instances = new List<ushort>(n);
             for (int i = 0; i < n; ++i)
+            {
                 Instances.Add(reader.ReadUInt16());
+            }
 
             CamHeader = reader.ReadUInt32();
-            if (ParentType != SectionType.CameraDemo)
-            {
-                UnkShort = reader.ReadUInt16();
-            }
-            else
-            {
-                UnkShort = 0;
-            }
+            UnkShort = ParentType != SectionType.CameraDemo ? reader.ReadUInt16() : (ushort)0;
             UnkFloat1 = reader.ReadSingle();
 
             UnkCoords1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
@@ -345,14 +352,7 @@ namespace Twinsanity
             CameraType1 = reader.ReadUInt32();
             CameraType2 = reader.ReadUInt32();
 
-            if (ParentType != SectionType.CameraDemo)
-            {
-                UnkByte = reader.ReadByte();
-            }
-            else
-            {
-                UnkByte = 0;
-            }
+            UnkByte = ParentType != SectionType.CameraDemo ? reader.ReadByte() : (byte)0;
 
             if (CameraType1 != 3)
             {
@@ -371,12 +371,13 @@ namespace Twinsanity
                 default:
                     throw new NotImplementedException();
                 case 0xA19:
-                    Camera_Boss Camera1 = new Camera_Boss();
-
-                    Camera1.unkInt = reader.ReadUInt32();
-                    Camera1.unkFloat1 = reader.ReadSingle();
-                    Camera1.unkFloat2 = reader.ReadSingle();
-                    Camera1.unkMatrix1 = new Pos[4];
+                    Camera_Boss Camera1 = new Camera_Boss
+                    {
+                        unkInt = reader.ReadUInt32(),
+                        unkFloat1 = reader.ReadSingle(),
+                        unkFloat2 = reader.ReadSingle(),
+                        unkMatrix1 = new Pos[4]
+                    };
                     for (int i = 0; i < Camera1.unkMatrix1.Length; ++i)
                     {
                         Camera1.unkMatrix1[i] = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
@@ -397,32 +398,35 @@ namespace Twinsanity
                     Cameras[ID] = Camera1;
                     break;
                 case 0x1C02:
-                    Camera_Point Camera2 = new Camera_Point();
-
-                    Camera2.unkInt = reader.ReadUInt32();
-                    Camera2.unkFloat1 = reader.ReadSingle();
-                    Camera2.unkFloat2 = reader.ReadSingle();
-                    Camera2.unkVector = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                    Camera_Point Camera2 = new Camera_Point
+                    {
+                        unkInt = reader.ReadUInt32(),
+                        unkFloat1 = reader.ReadSingle(),
+                        unkFloat2 = reader.ReadSingle(),
+                        unkVector = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle())
+                    };
 
                     Cameras[ID] = Camera2;
                     break;
                 case 0x1C03:
-                    Camera_Line Camera3 = new Camera_Line();
-
-                    Camera3.unkInt = reader.ReadUInt32();
-                    Camera3.unkFloat1 = reader.ReadSingle();
-                    Camera3.unkFloat2 = reader.ReadSingle();
-                    Camera3.unkBoundingBoxVector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                    Camera3.unkBoundingBoxVector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+                    Camera_Line Camera3 = new Camera_Line
+                    {
+                        unkInt = reader.ReadUInt32(),
+                        unkFloat1 = reader.ReadSingle(),
+                        unkFloat2 = reader.ReadSingle(),
+                        unkBoundingBoxVector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                        unkBoundingBoxVector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle())
+                    };
 
                     Cameras[ID] = Camera3;
                     break;
                 case 0x1C04:
-                    Camera_Path Camera4 = new Camera_Path();
-
-                    Camera4.unkInt = reader.ReadUInt32();
-                    Camera4.unkFloat1 = reader.ReadSingle();
-                    Camera4.unkFloat2 = reader.ReadSingle();
+                    Camera_Path Camera4 = new Camera_Path
+                    {
+                        unkInt = reader.ReadUInt32(),
+                        unkFloat1 = reader.ReadSingle(),
+                        unkFloat2 = reader.ReadSingle()
+                    };
                     uint VectorCount = reader.ReadUInt32();
                     Camera4.unkVectors = new Pos[VectorCount];
                     for (int i = 0; i < VectorCount; ++i)
@@ -439,13 +443,14 @@ namespace Twinsanity
                     Cameras[ID] = Camera5;
                     break;
                 case 0x1C06:
-                    Camera_Spline Camera6 = new Camera_Spline();
-
-                    Camera6.unkInt = reader.ReadInt32();
-                    Camera6.unkFloat1 = reader.ReadSingle();
-                    Camera6.unkFloat2 = reader.ReadSingle();
-                    Camera6.unkUInt = reader.ReadUInt32();
-                    Camera6.unkFloat3 = reader.ReadSingle();
+                    Camera_Spline Camera6 = new Camera_Spline
+                    {
+                        unkInt = reader.ReadInt32(),
+                        unkFloat1 = reader.ReadSingle(),
+                        unkFloat2 = reader.ReadSingle(),
+                        unkUInt = reader.ReadUInt32(),
+                        unkFloat3 = reader.ReadSingle()
+                    };
                     Camera6.unkVectors = new Pos[(Camera6.unkUInt + 1) * 2];
                     for (int i = 0; i < Camera6.unkVectors.Length; ++i)
                     {
@@ -457,46 +462,50 @@ namespace Twinsanity
                     Cameras[ID] = Camera6;
                     break;
                 case 0x1C09:
-                    Camera_0x1C09 Camera7 = new Camera_0x1C09();
-
-                    Camera7.unkInt = reader.ReadUInt32();
-                    Camera7.unkFloat1 = reader.ReadSingle();
-                    Camera7.unkFloat2 = reader.ReadSingle();
+                    Camera_0x1C09 Camera7 = new Camera_0x1C09
+                    {
+                        unkInt = reader.ReadUInt32(),
+                        unkFloat1 = reader.ReadSingle(),
+                        unkFloat2 = reader.ReadSingle()
+                    };
 
                     Cameras[ID] = Camera7;
                     break;
                 case 0x1C0B:
-                    Camera_Point2 Camera8 = new Camera_Point2();
-
-                    Camera8.unkInt = reader.ReadUInt32();
-                    Camera8.unkFloat1 = reader.ReadSingle();
-                    Camera8.unkFloat2 = reader.ReadSingle();
-                    Camera8.unkVector = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                    Camera8.unkFloat3 = reader.ReadSingle();
-                    Camera8.unkByte = reader.ReadByte();
+                    Camera_Point2 Camera8 = new Camera_Point2
+                    {
+                        unkInt = reader.ReadUInt32(),
+                        unkFloat1 = reader.ReadSingle(),
+                        unkFloat2 = reader.ReadSingle(),
+                        unkVector = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                        unkFloat3 = reader.ReadSingle(),
+                        unkByte = reader.ReadByte()
+                    };
 
                     Cameras[ID] = Camera8;
                     break;
                 case 0x1C0C:
-                    Camera_0x1C0C Camera9 = new Camera_0x1C0C();
-
-                    Camera9.unkByte1 = reader.ReadByte();
-                    Camera9.unkByte2 = reader.ReadByte();
-                    Camera9.unkByte3 = reader.ReadByte();
-                    Camera9.unkByte4 = reader.ReadByte();
+                    Camera_0x1C0C Camera9 = new Camera_0x1C0C
+                    {
+                        unkByte1 = reader.ReadByte(),
+                        unkByte2 = reader.ReadByte(),
+                        unkByte3 = reader.ReadByte(),
+                        unkByte4 = reader.ReadByte()
+                    };
 
                     Cameras[ID] = Camera9;
                     break;
                 case 0x1C0D:
-                    Camera_Line2 Camera10 = new Camera_Line2();
-
-                    Camera10.unkInt = reader.ReadUInt32();
-                    Camera10.unkFloat1 = reader.ReadSingle();
-                    Camera10.unkFloat2 = reader.ReadSingle();
-                    Camera10.unkBoundingBoxVector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                    Camera10.unkBoundingBoxVector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                    Camera10.unkFloat3 = reader.ReadSingle();
-                    Camera10.unkFloat4 = reader.ReadSingle();
+                    Camera_Line2 Camera10 = new Camera_Line2
+                    {
+                        unkInt = reader.ReadUInt32(),
+                        unkFloat1 = reader.ReadSingle(),
+                        unkFloat2 = reader.ReadSingle(),
+                        unkBoundingBoxVector1 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                        unkBoundingBoxVector2 = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                        unkFloat3 = reader.ReadSingle(),
+                        unkFloat4 = reader.ReadSingle()
+                    };
 
                     Cameras[ID] = Camera10;
                     break;
@@ -505,12 +514,13 @@ namespace Twinsanity
                     Cameras[ID] = Camera11;
                     break;
                 case 0x1C0F:
-                    Camera_Zone Camera12 = new Camera_Zone();
+                    Camera_Zone Camera12 = new Camera_Zone
+                    {
+                        //Camera12.unkData1 = reader.ReadBytes(0x50);
+                        //Camera12.unkData2 = reader.ReadBytes(0x50);
 
-                    //Camera12.unkData1 = reader.ReadBytes(0x50);
-                    //Camera12.unkData2 = reader.ReadBytes(0x50);
-
-                    Camera12.Data1_Vectors = new Pos[4];
+                        Data1_Vectors = new Pos[4]
+                    };
                     for (int i = 0; i < Camera12.Data1_Vectors.Length; i++)
                     {
                         Camera12.Data1_Vectors[i] = new Pos(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
@@ -748,19 +758,19 @@ namespace Twinsanity
                     count += 4 + 4 + 4 + (Camera1.unkMatrix1.Length * 16) + (Camera1.unkMatrix2.Length * 16) +
                         16 + 1 + 4 + 4 + 4 + 4 + 1;
                 }
-                else if (Cameras[i] is Camera_Point Camera2)
+                else if (Cameras[i] is Camera_Point)
                 {
                     count += 4 + 4 + 4 + 16;
                 }
-                else if (Cameras[i] is Camera_Line Camera3)
+                else if (Cameras[i] is Camera_Line)
                 {
                     count += 4 + 4 + 4 + 16 + 16;
                 }
                 else if (Cameras[i] is Camera_Path Camera4)
                 {
-                    count += 4 + 4 + 4 + 4 + (Camera4.unkVectors.Length * 16) + 4 + (Camera4.unkData.Length);
+                    count += 4 + 4 + 4 + 4 + (Camera4.unkVectors.Length * 16) + 4 + Camera4.unkData.Length;
                 }
-                else if (Cameras[i] is Camera_0x1C05 Camera5)
+                else if (Cameras[i] is Camera_0x1C05)
                 {
 
                 }
@@ -768,23 +778,23 @@ namespace Twinsanity
                 {
                     count += 4 + 4 + 4 + 4 + 4 + (Camera6.unkVectors.Length * 16) + Camera6.unkData.Length + 2;
                 }
-                else if (Cameras[i] is Camera_0x1C09 Camera7)
+                else if (Cameras[i] is Camera_0x1C09)
                 {
                     count += 4 + 4 + 4;
                 }
-                else if (Cameras[i] is Camera_Point2 Camera8)
+                else if (Cameras[i] is Camera_Point2)
                 {
                     count += 4 + 4 + 4 + 16 + 4 + 1;
                 }
-                else if (Cameras[i] is Camera_0x1C0C Camera9)
+                else if (Cameras[i] is Camera_0x1C0C)
                 {
                     count += 4;
                 }
-                else if (Cameras[i] is Camera_Line2 Camera10)
+                else if (Cameras[i] is Camera_Line2)
                 {
                     count += 4 + 4 + 4 + 16 + 16 + 4 + 4;
                 }
-                else if (Cameras[i] is Camera_0x1C0E Camera11)
+                else if (Cameras[i] is Camera_0x1C0E)
                 {
 
                 }

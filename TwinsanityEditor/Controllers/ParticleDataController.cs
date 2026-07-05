@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Twinsanity;
 
 namespace TwinsanityEditor
@@ -16,22 +15,16 @@ namespace TwinsanityEditor
 
         protected override string GetName()
         {
-            if (Data.IsStandalone)
-            {
-                return $"PTL File";
-            }
-            else
-            {
-                return $"Particle Data [ID {Data.ID}]";
-            }
+            return Data.IsStandalone ? $"PTL File" : $"Particle Data [ID {Data.ID}]";
         }
 
         protected override void GenText()
         {
-            List<string> text = new List<string>();
-
-            text.Add($"Size: {Data.Size}");
-            text.Add($"Version: {Data.Version}");
+            List<string> text = new List<string>
+            {
+                $"Size: {Data.Size}",
+                $"Version: {Data.Version}"
+            };
 
             if (Data.IsDefault)
             {
@@ -47,7 +40,11 @@ namespace TwinsanityEditor
                 ParticleData.ParticleSystemDefinition PS = Data.ParticleTypes[i];
                 text.Add($"#{i} Name: {PS.Name} ");
 
-                if (Data.Version == 0x20) text.Add($"\tGenRate: {PS.UnkByte1} ");
+                if (Data.Version == 0x20)
+                {
+                    text.Add($"\tGenRate: {PS.UnkByte1} ");
+                }
+
                 text.Add($"\tGenRate: {PS.GenRate} ");
                 text.Add($"\tMax Particle Count: {PS.MaxParticleCount} ");
                 text.Add($"\tUnkUShort3: {PS.UnkUShort3} ");
@@ -60,11 +57,31 @@ namespace TwinsanityEditor
                 text.Add($"\tTexture Filtering: {PS.TextureFilter} ");
                 text.Add($"\tUnkByte5: {PS.UnkByte5} ");
                 text.Add($"\tUnkFloat1: {PS.UnkFloat1} ");
-                if (Data.Version >= 0x6) text.Add($"\tCutOn Radius: {PS.CutOnRadius} ");
-                if (Data.Version >= 0x6) text.Add($"\tCutOff Radius: {PS.CutOffRadius} ");
-                if (Data.Version >= 0xA) text.Add($"\tDraw CutOff: {PS.DrawCutOff} ");
-                if (Data.Version > 0x16) text.Add($"\tUnkFloat5: {PS.UnkFloat5} ");
-                if (Data.Version >= 0x18) text.Add($"\tUnkFloat6: {PS.UnkFloat6} ");
+                if (Data.Version >= 0x6)
+                {
+                    text.Add($"\tCutOn Radius: {PS.CutOnRadius} ");
+                }
+
+                if (Data.Version >= 0x6)
+                {
+                    text.Add($"\tCutOff Radius: {PS.CutOffRadius} ");
+                }
+
+                if (Data.Version >= 0xA)
+                {
+                    text.Add($"\tDraw CutOff: {PS.DrawCutOff} ");
+                }
+
+                if (Data.Version > 0x16)
+                {
+                    text.Add($"\tUnkFloat5: {PS.UnkFloat5} ");
+                }
+
+                if (Data.Version >= 0x18)
+                {
+                    text.Add($"\tUnkFloat6: {PS.UnkFloat6} ");
+                }
+
                 text.Add($"\tVelocity: {PS.Velocity} ");
                 text.Add($"\tRandom Emit X: {PS.Random_Emit_X} ");
                 text.Add($"\tRandom Emit Y: {PS.Random_Emit_Y} ");
@@ -102,8 +119,16 @@ namespace TwinsanityEditor
                 {
                     text.Add($"\tAlpha {a}: Time: {PS.AlphaGradientTime[a]} Value: {PS.AlphaGradientValue[a]}");
                 }
-                if (Data.Version >= 0x15) text.Add($"\tDistortionX: {PS.DistortionX} ");
-                if (Data.Version >= 0x15) text.Add($"\tDistortionY: {PS.DistortionY} ");
+                if (Data.Version >= 0x15)
+                {
+                    text.Add($"\tDistortionX: {PS.DistortionX} ");
+                }
+
+                if (Data.Version >= 0x15)
+                {
+                    text.Add($"\tDistortionY: {PS.DistortionY} ");
+                }
+
                 text.Add($"\tMinSize: {PS.MinSize} ");
                 text.Add($"\tMaxSize: {PS.MaxSize} ");
                 for (int a = 0; a < PS.SizeWidthTime.Length; a++)
@@ -129,21 +154,41 @@ namespace TwinsanityEditor
                     text.Add($"\tUnkGrad2 {a}: Time: {PS.UnkGradient2Time[a]} Value: {PS.UnkGradient2Value[a]}");
                 }
                 if (PS.TextureStartX >= 524288f)
+                {
                     text.Add($"\tTextureStartX: {PS.TextureStartX - 524288f} / {PS.TextureStartX} F2");
+                }
                 else
+                {
                     text.Add($"\tTextureStartX: {PS.TextureStartX - 262144f} / {PS.TextureStartX} F1");
+                }
+
                 if (PS.TextureStartY >= 524288f)
+                {
                     text.Add($"\tTextureStartY: {PS.TextureStartY - 524288f} / {PS.TextureStartY} F2");
+                }
                 else
+                {
                     text.Add($"\tTextureStartY: {PS.TextureStartY - 262144f} / {PS.TextureStartY} F1");
+                }
+
                 if (PS.TextureEndX >= 524288f)
+                {
                     text.Add($"\tTextureEndX: {PS.TextureEndX - 524288f} / {PS.TextureEndX} F2");
+                }
                 else
+                {
                     text.Add($"\tTextureEndX: {PS.TextureEndX - 262144f} / {PS.TextureEndX} F1");
+                }
+
                 if (PS.TextureEndY >= 524288f)
+                {
                     text.Add($"\tTextureEndY: {PS.TextureEndY - 524288f} / {PS.TextureEndY} F2");
+                }
                 else
+                {
                     text.Add($"\tTextureEndY: {PS.TextureEndY - 262144f} / {PS.TextureEndY} F1");
+                }
+
                 if (Data.Version >= 0x3)
                 {
                     for (int a = 0; a < PS.CollisionTime.Length; a++)
@@ -151,17 +196,61 @@ namespace TwinsanityEditor
                         text.Add($"\tCollision {a}: Time: {PS.CollisionTime[a]} Value: {PS.CollisionValue[a]}");
                     }
                 }
-                if (Data.Version >= 0x3) text.Add($"\tCollisionNumSpheres: {PS.CollisionNumSpheres} ");
-                if (Data.Version >= 0x11) text.Add($"\tDrawFlag: {PS.DrawFlag} ");
-                if (Data.Version > 0x16 && Data.Version < 0x1D) text.Add($"\tPadAmount: {PS.padAmount} ");
-                if (Data.Version > 0x1B) text.Add($"\tScaleFactor: {PS.ScaleFactor} ");
-                if (Data.Version >= 0x10) text.Add($"\tGhostsNum: {PS.ParticleGhostsNum}");
-                if (Data.Version >= 0x10) text.Add($"\tGhostSeparation: {PS.GhostSeparation} ");
-                if (Data.Version >= 0x19) text.Add($"\tStarRadialPoints: {PS.StarRadialPoints}");
-                if (Data.Version >= 0x19) text.Add($"\tStarRadiusRatio: {PS.StarRadiusRatio} ");
-                if (Data.Version >= 0x1A) text.Add($"\tRampTime: {PS.RampTime} ");
-                if (Data.Version > 0x1A) text.Add($"\tTexture Page: {PS.TexturePage} ");
-                if (Data.Version >= 0x1E) text.Add($"\tUnkVec3: {PS.UnkVec3.X}; {PS.UnkVec3.Y}; {PS.UnkVec3.Z}; {PS.UnkVec3.W}");
+                if (Data.Version >= 0x3)
+                {
+                    text.Add($"\tCollisionNumSpheres: {PS.CollisionNumSpheres} ");
+                }
+
+                if (Data.Version >= 0x11)
+                {
+                    text.Add($"\tDrawFlag: {PS.DrawFlag} ");
+                }
+
+                if (Data.Version > 0x16 && Data.Version < 0x1D)
+                {
+                    text.Add($"\tPadAmount: {PS.padAmount} ");
+                }
+
+                if (Data.Version > 0x1B)
+                {
+                    text.Add($"\tScaleFactor: {PS.ScaleFactor} ");
+                }
+
+                if (Data.Version >= 0x10)
+                {
+                    text.Add($"\tGhostsNum: {PS.ParticleGhostsNum}");
+                }
+
+                if (Data.Version >= 0x10)
+                {
+                    text.Add($"\tGhostSeparation: {PS.GhostSeparation} ");
+                }
+
+                if (Data.Version >= 0x19)
+                {
+                    text.Add($"\tStarRadialPoints: {PS.StarRadialPoints}");
+                }
+
+                if (Data.Version >= 0x19)
+                {
+                    text.Add($"\tStarRadiusRatio: {PS.StarRadiusRatio} ");
+                }
+
+                if (Data.Version >= 0x1A)
+                {
+                    text.Add($"\tRampTime: {PS.RampTime} ");
+                }
+
+                if (Data.Version > 0x1A)
+                {
+                    text.Add($"\tTexture Page: {PS.TexturePage} ");
+                }
+
+                if (Data.Version >= 0x1E)
+                {
+                    text.Add($"\tUnkVec3: {PS.UnkVec3.X}; {PS.UnkVec3.Y}; {PS.UnkVec3.Z}; {PS.UnkVec3.W}");
+                }
+
                 if (Data.Version >= 0xB && Data.Version <= 0x15)
                 {
                     for (int a = 0; a < PS.SoundIDs.Length; a++)
@@ -174,7 +263,7 @@ namespace TwinsanityEditor
             text.Add($"Particle Instances: {Data.ParticleInstances.Count}");
             for (int i = 0; i < Data.ParticleInstances.Count; i++)
             {
-                var PI = Data.ParticleInstances[i];
+                ParticleData.ParticleSystemInstance PI = Data.ParticleInstances[i];
                 text.Add($"#{i} Name: {PI.Name}");
                 text.Add($"#{i} Pos: {PI.Position.X}; {PI.Position.Y}; {PI.Position.Z}");
                 text.Add($"#{i} Rot: {PI.EmitRotX}; {PI.EmitRotY}");

@@ -1,6 +1,5 @@
 ﻿using OpenTK;
 using System.Collections.Generic;
-using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -36,14 +35,16 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            List<string> Text = new List<string>();
-            Text.Add(string.Format("ID: {0:X8}", Data.ID));
-            Text.Add($"Size: {Data.Size}");
-            Text.Add($"Blend Shape Count: {Data.BlendShapeCount}");
-            Text.Add($"SubMesh Count: {Data.SubModels.Count}");
+            List<string> Text = new List<string>
+            {
+                string.Format("ID: {0:X8}", Data.ID),
+                $"Size: {Data.Size}",
+                $"Blend Shape Count: {Data.BlendShapeCount}",
+                $"SubMesh Count: {Data.SubModels.Count}"
+            };
             for (int i = 0; i < Data.SubModels.Count; i++)
             {
-                Text.Add($"SubMesh {i}: Material {Data.SubModels[i].MaterialID.ToString("X8")} Vertex Count {Data.SubModels[i].VData.Count} Groups {Data.SubModels[i].GroupList.Count}");
+                Text.Add($"SubMesh {i}: Material {Data.SubModels[i].MaterialID:X8} Vertex Count {Data.SubModels[i].VData.Count} Groups {Data.SubModels[i].GroupList.Count}");
 
                 for (int a = 0; a < Data.SubModels[i].GroupJoints.Count; a++)
                 {
@@ -66,7 +67,7 @@ namespace TwinsanityEditor
 
             Vertices.Clear();
             Indices.Clear();
-            foreach (var s in Data.SubModels)
+            foreach (BlendSkinX.SubModel s in Data.SubModels)
             {
                 List<Vertex> vtx = new List<Vertex>();
                 List<uint> idx = new List<uint>();
@@ -89,7 +90,7 @@ namespace TwinsanityEditor
                         int v2 = off + i - 1 - (i & 1);
                         int v3 = off + i;
                         Vector3 normal = VectorFuncs.CalcNormal(vtx[v1].Pos, vtx[v2].Pos, vtx[v3].Pos);
-                        var v = vtx[v1];
+                        Vertex v = vtx[v1];
                         v.Nor += normal;
                         vtx[v1] = v;
                         v = vtx[v2];
@@ -109,13 +110,13 @@ namespace TwinsanityEditor
                 Vertices.Add(vtx.ToArray());
                 Indices.Add(idx.ToArray());
             }
-            
+
         }
         public void LoadMeshData_BlendShape(int id)
         {
             Vertices.Clear();
             Indices.Clear();
-            foreach (var s in Data.SubModels)
+            foreach (BlendSkinX.SubModel s in Data.SubModels)
             {
                 List<Vertex> vtx = new List<Vertex>();
                 List<uint> idx = new List<uint>();
@@ -138,7 +139,7 @@ namespace TwinsanityEditor
                         int v2 = off + i - 1 - (i & 1);
                         int v3 = off + i;
                         Vector3 normal = VectorFuncs.CalcNormal(vtx[v1].Pos, vtx[v2].Pos, vtx[v3].Pos);
-                        var v = vtx[v1];
+                        Vertex v = vtx[v1];
                         v.Nor += normal;
                         vtx[v1] = v;
                         v = vtx[v2];
@@ -162,17 +163,17 @@ namespace TwinsanityEditor
 
         public List<Vector3[]> GetFacialPositions(int blendShape, float faceProgress)
         {
-            var faceOffsets = new List<Vector3[]>();
-            foreach (var model in Data.SubModels)
+            List<Vector3[]> faceOffsets = new List<Vector3[]>();
+            foreach (BlendSkinX.SubModel model in Data.SubModels)
             {
-                var modelFace = new List<Vector3>();
-                for (var j = 0; j < model.VData.Count; ++j)
+                List<Vector3> modelFace = new List<Vector3>();
+                for (int j = 0; j < model.VData.Count; ++j)
                 {
-                    var blendVec = new Vector3(-model.VData[j].BlendShapes[blendShape].X,
+                    Vector3 blendVec = new Vector3(-model.VData[j].BlendShapes[blendShape].X,
                         model.VData[j].BlendShapes[blendShape].Y,
                         model.VData[j].BlendShapes[blendShape].Z);
-                    var origVec = new Vector3(-model.VData[j].X, model.VData[j].Y, model.VData[j].Z);
-                    blendVec = blendVec - origVec;
+                    Vector3 origVec = new Vector3(-model.VData[j].X, model.VData[j].Y, model.VData[j].Z);
+                    blendVec -= origVec;
                     blendVec *= faceProgress;
                     modelFace.Add(blendVec);
                 }

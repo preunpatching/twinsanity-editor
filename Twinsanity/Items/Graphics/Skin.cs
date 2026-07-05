@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using Twinsanity.VIF;
 
@@ -22,20 +21,20 @@ namespace Twinsanity
         {
             long pre_pos = reader.BaseStream.Position;
 
-            var subModelAmt = reader.ReadUInt32();
+            uint subModelAmt = reader.ReadUInt32();
 
             SubModels = new List<SubModel>();
             for (int i = 0; i < subModelAmt; i++)
             {
-                var model = new SubModel
+                SubModel model = new SubModel
                 {
                     MaterialID = reader.ReadUInt32()
                 };
 
-                var codeSize = reader.ReadInt32();
+                int codeSize = reader.ReadInt32();
                 model.VertexAmount = reader.ReadInt32();
-                var interpreter = VIFInterpreter.InterpretCode(reader.ReadBytes(codeSize));
-                var data = interpreter.GetMem();
+                VIFInterpreter interpreter = VIFInterpreter.InterpretCode(reader.ReadBytes(codeSize));
+                List<List<Vector4>> data = interpreter.GetMem();
                 model.Vertexes = CalculateData(data);
                 SubModels.Add(model);
             }
@@ -52,24 +51,24 @@ namespace Twinsanity
 
         private List<VertexData> CalculateData(List<List<Vector4>> data)
         {
-            var vertexes = new List<VertexData>();
+            List<VertexData> vertexes = new List<VertexData>();
             const int VERT_DATA_INDEX = 3;
             for (int i = 0; i < data.Count;)
-            { 
-                var verts = (data[i][0].GetBinaryX() & 0xFF);
-                var fields = (data[i + 1][0].GetBinaryX() & 0xFF) / verts;
-                var scaleVec = data[i + 2][0];
+            {
+                uint verts = data[i][0].GetBinaryX() & 0xFF;
+                uint fields = (data[i + 1][0].GetBinaryX() & 0xFF) / verts;
+                Vector4 scaleVec = data[i + 2][0];
 
-                var vertex_batch_1 = data[i + VERT_DATA_INDEX];     // Position vectors
-                var vertex_batch_2 = data[i + VERT_DATA_INDEX + 1]; // UV vectors
-                var vertex_batch_3 = data[i + VERT_DATA_INDEX + 3]; // Weights and joint indices
-                var vertex_batch_4 = data[i + VERT_DATA_INDEX + 2]; // Color vectors
+                List<Vector4> vertex_batch_1 = data[i + VERT_DATA_INDEX];     // Position vectors
+                List<Vector4> vertex_batch_2 = data[i + VERT_DATA_INDEX + 1]; // UV vectors
+                List<Vector4> vertex_batch_3 = data[i + VERT_DATA_INDEX + 3]; // Weights and joint indices
+                List<Vector4> vertex_batch_4 = data[i + VERT_DATA_INDEX + 2]; // Color vectors
 
                 // Vertex conversion
                 for (int j = 0; j < verts; ++j)
                 {
-                    var v1 = new Vector4(vertex_batch_1[j]);
-                    var v2 = new Vector4(vertex_batch_2[j]);
+                    Vector4 v1 = new Vector4(vertex_batch_1[j]);
+                    Vector4 v2 = new Vector4(vertex_batch_2[j]);
                     v1.X = (int)v1.GetBinaryX();
                     v1.Y = (int)v1.GetBinaryY();
                     v1.Z = (int)v1.GetBinaryZ();
@@ -83,22 +82,22 @@ namespace Twinsanity
                     vertex_batch_1[j] = v1;
                     vertex_batch_2[j] = v2;
                 }
-                var connections = new List<bool>();
-                var jointInfos = new List<JointInfo>();
+                List<bool> connections = new List<bool>();
+                List<JointInfo> jointInfos = new List<JointInfo>();
                 for (int j = 0; j < verts; ++j)
                 {
-                    var v1 = vertex_batch_3[j];
+                    Vector4 v1 = vertex_batch_3[j];
 
-                    var connValue = v1.GetBinaryW() & 0xFF00;
+                    uint connValue = v1.GetBinaryW() & 0xFF00;
                     connections.Add((connValue >> 8) != 128);
 
-                    var weightAmount = v1.GetBinaryW() & 0xFF;
-                    var weight1 = 0f;
-                    var weight2 = 0f;
-                    var weight3 = 0f;
-                    var jointIndex1 = 0u;
-                    var jointIndex2 = 0u;
-                    var jointIndex3 = 0u;
+                    uint weightAmount = v1.GetBinaryW() & 0xFF;
+                    float weight1 = 0f;
+                    float weight2 = 0f;
+                    float weight3 = 0f;
+                    uint jointIndex1 = 0u;
+                    uint jointIndex2 = 0u;
+                    uint jointIndex3 = 0u;
                     if (weightAmount > 0)
                     {
                         jointIndex1 = v1.GetBinaryX() & 0xFF;
@@ -120,8 +119,8 @@ namespace Twinsanity
                         v1.SetBinaryZ(v1.GetBinaryZ() & 0xFFFFFF00);
                         weight3 = v1.Z;
                     }
-                    
-                    var joint = new JointInfo()
+
+                    JointInfo joint = new JointInfo()
                     {
                         Weight1 = weight1,
                         Weight2 = weight2,
@@ -136,7 +135,7 @@ namespace Twinsanity
 
                 for (int j = 0; j < verts; j++)
                 {
-                    var vertData = new VertexData
+                    VertexData vertData = new VertexData
                     {
                         // Vert coords
                         X = vertex_batch_1[j].X,
@@ -146,10 +145,10 @@ namespace Twinsanity
                         U = vertex_batch_2[j].X,
                         V = vertex_batch_2[j].Y,
                         // Colors
-                        R = (byte)(Math.Min((int)(vertex_batch_4[j].GetBinaryX() & 0xFF) + 127, 255)),
-                        G = (byte)(Math.Min((int)(vertex_batch_4[j].GetBinaryY() & 0xFF) + 127, 255)),
-                        B = (byte)(Math.Min((int)(vertex_batch_4[j].GetBinaryZ() & 0xFF) + 127, 255)),
-                        A = (byte)(Math.Min((int)(vertex_batch_4[j].GetBinaryW() & 0xFF) + 127, 255)),
+                        R = (byte)Math.Min((int)(vertex_batch_4[j].GetBinaryX() & 0xFF) + 127, 255),
+                        G = (byte)Math.Min((int)(vertex_batch_4[j].GetBinaryY() & 0xFF) + 127, 255),
+                        B = (byte)Math.Min((int)(vertex_batch_4[j].GetBinaryZ() & 0xFF) + 127, 255),
+                        A = (byte)Math.Min((int)(vertex_batch_4[j].GetBinaryW() & 0xFF) + 127, 255),
                         Joint = jointInfos[j],
                         Conn = connections[j]
                     };
@@ -163,15 +162,15 @@ namespace Twinsanity
 
         internal void FillPackage(TwinsFile source, TwinsFile destination)
         {
-            var sourceMaterials = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(1);
-            var destinationMaterials = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(1);
-            foreach (var model in SubModels)
+            TwinsSection sourceMaterials = source.GetItem<TwinsSection>(11).GetItem<TwinsSection>(1);
+            TwinsSection destinationMaterials = destination.GetItem<TwinsSection>(11).GetItem<TwinsSection>(1);
+            foreach (SubModel model in SubModels)
             {
                 if (destinationMaterials.HasItem(model.MaterialID))
                 {
                     continue;
                 }
-                var linkedMaterial = sourceMaterials.GetItem<Material>(model.MaterialID);
+                Material linkedMaterial = sourceMaterials.GetItem<Material>(model.MaterialID);
                 destinationMaterials.AddItem(model.MaterialID, linkedMaterial);
                 linkedMaterial.FillPackage(source, destination);
             }

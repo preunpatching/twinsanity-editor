@@ -1,9 +1,5 @@
 ﻿using OpenTK;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TwinsanityEditor.Controllers;
 
 namespace TwinsanityEditor.Animations
@@ -64,9 +60,12 @@ namespace TwinsanityEditor.Animations
 
         public void AdvanceClock(float deltaTime) // In seconds
         {
-            if (!Playing || animation == null) return;
+            if (!Playing || animation == null)
+            {
+                return;
+            }
 
-            var frameTime = 1f / FPS;
+            float frameTime = 1f / FPS;
             time += deltaTime;
 
             while (time > frameTime)
@@ -79,7 +78,10 @@ namespace TwinsanityEditor.Animations
 
         public float[] PlayFacial()
         {
-            if (animation == null || animation.Data.FacialAnimationTotalFrames == 0) return new float[0];
+            if (animation == null || animation.Data.FacialAnimationTotalFrames == 0)
+            {
+                return new float[0];
+            }
 
             if (!Playing)
             {
@@ -90,7 +92,7 @@ namespace TwinsanityEditor.Animations
             {
                 if (Loop)
                 {
-                    animFrame %= (animation.Data.FacialAnimationTotalFrames - 1);
+                    animFrame %= animation.Data.FacialAnimationTotalFrames - 1;
                 }
                 else
                 {
@@ -101,26 +103,29 @@ namespace TwinsanityEditor.Animations
                 }
             }
 
-            var frameTime = 1f / FPS;
-            var frameDisplacement = time / frameTime;
+            float frameTime = 1f / FPS;
+            float frameDisplacement = time / frameTime;
             return animation.GetFacialAnimationTransform(animFrame, animFrame + 1, frameDisplacement);
         }
 
         public Tuple<Matrix4, Quaternion, bool> Play(int joint)
         {
-            if (animation == null) return new Tuple<Matrix4, Quaternion, bool>(Matrix4.Identity, Quaternion.Identity, false);
+            if (animation == null)
+            {
+                return new Tuple<Matrix4, Quaternion, bool>(Matrix4.Identity, Quaternion.Identity, false);
+            }
 
             if (!Playing)
             {
                 return animation.GetMainAnimationTransform(joint, animFrame, animFrame, 0);
             }
-            
+
 
             if (animFrame + 1 >= animation.Data.TotalFrames)
             {
                 if (Loop)
                 {
-                    animFrame %= (animation.Data.TotalFrames - 1);
+                    animFrame %= animation.Data.TotalFrames - 1;
                 }
                 else
                 {
@@ -131,14 +136,14 @@ namespace TwinsanityEditor.Animations
                 }
             }
 
-            var frameTime = 1f / FPS;
-            var frameDisplacement = time / frameTime;
+            float frameTime = 1f / FPS;
+            float frameDisplacement = time / frameTime;
             return animation.GetMainAnimationTransform(joint, animFrame, animFrame + 1, frameDisplacement);
         }
 
         private void OnFrameChanged(EventArgs e)
         {
-           FrameChanged?.Invoke(this, e);
+            FrameChanged?.Invoke(this, e);
         }
     }
 }

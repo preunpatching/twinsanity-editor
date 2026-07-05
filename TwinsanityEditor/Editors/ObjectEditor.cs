@@ -1,47 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Runtime.Remoting.Channels;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 using Twinsanity;
 using TwinsanityEditor.Utils;
-using System.IO;
 
 namespace TwinsanityEditor
 {
     public partial class ObjectEditor : Form
     {
-        private SectionController controller;
+        private readonly SectionController controller;
         private GameObject gameObject;
         private FileController File { get; set; }
-        private TwinsFile FileData { get => File.Data; }
+        private TwinsFile FileData => File.Data;
         private InstanceFlagsEditor flagsEditor;
 
-        private ListManipulatorEvent EventsManipulator;
-        private ListManipulatorUInt16 ScriptsManipulator;
-        private ListManipulatorUInt16 ObjectsManipulator;
-        private ListManipulatorUInt16 AnimationsManipulator;
-        private ListManipulatorUInt16 OGIManipulator;
-        private ListManipulatorUInt16 SoundManipulator;
-        private ListManipulatorUInt16 ParamsManipulator;
+        private readonly ListManipulatorEvent EventsManipulator;
+        private readonly ListManipulatorUInt16 ScriptsManipulator;
+        private readonly ListManipulatorUInt16 ObjectsManipulator;
+        private readonly ListManipulatorUInt16 AnimationsManipulator;
+        private readonly ListManipulatorUInt16 OGIManipulator;
+        private readonly ListManipulatorUInt16 SoundManipulator;
+        private readonly ListManipulatorUInt16 ParamsManipulator;
 
-        private ListManipulatorUInt16 cScriptsManipulator;
-        private ListManipulatorUInt16 cObjectsManipulator;
-        private ListManipulatorUInt16 cAnimationsManipulator;
-        private ListManipulatorUInt16 cOGIManipulator;
-        private ListManipulatorUInt16 cSoundManipulator;
-        private ListManipulatorUInt16 cCmManipulator;
+        private readonly ListManipulatorUInt16 cScriptsManipulator;
+        private readonly ListManipulatorUInt16 cObjectsManipulator;
+        private readonly ListManipulatorUInt16 cAnimationsManipulator;
+        private readonly ListManipulatorUInt16 cOGIManipulator;
+        private readonly ListManipulatorUInt16 cSoundManipulator;
+        private readonly ListManipulatorUInt16 cCmManipulator;
 
-        private ListManipulatorUInt32 instFlagsManipulator;
-        private ListManipulatorSingle instFloatsManipulator;
-        private ListManipulatorUInt32 instIntergersManipulator;
-        private ListManipulatorUInt16 unk4Manipulator;
+        private readonly ListManipulatorUInt32 instFlagsManipulator;
+        private readonly ListManipulatorSingle instFloatsManipulator;
+        private readonly ListManipulatorUInt32 instIntergersManipulator;
+        private readonly ListManipulatorUInt16 unk4Manipulator;
         public ObjectEditor(SectionController c)
         {
             File = c.MainFile;
@@ -76,37 +70,27 @@ namespace TwinsanityEditor
             objectList.Items.Clear();
             foreach (GameObject i in controller.Data.Records)
             {
-                objectList.Items.Add(GenTextForList(i));
+                _ = objectList.Items.Add(GenTextForList(i));
             }
             objectList.EndUpdate();
 
             // Populate with current script command knowledge
             for (ushort i = 0; i < Script.MainScript.ScriptCommand.ScriptCommandTableSize; ++i)
             {
-                if (Enum.IsDefined(typeof(DefaultEnums.CommandID), i))
-                {
-                    cbVTableIndexes.Items.Add(((DefaultEnums.CommandID)i).ToString());
-                }
-                else
-                {
-                    cbVTableIndexes.Items.Add("Unexisting/Unknown " + i.ToString());
-                }
+                _ = Enum.IsDefined(typeof(DefaultEnums.CommandID), i)
+                    ? cbVTableIndexes.Items.Add(((DefaultEnums.CommandID)i).ToString())
+                    : cbVTableIndexes.Items.Add("Unexisting/Unknown " + i.ToString());
             }
         }
         private void PopulateObjectCommandList()
         {
-            var command = gameObject.scriptCommand;
+            Script.MainScript.ScriptCommand command = gameObject.scriptCommand;
             commandsList.Items.Clear();
             while (command != null)
             {
-                if (Enum.IsDefined(typeof(DefaultEnums.CommandID), command.VTableIndex))
-                {
-                    commandsList.Items.Add((DefaultEnums.CommandID)command.VTableIndex);
-                }
-                else
-                {
-                    commandsList.Items.Add($"Command {command.VTableIndex}");
-                }
+                _ = Enum.IsDefined(typeof(DefaultEnums.CommandID), command.VTableIndex)
+                    ? commandsList.Items.Add((DefaultEnums.CommandID)command.VTableIndex)
+                    : commandsList.Items.Add($"Command {command.VTableIndex}");
                 command = command.nextCommand;
             }
         }
@@ -177,14 +161,14 @@ namespace TwinsanityEditor
             unk4Manipulator.PopulateList();
 
             nameSource.Text = gameObject.Name;
-            uint objType = (gameObject.UnkBitfield >> 0x14 & 0xFF);
-            uint mobileType = (gameObject.UnkBitfield >> 0xC & 0xFF);
-            uint jointIDcount = (gameObject.UnkBitfield >> 0x6 & 0x3F);
-            uint exitPointcount = (gameObject.UnkBitfield & 0x3F);
-            uint bitflag1 = (gameObject.UnkBitfield >> 0x1C & 0x1);
-            uint bitflag2 = (gameObject.UnkBitfield >> 0x1D & 0x1);
-            uint bitflag3 = (gameObject.UnkBitfield >> 0x1E & 0x1);
-            uint bitflag4 = (gameObject.UnkBitfield >> 0x1F & 0x1);
+            uint objType = (gameObject.UnkBitfield >> 0x14) & 0xFF;
+            uint mobileType = (gameObject.UnkBitfield >> 0xC) & 0xFF;
+            uint jointIDcount = (gameObject.UnkBitfield >> 0x6) & 0x3F;
+            uint exitPointcount = gameObject.UnkBitfield & 0x3F;
+            uint bitflag1 = (gameObject.UnkBitfield >> 0x1C) & 0x1;
+            uint bitflag2 = (gameObject.UnkBitfield >> 0x1D) & 0x1;
+            uint bitflag3 = (gameObject.UnkBitfield >> 0x1E) & 0x1;
+            uint bitflag4 = (gameObject.UnkBitfield >> 0x1F) & 0x1;
             comboBoxObjectType.SelectedIndex = (int)objType;
             switch (mobileType)
             {
@@ -217,16 +201,16 @@ namespace TwinsanityEditor
         {
             if (gameObject != null)
             {
-                UInt32 val = 0;
-                if (UInt32.TryParse(((TextBox)sender).Text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out val))
+                if (uint.TryParse(((TextBox)sender).Text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint val))
                 {
                     gameObject.flag = val;
                     ((TextBox)sender).BackColor = Color.White;
-                } else
+                }
+                else
                 {
                     ((TextBox)sender).BackColor = Color.Red;
                 }
-                
+
             }
         }
 
@@ -234,8 +218,7 @@ namespace TwinsanityEditor
         {
             if (gameObject != null)
             {
-                UInt32 val = 0;
-                if (UInt32.TryParse(((TextBox)sender).Text,  out val))
+                if (uint.TryParse(((TextBox)sender).Text, out uint val))
                 {
                     gameObject.ID = val;
                     ((TextBox)sender).BackColor = Color.White;
@@ -250,13 +233,20 @@ namespace TwinsanityEditor
 
         private void deleteObjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var sel_i = objectList.SelectedIndex;
+            int sel_i = objectList.SelectedIndex;
             if (sel_i == -1)
+            {
                 return;
+            }
+
             controller.RemoveItem(gameObject.ID);
             objectList.BeginUpdate();
             objectList.Items.RemoveAt(sel_i);
-            if (sel_i >= objectList.Items.Count) sel_i = objectList.Items.Count - 1;
+            if (sel_i >= objectList.Items.Count)
+            {
+                sel_i = objectList.Items.Count - 1;
+            }
+
             objectList.SelectedIndex = sel_i;
             objectList.EndUpdate();
             controller.UpdateTextBox();
@@ -265,11 +255,13 @@ namespace TwinsanityEditor
         private void createObjectToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ushort maxid = (ushort)controller.Data.RecordIDs.Select(p => p.Key).Max();
-            ushort id = Math.Max((ushort)(8192), maxid);
+            ushort id = Math.Max((ushort)8192, maxid);
             ++id;
-            GameObject newGameObject = new GameObject();
-            newGameObject.ID = id;
-            newGameObject.Name = "New Game Object";
+            GameObject newGameObject = new GameObject
+            {
+                ID = id,
+                Name = "New Game Object"
+            };
             controller.Data.AddItem(id, newGameObject);
             ((MainForm)Tag).GenTreeNode(newGameObject, controller);
             gameObject = newGameObject;
@@ -284,7 +276,7 @@ namespace TwinsanityEditor
             if (gameObject != null)
             {
                 ushort maxid = (ushort)controller.Data.RecordIDs.Select(p => p.Key).Max();
-                ushort id = Math.Max((ushort)(8192), maxid);
+                ushort id = Math.Max((ushort)8192, maxid);
                 ++id;
                 GameObject newGameObject = new GameObject();
                 using (MemoryStream stream = new MemoryStream())
@@ -308,9 +300,12 @@ namespace TwinsanityEditor
 
         private void commandsList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (skipUpdate || commandsList.SelectedIndex == -1) return;
-            
-            var command = gameObject.scriptCommands[commandsList.SelectedIndex];
+            if (skipUpdate || commandsList.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            Script.MainScript.ScriptCommand command = gameObject.scriptCommands[commandsList.SelectedIndex];
             cbVTableIndexes.SelectedIndex = command.VTableIndex;
             UpdateCommandFields(command);
         }
@@ -336,24 +331,76 @@ namespace TwinsanityEditor
         {
             // Imagine C# not having a proper way to temporarily and properly disabling Text firing TextChanged event
             skipUpdate = true;
-            if (tbHEXRepres != sender) tbHEXRepres.Text = val.ToString("X8");
-            if (tbUInt32Repres != sender)  tbUInt32Repres.Text = val.ToString();
-            if (tbFloatRepres != sender)  tbFloatRepres.Text = (BitConverter.ToSingle(BitConverter.GetBytes(val), 0)).ToString();
-            if (tbUint16_1Repres != sender)  tbUint16_1Repres.Text = (val & 0xFFFF).ToString();
-            if (tbUInt16_2Repres != sender)  tbUInt16_2Repres.Text = ((val & 0xFFFF0000) >> 16).ToString();
-            if (tbByte1Repres != sender)  tbByte1Repres.Text = ((val & 0xFF) >> 0).ToString();
-            if (tbByte2Repres != sender)  tbByte2Repres.Text = ((val & 0xFF00) >> 8).ToString();
-            if (tbByte3Repres != sender)  tbByte3Repres.Text = ((val & 0xFF0000) >> 16).ToString();
-            if (tbByte4Repres != sender)  tbByte4Repres.Text = ((val & 0xFF000000) >> 24).ToString();
-            if (tbInt32Repres != sender)  tbInt32Repres.Text = ((int)val).ToString();
-            if (tbInt16_1Repres != sender)  tbInt16_1Repres.Text = ((Int16)(val & 0xFFFF)).ToString();
-            if (tbInt16_2Repres != sender)  tbInt16_2Repres.Text = ((Int16)((val & 0xFFFF0000) >> 16)).ToString();
-            if (tbBinaryRepres != sender)  tbBinaryRepres.Text = Convert.ToString(val, 2).PadLeft(32, '0');
+            if (tbHEXRepres != sender)
+            {
+                tbHEXRepres.Text = val.ToString("X8");
+            }
+
+            if (tbUInt32Repres != sender)
+            {
+                tbUInt32Repres.Text = val.ToString();
+            }
+
+            if (tbFloatRepres != sender)
+            {
+                tbFloatRepres.Text = BitConverter.ToSingle(BitConverter.GetBytes(val), 0).ToString();
+            }
+
+            if (tbUint16_1Repres != sender)
+            {
+                tbUint16_1Repres.Text = (val & 0xFFFF).ToString();
+            }
+
+            if (tbUInt16_2Repres != sender)
+            {
+                tbUInt16_2Repres.Text = ((val & 0xFFFF0000) >> 16).ToString();
+            }
+
+            if (tbByte1Repres != sender)
+            {
+                tbByte1Repres.Text = ((val & 0xFF) >> 0).ToString();
+            }
+
+            if (tbByte2Repres != sender)
+            {
+                tbByte2Repres.Text = ((val & 0xFF00) >> 8).ToString();
+            }
+
+            if (tbByte3Repres != sender)
+            {
+                tbByte3Repres.Text = ((val & 0xFF0000) >> 16).ToString();
+            }
+
+            if (tbByte4Repres != sender)
+            {
+                tbByte4Repres.Text = ((val & 0xFF000000) >> 24).ToString();
+            }
+
+            if (tbInt32Repres != sender)
+            {
+                tbInt32Repres.Text = ((int)val).ToString();
+            }
+
+            if (tbInt16_1Repres != sender)
+            {
+                tbInt16_1Repres.Text = ((short)(val & 0xFFFF)).ToString();
+            }
+
+            if (tbInt16_2Repres != sender)
+            {
+                tbInt16_2Repres.Text = ((short)((val & 0xFFFF0000) >> 16)).ToString();
+            }
+
+            if (tbBinaryRepres != sender)
+            {
+                tbBinaryRepres.Text = Convert.ToString(val, 2).PadLeft(32, '0');
+            }
+
             if (sender != lbCommandArguments)
             {
-                for (var i = 0; i < gameObject.scriptCommands[commandsList.SelectedIndex].arguments.Count; ++i)
+                for (int i = 0; i < gameObject.scriptCommands[commandsList.SelectedIndex].arguments.Count; ++i)
                 {
-                    var selIndex = lbCommandArguments.SelectedIndex;
+                    int selIndex = lbCommandArguments.SelectedIndex;
                     lbCommandArguments.Items[i] = $"{i:D3}: 0x{gameObject.scriptCommands[commandsList.SelectedIndex].arguments[i]:X8}";
                     lbCommandArguments.SelectedIndex = selIndex;
                 }
@@ -377,8 +424,8 @@ namespace TwinsanityEditor
             {
                 parser = new Func<string, ArgParseResult>(str =>
                 {
-                    var result = new ArgParseResult();
-                    result.success = UInt32.TryParse(str, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result.val);
+                    ArgParseResult result = new ArgParseResult();
+                    result.success = uint.TryParse(str, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result.val);
                     return result;
                 }),
                 mask = 0xFFFFFFFF,
@@ -388,10 +435,10 @@ namespace TwinsanityEditor
             {
                 parser = new Func<string, ArgParseResult>(str =>
                 {
-                    var result = new ArgParseResult();
-                    var value = (int)result.val;
+                    ArgParseResult result = new ArgParseResult();
+                    int value = (int)result.val;
                     result.success = int.TryParse(str, out value);
-                    result.val = (UInt32)value;
+                    result.val = (uint)value;
                     return result;
                 }),
                 mask = 0xFFFFFFFF,
@@ -401,8 +448,8 @@ namespace TwinsanityEditor
             {
                 parser = new Func<string, ArgParseResult>(str =>
                 {
-                    var result = new ArgParseResult();
-                    result.success = UInt32.TryParse(str, out result.val);
+                    ArgParseResult result = new ArgParseResult();
+                    result.success = uint.TryParse(str, out result.val);
                     return result;
                 }),
                 mask = 0xFFFFFFFF,
@@ -412,21 +459,21 @@ namespace TwinsanityEditor
             {
                 parser = new Func<string, ArgParseResult>(str =>
                 {
-                    var result = new ArgParseResult();
-                    var value = (Single)result.val;
-                    result.success = Single.TryParse(str, out value);
-                    result.val = (UInt32)value;
+                    ArgParseResult result = new ArgParseResult();
+                    float value = result.val;
+                    result.success = float.TryParse(str, out value);
+                    result.val = (uint)value;
                     return result;
                 }),
                 mask = 0xFFFFFFFF,
                 shiftAmount = 0
             };
-            var int16_parser = new Func<string, ArgParseResult>(str =>
+            Func<string, ArgParseResult> int16_parser = new Func<string, ArgParseResult>(str =>
             {
-                var result = new ArgParseResult();
-                var value = (Int16)result.val;
-                result.success = Int16.TryParse(str, out value);
-                result.val = (UInt32)value;
+                ArgParseResult result = new ArgParseResult();
+                short value = (short)result.val;
+                result.success = short.TryParse(str, out value);
+                result.val = (uint)value;
                 return result;
             });
             tbInt16_1Repres.Tag = new ScriptArgumentParser
@@ -441,12 +488,12 @@ namespace TwinsanityEditor
                 mask = 0x0000FFFF,
                 shiftAmount = 16
             };
-            var uint16_parser = new Func<string, ArgParseResult>(str =>
+            Func<string, ArgParseResult> uint16_parser = new Func<string, ArgParseResult>(str =>
             {
-                var result = new ArgParseResult();
-                var value = (UInt16)result.val;
-                result.success = UInt16.TryParse(str, out value);
-                result.val = (UInt32)value;
+                ArgParseResult result = new ArgParseResult();
+                ushort value = (ushort)result.val;
+                result.success = ushort.TryParse(str, out value);
+                result.val = value;
                 return result;
             });
             tbUint16_1Repres.Tag = new ScriptArgumentParser
@@ -461,12 +508,12 @@ namespace TwinsanityEditor
                 mask = 0x0000FFFF,
                 shiftAmount = 16
             };
-            var byteParser = new Func<string, ArgParseResult>(str =>
+            Func<string, ArgParseResult> byteParser = new Func<string, ArgParseResult>(str =>
             {
-                var result = new ArgParseResult();
-                var value = (Byte)result.val;
-                result.success = Byte.TryParse(str, out value);
-                result.val = (UInt32)value;
+                ArgParseResult result = new ArgParseResult();
+                byte value = (byte)result.val;
+                result.success = byte.TryParse(str, out value);
+                result.val = value;
                 return result;
             });
             tbByte1Repres.Tag = new ScriptArgumentParser
@@ -497,7 +544,7 @@ namespace TwinsanityEditor
             {
                 parser = new Func<string, ArgParseResult>(str =>
                 {
-                    var result = new ArgParseResult
+                    ArgParseResult result = new ArgParseResult
                     {
                         success = true
                     };
@@ -518,14 +565,18 @@ namespace TwinsanityEditor
         private bool skipUpdate = false;
         private void textbox_RepresentationTextChanged(object sender, EventArgs e)
         {
-            if (skipUpdate) return;
+            if (skipUpdate)
+            {
+                return;
+            }
+
             TextBox tb = (TextBox)sender;
-            var parser = (ScriptArgumentParser)tb.Tag;
-            var parseResult = parser.parser(tb.Text);
+            ScriptArgumentParser parser = (ScriptArgumentParser)tb.Tag;
+            ArgParseResult parseResult = parser.parser(tb.Text);
             if (parseResult.success)
             {
                 tb.BackColor = Color.White;
-                var outVal = gameObject.scriptCommands[commandsList.SelectedIndex].arguments[lbCommandArguments.SelectedIndex];
+                uint outVal = gameObject.scriptCommands[commandsList.SelectedIndex].arguments[lbCommandArguments.SelectedIndex];
                 outVal = (outVal & parser.mask) | (parseResult.val << parser.shiftAmount);
                 gameObject.scriptCommands[commandsList.SelectedIndex].arguments[lbCommandArguments.SelectedIndex] = outVal;
                 UpdateRepresentation(outVal, sender);
@@ -537,7 +588,11 @@ namespace TwinsanityEditor
         }
         private void lbCommandArguments_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (skipUpdate) return;
+            if (skipUpdate)
+            {
+                return;
+            }
+
             ListBox lb = (ListBox)sender;
             if (lb.SelectedItem != null)
             {
@@ -547,9 +602,9 @@ namespace TwinsanityEditor
 
         private void cbVTableIndexes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var command = gameObject.scriptCommands[commandsList.SelectedIndex];
-            UInt16 val = command.VTableIndex;
-            if (UInt16.TryParse(((ComboBox)sender).SelectedIndex.ToString(), out val))
+            Script.MainScript.ScriptCommand command = gameObject.scriptCommands[commandsList.SelectedIndex];
+            _ = command.VTableIndex;
+            if (ushort.TryParse(((ComboBox)sender).SelectedIndex.ToString(), out ushort val))
             {
                 ((ComboBox)sender).BackColor = Color.White;
                 command.VTableIndex = val;
@@ -563,12 +618,12 @@ namespace TwinsanityEditor
         }
         private void UpdateCommandName(Script.MainScript.ScriptCommand command)
         {
-            var str = $"Command {command.VTableIndex}";
+            string str = $"Command {command.VTableIndex}";
             if (Enum.IsDefined(typeof(DefaultEnums.CommandID), command.VTableIndex))
             {
                 str = ((DefaultEnums.CommandID)command.VTableIndex).ToString();
             }
-            var selIndex = commandsList.SelectedIndex;
+            int selIndex = commandsList.SelectedIndex;
             skipUpdate = true;
             commandsList.Items[commandsList.SelectedIndex] = str;
             skipUpdate = false;
@@ -580,24 +635,23 @@ namespace TwinsanityEditor
             ClearRepresentation();
             lblArguments.Text = $"Arguments: {command.arguments.Count}";
             lbCommandArguments.Items.Clear();
-            for (var i = 0; i < command.arguments.Count; ++i)
+            for (int i = 0; i < command.arguments.Count; ++i)
             {
-                lbCommandArguments.Items.Add($"{i:D3}: 0x{command.arguments[i]:X8}");
+                _ = lbCommandArguments.Items.Add($"{i:D3}: 0x{command.arguments[i]:X8}");
             }
             tbBitfield.Text = command.UnkShort.ToString("X4");
             tbCommandPosition.Text = "";
         }
         private void btnAddCommand_Click(object sender, EventArgs e)
         {
-            UInt32 position;
-            if (UInt32.TryParse(tbCommandPosition.Text, out position))
+            if (uint.TryParse(tbCommandPosition.Text, out uint position))
             {
                 if (position > gameObject.scriptCommandsAmount)
                 {
-                    position = (UInt32)gameObject.scriptCommandsAmount;
+                    position = (uint)gameObject.scriptCommandsAmount;
                 }
             }
-            var newCom = new Script.MainScript.ScriptCommand(gameObject.scriptGameVersion);
+            Script.MainScript.ScriptCommand newCom = new Script.MainScript.ScriptCommand(gameObject.scriptGameVersion);
             if (position == 0)
             {
                 if (gameObject.scriptCommandsAmount > 1)
@@ -607,16 +661,16 @@ namespace TwinsanityEditor
                 }
                 gameObject.scriptCommand = newCom;
             }
-            else if (position != (UInt32)gameObject.scriptCommandsAmount)
+            else if (position != (uint)gameObject.scriptCommandsAmount)
             {
-                var prevCom = gameObject.scriptCommands[(int)(position - 1)];
+                Script.MainScript.ScriptCommand prevCom = gameObject.scriptCommands[(int)(position - 1)];
                 newCom.nextCommand = prevCom.nextCommand;
                 prevCom.nextCommand = newCom;
                 newCom.internalIndex |= 0x1000000;
             }
             else
             {
-                var prevCom = gameObject.scriptCommands[(int)(position - 1)];
+                Script.MainScript.ScriptCommand prevCom = gameObject.scriptCommands[(int)(position - 1)];
                 prevCom.nextCommand = newCom;
                 prevCom.internalIndex |= 0x1000000;
             }
@@ -631,26 +685,19 @@ namespace TwinsanityEditor
             {
                 if (gameObject.scriptCommandsAmount > 1 && commandsList.SelectedIndex == gameObject.scriptCommandsAmount - 1)
                 {
-                    var prevCom = gameObject.scriptCommands[commandsList.SelectedIndex - 1];
+                    Script.MainScript.ScriptCommand prevCom = gameObject.scriptCommands[commandsList.SelectedIndex - 1];
                     prevCom.nextCommand = null;
                     prevCom.internalIndex &= 0x70FFFFFF;
                 }
                 else if (commandsList.SelectedIndex != 0)
                 {
-                    var remCom = gameObject.scriptCommands[commandsList.SelectedIndex];
-                    var prevCom = gameObject.scriptCommands[commandsList.SelectedIndex - 1];
+                    Script.MainScript.ScriptCommand remCom = gameObject.scriptCommands[commandsList.SelectedIndex];
+                    Script.MainScript.ScriptCommand prevCom = gameObject.scriptCommands[commandsList.SelectedIndex - 1];
                     prevCom.nextCommand = remCom.nextCommand;
                 }
                 else
                 { // If first command is being removed, set new starting command
-                    if (gameObject.scriptCommandsAmount > 1)
-                    {
-                        gameObject.scriptCommand = gameObject.scriptCommands[1];
-                    }
-                    else
-                    {
-                        gameObject.scriptCommand = null;
-                    }
+                    gameObject.scriptCommand = gameObject.scriptCommandsAmount > 1 ? gameObject.scriptCommands[1] : null;
                 }
                 gameObject.scriptCommands.RemoveAt(commandsList.SelectedIndex);
                 gameObject.scriptCommandsAmount--;
@@ -663,7 +710,7 @@ namespace TwinsanityEditor
 
         private void typeSource_TextChanged(object sender, EventArgs e)
         {
-            
+
         }
 
 
@@ -687,11 +734,11 @@ namespace TwinsanityEditor
 
         private void comboBoxObjectType_SelectedIndexChanged(object sender, EventArgs e)
         {
-            uint objType = (gameObject.UnkBitfield >> 0x14 & 0xFF);
-            uint mobileType = (gameObject.UnkBitfield >> 0xC & 0xFF);
-            uint jointIDcount = (gameObject.UnkBitfield >> 0x6 & 0x3F);
-            uint exitPointcount = (gameObject.UnkBitfield & 0x3F);
-            uint rest = (gameObject.UnkBitfield >> 0x1C);
+            _ = (gameObject.UnkBitfield >> 0x14) & 0xFF;
+            uint mobileType = (gameObject.UnkBitfield >> 0xC) & 0xFF;
+            uint jointIDcount = (gameObject.UnkBitfield >> 0x6) & 0x3F;
+            uint exitPointcount = gameObject.UnkBitfield & 0x3F;
+            uint rest = gameObject.UnkBitfield >> 0x1C;
             gameObject.UnkBitfield = 0;
             gameObject.UnkBitfield += (uint)comboBoxObjectType.SelectedIndex << 0x14;
             gameObject.UnkBitfield += mobileType << 0xC;
@@ -702,11 +749,11 @@ namespace TwinsanityEditor
 
         private void comboBoxObjectMobileType_SelectedIndexChanged(object sender, EventArgs e)
         {
-            uint objType = (gameObject.UnkBitfield >> 0x14 & 0xFF);
-            uint mobileType = (gameObject.UnkBitfield >> 0xC & 0xFF);
-            uint jointIDcount = (gameObject.UnkBitfield >> 0x6 & 0x3F);
-            uint exitPointcount = (gameObject.UnkBitfield & 0x3F);
-            uint rest = (gameObject.UnkBitfield >> 0x1C);
+            uint objType = (gameObject.UnkBitfield >> 0x14) & 0xFF;
+            _ = (gameObject.UnkBitfield >> 0xC) & 0xFF;
+            uint jointIDcount = (gameObject.UnkBitfield >> 0x6) & 0x3F;
+            uint exitPointcount = gameObject.UnkBitfield & 0x3F;
+            uint rest = gameObject.UnkBitfield >> 0x1C;
             gameObject.UnkBitfield = 0;
             gameObject.UnkBitfield += objType << 0x14;
             switch (comboBoxObjectMobileType.SelectedIndex)
@@ -722,11 +769,11 @@ namespace TwinsanityEditor
 
         private void numericUpDownJointIDs_ValueChanged(object sender, EventArgs e)
         {
-            uint objType = (gameObject.UnkBitfield >> 0x14 & 0xFF);
-            uint mobileType = (gameObject.UnkBitfield >> 0xC & 0xFF);
-            uint jointIDcount = (gameObject.UnkBitfield >> 0x6 & 0x3F);
-            uint exitPointcount = (gameObject.UnkBitfield & 0x3F);
-            uint rest = (gameObject.UnkBitfield >> 0x1C);
+            uint objType = (gameObject.UnkBitfield >> 0x14) & 0xFF;
+            uint mobileType = (gameObject.UnkBitfield >> 0xC) & 0xFF;
+            _ = (gameObject.UnkBitfield >> 0x6) & 0x3F;
+            uint exitPointcount = gameObject.UnkBitfield & 0x3F;
+            uint rest = gameObject.UnkBitfield >> 0x1C;
             gameObject.UnkBitfield = 0;
             gameObject.UnkBitfield += objType << 0x14;
             gameObject.UnkBitfield += mobileType << 0xC;
@@ -737,11 +784,11 @@ namespace TwinsanityEditor
 
         private void numericUpDownExitPoints_ValueChanged(object sender, EventArgs e)
         {
-            uint objType = (gameObject.UnkBitfield >> 0x14 & 0xFF);
-            uint mobileType = (gameObject.UnkBitfield >> 0xC & 0xFF);
-            uint jointIDcount = (gameObject.UnkBitfield >> 0x6 & 0x3F);
-            uint exitPointcount = (gameObject.UnkBitfield & 0x3F);
-            uint rest = (gameObject.UnkBitfield >> 0x1C);
+            uint objType = (gameObject.UnkBitfield >> 0x14) & 0xFF;
+            uint mobileType = (gameObject.UnkBitfield >> 0xC) & 0xFF;
+            uint jointIDcount = (gameObject.UnkBitfield >> 0x6) & 0x3F;
+            _ = gameObject.UnkBitfield & 0x3F;
+            uint rest = gameObject.UnkBitfield >> 0x1C;
             gameObject.UnkBitfield = 0;
             gameObject.UnkBitfield += objType << 0x14;
             gameObject.UnkBitfield += mobileType << 0xC;

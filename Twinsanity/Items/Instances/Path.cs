@@ -1,5 +1,5 @@
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Twinsanity
 {
@@ -11,7 +11,7 @@ namespace Twinsanity
         public override void Save(BinaryWriter writer)
         {
             writer.Write(Positions.Count);
-            foreach (var p in Positions)
+            foreach (Pos p in Positions)
             {
                 writer.Write(p.X);
                 writer.Write(p.Y);
@@ -19,7 +19,7 @@ namespace Twinsanity
                 writer.Write(p.W);
             }
             writer.Write(Params.Count);
-            foreach (var p in Params)
+            foreach (PathParam p in Params)
             {
                 writer.Write(p.P1);
                 writer.Write(p.P2);
@@ -42,7 +42,7 @@ namespace Twinsanity
 
         protected override int GetSize()
         {
-            return 8 + Positions.Count * 16 + Params.Count * 8;
+            return 8 + (Positions.Count * 16) + (Params.Count * 8);
         }
 
         #region STRUCTURES

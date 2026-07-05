@@ -1,35 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Twinsanity.VIF
 {
     public class GIFTag
     {
-        public UInt16 NLOOP { get; set; }
-        public Byte EOP { get; set; }
-        public Byte PRE { get; set; }
-        public UInt16 PRIM { get; set; }
+        public ushort NLOOP { get; set; }
+        public byte EOP { get; set; }
+        public byte PRE { get; set; }
+        public ushort PRIM { get; set; }
         public GIFModeEnum FLG { get; set; }
-        public Byte NREG { get; set; }
+        public byte NREG { get; set; }
         public REGSEnum[] REGS { get; set; }
         public List<RegOutput> Data { get; set; }
-        private UInt64 Q = 0x3F800000;
+        private ulong Q = 0x3F800000;
         public void Read(BinaryReader reader)
         {
-            UInt64 low = reader.ReadUInt64();
-            NLOOP = (UInt16)((low & (UInt64)0b111111111111111) >> 0);
-            EOP = (Byte)((low & ((UInt64)0b1 << 15)) >> 15);
-            PRE = (Byte)((low & ((UInt64)0b1 << 46)) >> 46);
-            PRIM = (UInt16)((low & ((UInt64)0b11111111111 << 47)) >> 47);
-            FLG = (GIFModeEnum)((low & (((UInt64)0b11) << 58)) >> 58);
-            NREG = (Byte)((low & ((UInt64)0b1111 << 60)) >> 60);
-            NREG = (NREG == 0) ? (Byte)16 : NREG;
+            ulong low = reader.ReadUInt64();
+            NLOOP = (ushort)((low & 0b111111111111111) >> 0);
+            EOP = (byte)((low & ((ulong)0b1 << 15)) >> 15);
+            PRE = (byte)((low & ((ulong)0b1 << 46)) >> 46);
+            PRIM = (ushort)((low & ((ulong)0b11111111111 << 47)) >> 47);
+            FLG = (GIFModeEnum)((low & (((ulong)0b11) << 58)) >> 58);
+            NREG = (byte)((low & ((ulong)0b1111 << 60)) >> 60);
+            NREG = (NREG == 0) ? (byte)16 : NREG;
             REGS = new REGSEnum[16];
-            UInt64 high = reader.ReadUInt64();
+            ulong high = reader.ReadUInt64();
             for (int i = 0; i < 16; ++i)
             {
                 REGS[i] = (REGSEnum)(high & 0b1111);
@@ -38,9 +35,11 @@ namespace Twinsanity.VIF
             Data = new List<RegOutput>();
             if (PRE == 1)
             {
-                RegOutput prim = new RegOutput();
-                prim.REG = REGSEnum.PRIM;
-                prim.Output = PRIM;
+                RegOutput prim = new RegOutput
+                {
+                    REG = REGSEnum.PRIM,
+                    Output = PRIM
+                };
                 Data.Add(prim);
             }
             switch (FLG)
@@ -75,7 +74,7 @@ namespace Twinsanity.VIF
         private void Interpret(BinaryReader reader, REGSEnum REG, List<RegOutput> list)
         {
             RegOutput output = new RegOutput();
-            UInt64 low, high;
+            ulong low, high;
             switch (FLG)
             {
                 case GIFModeEnum.PACKED:
@@ -85,69 +84,55 @@ namespace Twinsanity.VIF
                     switch (REG)
                     {
                         case REGSEnum.RGBAQ:
-                            UInt64 r = BitUtils.GetBits(low, 8, 0);
-                            UInt64 g = BitUtils.GetBits(low, 8, 23);
-                            UInt64 b = BitUtils.GetBits(low, 8, 46);
-                            UInt64 a = BitUtils.GetBits(low, 8, 69);
+                            ulong r = BitUtils.GetBits(low, 8, 0);
+                            ulong g = BitUtils.GetBits(low, 8, 23);
+                            ulong b = BitUtils.GetBits(low, 8, 46);
+                            ulong a = BitUtils.GetBits(low, 8, 69);
                             output.Output = BitUtils.SetBits(BitUtils.SetBits(BitUtils.SetBits(BitUtils.SetBits(r, g, 8), b, 16), a, 24), Q, 32);
                             break;
                         case REGSEnum.ST:
-                            UInt64 s = BitUtils.GetBits(low, 32, 0);
-                            UInt64 t = BitUtils.GetBits(low, 32, 32);
-                            UInt64 q = BitUtils.GetBits(high, 32, 0);
+                            ulong s = BitUtils.GetBits(low, 32, 0);
+                            ulong t = BitUtils.GetBits(low, 32, 32);
+                            ulong q = BitUtils.GetBits(high, 32, 0);
                             Q = q;
                             output.Output = BitUtils.SetBits(s, t, 32);
                             break;
                         case REGSEnum.UV:
-                            UInt64 v = BitUtils.GetBits(low, 14, 0);
-                            UInt64 u = BitUtils.GetBits(low, 14, 32);
+                            ulong v = BitUtils.GetBits(low, 14, 0);
+                            ulong u = BitUtils.GetBits(low, 14, 32);
                             output.Output = BitUtils.SetBits(v, u, 16);
                             break;
                         case REGSEnum.XYZF2:
                             {
-                                UInt64 x = BitUtils.GetBits(low, 16, 0);
-                                UInt64 y = BitUtils.GetBits(low, 16, 32);
-                                UInt64 z = BitUtils.GetBits(high, 24, 4);
-                                UInt64 f = BitUtils.GetBits(high, 8, 36);
-                                UInt64 adc = BitUtils.GetBits(high, 1, 47);
-                                if (adc == 0)
-                                {
-                                    output.REG = REGSEnum.XYZF2;
-                                }
-                                else
-                                {
-                                    output.REG = REGSEnum.XYZF3;
-                                }
+                                ulong x = BitUtils.GetBits(low, 16, 0);
+                                ulong y = BitUtils.GetBits(low, 16, 32);
+                                ulong z = BitUtils.GetBits(high, 24, 4);
+                                ulong f = BitUtils.GetBits(high, 8, 36);
+                                ulong adc = BitUtils.GetBits(high, 1, 47);
+                                output.REG = adc == 0 ? REGSEnum.XYZF2 : REGSEnum.XYZF3;
                                 output.Output = BitUtils.SetBits(BitUtils.SetBits(BitUtils.SetBits(x, y, 16), z, 32), f, 56);
                             }
                             break;
                         case REGSEnum.XYZ2:
                             {
-                                UInt64 x = BitUtils.GetBits(low, 16, 0);
-                                UInt64 y = BitUtils.GetBits(low, 16, 32);
-                                UInt64 z = BitUtils.GetBits(high, 32, 0);
-                                UInt64 adc = BitUtils.GetBits(high, 1, 47);
-                                if (adc == 0)
-                                {
-                                    output.REG = REGSEnum.XYZ2;
-                                }
-                                else
-                                {
-                                    output.REG = REGSEnum.XYZ3;
-                                }
+                                ulong x = BitUtils.GetBits(low, 16, 0);
+                                ulong y = BitUtils.GetBits(low, 16, 32);
+                                ulong z = BitUtils.GetBits(high, 32, 0);
+                                ulong adc = BitUtils.GetBits(high, 1, 47);
+                                output.REG = adc == 0 ? REGSEnum.XYZ2 : REGSEnum.XYZ3;
                                 output.Output = BitUtils.SetBits(BitUtils.SetBits(x, y, 16), z, 32);
                             }
 
                             break;
                         case REGSEnum.FOG:
                             {
-                                UInt64 f = BitUtils.GetBits(high, 8, 36);
+                                ulong f = BitUtils.GetBits(high, 8, 36);
                                 output.Output = BitUtils.SetBits(0, f, 56);
                             }
                             break;
                         case REGSEnum.ApD:
-                            UInt64 Data = high;
-                            UInt64 Addr = BitUtils.GetBits(low, 7, 0);
+                            ulong Data = high;
+                            ulong Addr = BitUtils.GetBits(low, 7, 0);
                             output.Output = Data;
                             output.Address = Addr;
                             break;
@@ -189,18 +174,18 @@ namespace Twinsanity.VIF
         }
         public void Write(BinaryWriter writer)
         {
-            UInt64 low = 0;
-            low |= ((UInt64)NLOOP & 0b111111111111111) << 0;
-            low |= ((UInt64)EOP & 0b1) << 15;
-            low |= ((UInt64)PRE & 0b1) << 46;
-            low |= ((UInt64)PRIM & 0b11111111111) << 47;
-            low |= ((UInt64)FLG & 0b11) << 58;
-            low |= ((UInt64)NREG & 0b1111) << 60;
+            ulong low = 0;
+            low |= ((ulong)NLOOP & 0b111111111111111) << 0;
+            low |= ((ulong)EOP & 0b1) << 15;
+            low |= ((ulong)PRE & 0b1) << 46;
+            low |= ((ulong)PRIM & 0b11111111111) << 47;
+            low |= ((ulong)FLG & 0b11) << 58;
+            low |= ((ulong)NREG & 0b1111) << 60;
             writer.Write(low);
-            UInt64 high = 0;
+            ulong high = 0;
             for (int i = 0; i < 16; ++i)
             {
-                high |= (UInt64)REGS[REGS.Length - i - 1] & 0b1111;
+                high |= (ulong)REGS[REGS.Length - i - 1] & 0b1111;
                 if (i != 15)
                 {
                     high <<= 4;
@@ -211,7 +196,7 @@ namespace Twinsanity.VIF
             {
                 case GIFModeEnum.PACKED:
                     // Twinsanity textures only use A+D with PACKED, so we can safely ignore all the other writes
-                    for (var i = 0; i < Data.Count; ++i)
+                    for (int i = 0; i < Data.Count; ++i)
                     {
                         switch (Data[i].REG)
                         {
@@ -223,13 +208,13 @@ namespace Twinsanity.VIF
                     }
                     break;
                 case GIFModeEnum.REGLIST:
-                    for (var i = 0; i < Data.Count; ++i)
+                    for (int i = 0; i < Data.Count; ++i)
                     {
                         writer.Write(Data[i].Output);
                     }
                     break;
                 case GIFModeEnum.IMAGE:
-                    for (var i = 0; i < Data.Count; i += 2)
+                    for (int i = 0; i < Data.Count; i += 2)
                     {
                         writer.Write(Data[i + 1].Output);
                         writer.Write(Data[i].Output);
@@ -240,7 +225,7 @@ namespace Twinsanity.VIF
                     break;
             }
         }
-        public Int32 GetLength()
+        public int GetLength()
         {
             switch (FLG)
             {
@@ -285,124 +270,121 @@ namespace Twinsanity.VIF
     }
     public class RegOutput
     {
-        private UInt64 _Output;
-        public UInt64 Output
+        private ulong _Output;
+        public ulong Output
         {
-            get
-            {
-                return _Output;
-            }
+            get => _Output;
             set
             {
                 _Output = value;
                 switch (REG)
                 {
                     case REGSEnum.RGBAQ:
-                        R = (Byte)BitUtils.GetBits(_Output, 8, 0);
-                        G = (Byte)BitUtils.GetBits(_Output, 8, 8);
-                        B = (Byte)BitUtils.GetBits(_Output, 8, 16);
-                        A = (Byte)BitUtils.GetBits(_Output, 8, 24);
-                        Q = BitConverter.ToSingle(BitConverter.GetBytes((UInt32)BitUtils.GetBits(_Output, 32, 32)), 0);
+                        R = (byte)BitUtils.GetBits(_Output, 8, 0);
+                        G = (byte)BitUtils.GetBits(_Output, 8, 8);
+                        B = (byte)BitUtils.GetBits(_Output, 8, 16);
+                        A = (byte)BitUtils.GetBits(_Output, 8, 24);
+                        Q = BitConverter.ToSingle(BitConverter.GetBytes((uint)BitUtils.GetBits(_Output, 32, 32)), 0);
                         break;
                     case REGSEnum.ST:
-                        S = BitConverter.ToSingle(BitConverter.GetBytes((UInt32)BitUtils.GetBits(_Output, 32, 0)), 0);
-                        T = BitConverter.ToSingle(BitConverter.GetBytes((UInt32)BitUtils.GetBits(_Output, 32, 32)), 0);
+                        S = BitConverter.ToSingle(BitConverter.GetBytes((uint)BitUtils.GetBits(_Output, 32, 0)), 0);
+                        T = BitConverter.ToSingle(BitConverter.GetBytes((uint)BitUtils.GetBits(_Output, 32, 32)), 0);
                         break;
                     case REGSEnum.UV:
-                        UInt64 v = BitUtils.GetBits(_Output, 14, 0);
-                        UInt64 v_int = BitUtils.GetBits(v, 10, 4);
-                        UInt64 v_fract = BitUtils.GetBits(v, 4, 0);
-                        UInt64 u = BitUtils.GetBits(_Output, 14, 16);
-                        UInt64 u_int = BitUtils.GetBits(u, 10, 4);
-                        UInt64 u_fract = BitUtils.GetBits(u, 4, 0);
+                        ulong v = BitUtils.GetBits(_Output, 14, 0);
+                        ulong v_int = BitUtils.GetBits(v, 10, 4);
+                        ulong v_fract = BitUtils.GetBits(v, 4, 0);
+                        ulong u = BitUtils.GetBits(_Output, 14, 16);
+                        ulong u_int = BitUtils.GetBits(u, 10, 4);
+                        ulong u_fract = BitUtils.GetBits(u, 4, 0);
                         U = BitUtils.FixedToSingle(u_int, u_fract, 4);
                         V = BitUtils.FixedToSingle(v_int, v_fract, 4);
                         break;
                     case REGSEnum.XYZF3:
                     case REGSEnum.XYZF2:
                         {
-                            Z = (UInt32)BitUtils.GetBits(_Output, 24, 32);
-                            UInt64 x = BitUtils.GetBits(_Output, 16, 0);
-                            UInt64 x_int = BitUtils.GetBits(x, 12, 4);
-                            UInt64 x_fract = BitUtils.GetBits(x, 4, 0);
-                            UInt64 y = BitUtils.GetBits(_Output, 16, 16);
-                            UInt64 y_int = BitUtils.GetBits(y, 12, 4);
-                            UInt64 y_fract = BitUtils.GetBits(y, 4, 0);
+                            Z = (uint)BitUtils.GetBits(_Output, 24, 32);
+                            ulong x = BitUtils.GetBits(_Output, 16, 0);
+                            ulong x_int = BitUtils.GetBits(x, 12, 4);
+                            ulong x_fract = BitUtils.GetBits(x, 4, 0);
+                            ulong y = BitUtils.GetBits(_Output, 16, 16);
+                            ulong y_int = BitUtils.GetBits(y, 12, 4);
+                            ulong y_fract = BitUtils.GetBits(y, 4, 0);
                             X = BitUtils.FixedToSingle(x_int, x_fract, 4);
                             Y = BitUtils.FixedToSingle(y_int, y_fract, 4);
-                            F = (Byte)BitUtils.GetBits(_Output, 8, 56);
+                            F = (byte)BitUtils.GetBits(_Output, 8, 56);
                         }
                         break;
                     case REGSEnum.XYZ3:
                     case REGSEnum.XYZ2:
                         {
-                            Z = (UInt32)(_Output >> 32);
-                            UInt64 x = BitUtils.GetBits(_Output, 16, 0);
-                            UInt64 x_int = BitUtils.GetBits(x, 12, 4);
-                            UInt64 x_fract = BitUtils.GetBits(x, 4, 0);
-                            UInt64 y = BitUtils.GetBits(_Output, 16, 16);
-                            UInt64 y_int = BitUtils.GetBits(y, 12, 4);
-                            UInt64 y_fract = BitUtils.GetBits(y, 4, 0);
+                            Z = (uint)(_Output >> 32);
+                            ulong x = BitUtils.GetBits(_Output, 16, 0);
+                            ulong x_int = BitUtils.GetBits(x, 12, 4);
+                            ulong x_fract = BitUtils.GetBits(x, 4, 0);
+                            ulong y = BitUtils.GetBits(_Output, 16, 16);
+                            ulong y_int = BitUtils.GetBits(y, 12, 4);
+                            ulong y_fract = BitUtils.GetBits(y, 4, 0);
                             X = BitUtils.FixedToSingle(x_int, x_fract, 4);
                             Y = BitUtils.FixedToSingle(y_int, y_fract, 4);
                         }
                         break;
                     case REGSEnum.FOG:
                         {
-                            F = (Byte)(_Output >> 56);
+                            F = (byte)(_Output >> 56);
                         }
                         break;
                 }
             }
         }
         public REGSEnum REG { get; set; }
-        public UInt64 Address { get; set; }
-        public UInt16 PRIM { get; set; }
-        public Byte A { get; set; }
-        public Byte R { get; set; }
-        public Byte G { get; set; }
-        public Byte B { get; set; }
-        public Single Q { get; set; }
-        public Single T { get; set; }
-        public Single S { get; set; }
-        public Single V { get; set; }
-        public Single U { get; set; }
-        public Single X { get; set; }
-        public Single Y { get; set; }
-        public UInt32 Z { get; set; }
-        public Byte F { get; set; }
+        public ulong Address { get; set; }
+        public ushort PRIM { get; set; }
+        public byte A { get; set; }
+        public byte R { get; set; }
+        public byte G { get; set; }
+        public byte B { get; set; }
+        public float Q { get; set; }
+        public float T { get; set; }
+        public float S { get; set; }
+        public float V { get; set; }
+        public float U { get; set; }
+        public float X { get; set; }
+        public float Y { get; set; }
+        public uint Z { get; set; }
+        public byte F { get; set; }
     }
     public static class BitUtils
     {
-        public static Single[] Fracts;
+        public static float[] Fracts;
 
         static BitUtils()
         {
-            Fracts = new Single[64];
+            Fracts = new float[64];
             for (int i = 0; i < 64; ++i)
             {
-                Fracts[i] = 1.0f / ((Single)Math.Pow(2, i));
+                Fracts[i] = 1.0f / ((float)Math.Pow(2, i));
             }
         }
-        public static UInt64 GetBits(UInt64 src, Byte len, Byte offset)
+        public static ulong GetBits(ulong src, byte len, byte offset)
         {
-            UInt64 mask = 0;
+            ulong mask = 0;
             for (int i = 0; i < len; ++i)
             {
                 mask = (mask << 1) | 1;
             }
-            return ((src & ((UInt64)0b11111111 << offset)) >> offset);
+            return (src & ((ulong)0b11111111 << offset)) >> offset;
         }
-        public static UInt64 SetBits(UInt64 src, UInt64 val, Byte offset)
+        public static ulong SetBits(ulong src, ulong val, byte offset)
         {
             return src | (val << offset);
         }
-        public static Single FixedToSingle(UInt64 I, UInt64 F, Byte fractLength)
+        public static float FixedToSingle(ulong I, ulong F, byte fractLength)
         {
-            Single result = (Single)I;
+            float result = I;
             for (int i = 1; i <= fractLength; ++i)
             {
-                Single fract = Fracts[fractLength - i];
+                float fract = Fracts[fractLength - i];
                 if ((F & 0b1) != 0)
                 {
                     result += fract;

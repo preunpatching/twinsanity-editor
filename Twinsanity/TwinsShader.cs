@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace Twinsanity
 {
     public class TwinsShader
     {
-        public UInt32 ShaderType { get; set; }
-        public UInt32 IntParam { get; set; }
-        public Single[] FloatParam { get; private set; }
+        public uint ShaderType { get; set; }
+        public uint IntParam { get; set; }
+        public float[] FloatParam { get; private set; }
         public AlphaBlending ABlending;
         public byte AlphaRegSettingsIndex;
         public AlphaTest ATest;
@@ -43,14 +38,14 @@ namespace Twinsanity
         public bool UnkFlag3;
         public bool BlobFlag; // Technically blobs have never been encountered before yet
         // For LOD level calculation the following formula is used: LOD = (log2(1/Q)<<L)+K, applicable only to STQ TextureCoordinatesSpecification
-        public UInt16 LodParamK { get; set; }
-        public UInt16 LodParamL { get; set; }
+        public ushort LodParamK { get; set; }
+        public ushort LodParamL { get; set; }
         public TwinsVector4 UnkVector1 { get; set; }
         public TwinsVector4 UnkVector2 { get; set; }
         public TwinsVector4 UnkVector3 { get; set; }
-        public UInt32 TextureId { get; set; }
+        public uint TextureId { get; set; }
         public bool isDemo { get; set; }
-        
+
         public TwinsShader()
         {
             FloatParam = new float[4];
@@ -68,7 +63,7 @@ namespace Twinsanity
             {
                 paramLen -= 2;
             }
-            return 4 + paramLen + 30 + 4 + 16 * 3 + 8;
+            return 4 + paramLen + 30 + 4 + (16 * 3) + 8;
         }
 
         public void Read(BinaryReader reader, int length, bool Demo = false, bool SMBA = false)
@@ -142,10 +137,10 @@ namespace Twinsanity
             UnkVector3.Load(reader, 16);
             if (SMBA)
             {
-                reader.ReadUInt16(); // todo somewhere here these 2 bytes
+                _ = reader.ReadUInt16(); // todo somewhere here these 2 bytes
             }
             TextureId = reader.ReadUInt32();
-            reader.ReadUInt32(); // Shader type
+            _ = reader.ReadUInt32(); // Shader type
         }
 
         public void Write(BinaryWriter writer)
@@ -228,21 +223,21 @@ namespace Twinsanity
         }
         public enum AlphaTestMethod
         {
-            NEVER       = 0b000,
-            ALWAYS      = 0b001,
-            LESS        = 0b010,
-            LEQUAL      = 0b011,
-            EQUAL       = 0b100,
-            GEQUAL      = 0b101,
-            GREATER     = 0b110,
-            NOTEQUAL    = 0b111
+            NEVER = 0b000,
+            ALWAYS = 0b001,
+            LESS = 0b010,
+            LEQUAL = 0b011,
+            EQUAL = 0b100,
+            GEQUAL = 0b101,
+            GREATER = 0b110,
+            NOTEQUAL = 0b111
         }
         public enum ProcessAfterAlphaTestFailed
         {
-            KEEP        = 0b00,
-            FB_ONLY     = 0b01,
-            ZB_ONLY     = 0b10,
-            RGB_ONLY    = 0b11
+            KEEP = 0b00,
+            FB_ONLY = 0b01,
+            ZB_ONLY = 0b10,
+            RGB_ONLY = 0b11
         }
         public enum DestinationAlphaTest
         {
@@ -256,14 +251,14 @@ namespace Twinsanity
         }
         public enum DepthTestMethod
         {
-            NEVER   = 0b00,
-            ALWAYS  = 0b01,
-            GEQUAL  = 0b10,
+            NEVER = 0b00,
+            ALWAYS = 0b01,
+            GEQUAL = 0b10,
             GREATER = 0b11
         }
         public enum ShadingMethod
         {
-            FLAT    = 0,
+            FLAT = 0,
             GOURAND = 1
         }
         public enum TextureMapping
@@ -288,9 +283,9 @@ namespace Twinsanity
         }
         public enum ColorSpecMethod
         {
-            SOURCE   = 0b00,
-            FB       = 0b01,
-            ZERO     = 0b10,
+            SOURCE = 0b00,
+            FB = 0b01,
+            ZERO = 0b10,
             RESERVED = 0b11
         }
         public enum AlphaSpecMethod

@@ -1,5 +1,5 @@
-﻿using System.Windows.Forms;
-using System.IO;
+﻿using System.IO;
+using System.Windows.Forms;
 using Twinsanity;
 
 namespace TwinsanityEditor
@@ -56,8 +56,10 @@ namespace TwinsanityEditor
 
         private void Menu_ExtractItem()
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.FileName = GetName().Replace(":", string.Empty);
+            SaveFileDialog sfd = new SaveFileDialog
+            {
+                FileName = GetName().Replace(":", string.Empty)
+            };
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 FileStream file = new FileStream(sfd.FileName, FileMode.Create, FileAccess.Write);
@@ -109,7 +111,10 @@ namespace TwinsanityEditor
                     col.Load(reader, (int)reader.BaseStream.Length);
                 }
                 else
+                {
                     Data.Load(reader, (int)reader.BaseStream.Length);
+                }
+
                 reader.Close();
                 UpdateText();
             }
@@ -120,6 +125,9 @@ namespace TwinsanityEditor
             MainFile.OpenIDEditor(this);
         }
 
-        public string GetItemName() => GetName();
+        public string GetItemName()
+        {
+            return GetName();
+        }
     }
 }

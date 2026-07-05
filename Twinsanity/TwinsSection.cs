@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Twinsanity;
 
 namespace Twinsanity
 {
@@ -11,7 +10,8 @@ namespace Twinsanity
     /// 
     /// Please append more section types at the END of this list, BEFORE "Last".
     /// </summary>
-    public enum SectionType {
+    public enum SectionType
+    {
         Null,
         Graphics, GraphicsX, GraphicsD, GraphicsMB,
         Code, CodeDemo, CodeX, CodeMB,
@@ -75,7 +75,7 @@ namespace Twinsanity
         public Dictionary<uint, int> RecordIDs = new Dictionary<uint, int>();
         public SectionType Type { get; set; }
         public int Level { get; set; }
-        public int ContentSize { get => GetContentSize(); }
+        public int ContentSize => GetContentSize();
 
         public byte[] ExtraData { get; set; } = new byte[0];
 
@@ -97,21 +97,25 @@ namespace Twinsanity
             this.size = size;
             Records = new List<TwinsItem>();
             RecordIDs = new Dictionary<uint, int>();
-            var MagicStart = reader.BaseStream.Position;
+            long MagicStart = reader.BaseStream.Position;
             if (size < 0xC || ((Magic = reader.ReadUInt32()) != magic && Magic != magicV2))
+            {
                 return;
-            int count = 0;
+            }
+
+            int count;
             if (isMonkeyBallPS2)
             {
                 count = reader.ReadInt16();
-                reader.ReadBytes(2); // compression flag?
+                _ = reader.ReadBytes(2); // compression flag?
             }
             else
             {
                 count = reader.ReadInt32();
             }
-            var sec_size = reader.ReadUInt32();
-            var start_sk = reader.BaseStream.Position - 12;
+
+            _ = reader.ReadUInt32();
+            long start_sk = reader.BaseStream.Position - 12;
             long extra_begin = 12;
 
             if (isMonkeyBallPS2 && Level == 2)
@@ -129,15 +133,15 @@ namespace Twinsanity
                 }
                 for (int i = 0; i < count; i++)
                 {
-                    int ItemSize = 0;
                     bool compressionCheck = true;
-                    var sk = reader.BaseStream.Position;
-                    if (i != count - 1)
-                        ItemSize = (int)(SubItems[i + 1].Off - SubItems[i].Off);
-                    else
-                        ItemSize = (int)(size - SubItems[i].Off);
-                    if (SubItems[i].Size == ItemSize) compressionCheck = false;
-                    int preSize = SubItems[i].Size;
+                    long sk = reader.BaseStream.Position;
+                    int ItemSize = i != count - 1 ? (int)(SubItems[i + 1].Off - SubItems[i].Off) : (int)(size - SubItems[i].Off);
+                    if (SubItems[i].Size == ItemSize)
+                    {
+                        compressionCheck = false;
+                    }
+
+                    _ = SubItems[i].Size;
                     reader.BaseStream.Position = MagicStart + SubItems[i].Off;
                     extra_begin = Math.Max(SubItems[i].Off + ItemSize, extra_begin);
                     if (i == count - 1 && Type == SectionType.MB_SE)
@@ -154,15 +158,17 @@ namespace Twinsanity
                     {
                         try
                         {
-                            reader.ReadBytes(4); // PACK
+                            _ = reader.ReadBytes(4); // PACK
                             byte[] outData = InteropUCL.DecompressNRV2B(reader.ReadBytes(ItemSize - 4));
                             using (MemoryStream subMem = new MemoryStream(outData))
                             using (BinaryReader subReader = new BinaryReader(subMem))
+                            {
                                 LoadSectionItem(subReader, SubItems[i]);
+                            }
                         }
                         catch
                         {
-                            Console.WriteLine($"Failed to unpack item {SubItems[i].ID} in {Type} at {(MagicStart + SubItems[i].Off):X8}");
+                            Console.WriteLine($"Failed to unpack item {SubItems[i].ID} in {Type} at {MagicStart + SubItems[i].Off:X8}");
                         }
                     }
                     else
@@ -184,8 +190,8 @@ namespace Twinsanity
                     Size = reader.ReadInt32(),
                     ID = reader.ReadUInt32()
                 };
-                var sk = reader.BaseStream.Position;
-                reader.BaseStream.Position = sk - (i + 2) * 0xC + sub.Off;
+                long sk = reader.BaseStream.Position;
+                reader.BaseStream.Position = sk - ((i + 2) * 0xC) + sub.Off;
                 extra_begin = Math.Max(sub.Off + sub.Size, extra_begin);
                 //var m = reader.ReadUInt32(); //get magic number [obsolete?]
                 //reader.BaseStream.Position -= 4;
@@ -208,49 +214,83 @@ namespace Twinsanity
                     {
                         case 0:
                             if (Type == SectionType.GraphicsX)
+                            {
                                 LoadSection(reader, sub, SectionType.TextureX);
+                            }
                             else if (Type == SectionType.GraphicsMB && !isMonkeyBallPS2)
+                            {
                                 LoadSection(reader, sub, SectionType.TextureP);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.Texture);
+                            }
+
                             break;
                         case 1:
                             if (Type == SectionType.GraphicsD)
+                            {
                                 LoadSection(reader, sub, SectionType.MaterialD);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.Material);
+                            }
+
                             break;
                         case 2:
                             if (Type == SectionType.GraphicsX)
+                            {
                                 LoadSection(reader, sub, SectionType.ModelX);
+                            }
                             else if (Type == SectionType.GraphicsMB && !isMonkeyBallPS2)
+                            {
                                 LoadSection(reader, sub, SectionType.ModelP);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.Model);
+                            }
+
                             break;
                         case 3:
                             LoadSection(reader, sub, SectionType.RigidModel);
                             break;
                         case 4:
                             if (Type == SectionType.GraphicsX)
+                            {
                                 LoadSection(reader, sub, SectionType.SkinX);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.Skin);
+                            }
+
                             break;
                         case 5:
                             if (Type == SectionType.GraphicsX)
+                            {
                                 LoadSection(reader, sub, SectionType.BlendSkinX);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.BlendSkin);
+                            }
+
                             break;
                         case 6:
                             LoadSection(reader, sub, SectionType.Mesh);
                             break;
                         case 7:
                             if (Type == SectionType.GraphicsMB)
+                            {
                                 LoadSection(reader, sub, SectionType.LodModelMB);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.LodModel);
+                            }
+
                             break;
                         case 8:
                             LoadSection(reader, sub, SectionType.Skydome);
@@ -266,9 +306,14 @@ namespace Twinsanity
                     {
                         case 0:
                             if (Type == SectionType.InstanceDemo)
+                            {
                                 LoadSection(reader, sub, SectionType.InstanceTemplateDemo);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.InstanceTemplate);
+                            }
+
                             break;
                         case 1:
                             LoadSection(reader, sub, SectionType.AIPosition);
@@ -287,18 +332,28 @@ namespace Twinsanity
                             break;
                         case 6:
                             if (Type == SectionType.InstanceDemo)
+                            {
                                 LoadSection(reader, sub, SectionType.ObjectInstanceDemo);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.ObjectInstance);
+                            }
+
                             break;
                         case 7:
                             LoadSection(reader, sub, SectionType.Trigger);
                             break;
                         case 8:
                             if (Type == SectionType.InstanceDemo)
+                            {
                                 LoadSection(reader, sub, SectionType.CameraDemo);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.Camera);
+                            }
+
                             break;
                         default:
                             LoadItem<TwinsItem>(reader, sub, Type);
@@ -347,17 +402,29 @@ namespace Twinsanity
                     {
                         case 0:
                             if (Type == SectionType.CodeDemo)
+                            {
                                 LoadSection(reader, sub, SectionType.ObjectDemo);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.Object);
+                            }
+
                             break;
                         case 1:
                             if (Type == SectionType.Code)
+                            {
                                 LoadSection(reader, sub, SectionType.Script);
+                            }
                             else if (Type == SectionType.CodeX)
+                            {
                                 LoadSection(reader, sub, SectionType.ScriptX);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.ScriptDemo);
+                            }
+
                             break;
                         case 2:
                             LoadSection(reader, sub, SectionType.Animation);
@@ -367,53 +434,95 @@ namespace Twinsanity
                             break;
                         case 4:
                             if (Type == SectionType.Code)
+                            {
                                 LoadSection(reader, sub, SectionType.CustomAgent);
+                            }
                             else if (Type == SectionType.CodeX)
+                            {
                                 LoadSection(reader, sub, SectionType.CustomAgentX);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.CustomAgentDemo);
+                            }
+
                             break;
                         case 6:
                             if (Type == SectionType.CodeX)
+                            {
                                 LoadSection(reader, sub, SectionType.Xbox_SE);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.SE);
+                            }
+
                             break;
                         case 7:
                             if (Type == SectionType.CodeX)
+                            {
                                 LoadSection(reader, sub, SectionType.Xbox_SE_Eng);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.SE_Eng);
+                            }
+
                             break;
                         case 8:
                             if (Type == SectionType.CodeX)
+                            {
                                 LoadSection(reader, sub, SectionType.Xbox_SE_Fre);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.SE_Fre);
+                            }
+
                             break;
                         case 9:
                             if (Type == SectionType.CodeX)
+                            {
                                 LoadSection(reader, sub, SectionType.Xbox_SE_Ger);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.SE_Ger);
+                            }
+
                             break;
                         case 10:
                             if (Type == SectionType.CodeX)
+                            {
                                 LoadSection(reader, sub, SectionType.Xbox_SE_Spa);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.SE_Spa);
+                            }
+
                             break;
                         case 11:
                             if (Type == SectionType.CodeX)
+                            {
                                 LoadSection(reader, sub, SectionType.Xbox_SE_Ita);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.SE_Ita);
+                            }
+
                             break;
                         case 12:
                             if (Type == SectionType.CodeX)
+                            {
                                 LoadSection(reader, sub, SectionType.Xbox_SE_Jpn);
+                            }
                             else
+                            {
                                 LoadSection(reader, sub, SectionType.SE_Jpn);
+                            }
+
                             break;
                         default:
                             LoadItem<TwinsItem>(reader, sub, Type);
@@ -642,9 +751,9 @@ namespace Twinsanity
             T rec = new T
             {
                 ID = sub.ID,
-                Parent = this
+                Parent = this,
+                ParentType = type
             };
-            rec.ParentType = type;
             rec.Load(reader, sub.Size);
             RecordIDs.Add(sub.ID, Records.Count);
             Records.Add(rec);
@@ -652,12 +761,13 @@ namespace Twinsanity
 
         private void LoadSection(BinaryReader reader, TwinsSubInfo sub, SectionType type)
         {
-            TwinsSection sec = new TwinsSection {
+            TwinsSection sec = new TwinsSection
+            {
                 ID = sub.ID,
                 Level = Level + 1,
                 Type = type,
                 Parent = this,
-                isMonkeyBallPS2 = this.isMonkeyBallPS2,
+                isMonkeyBallPS2 = isMonkeyBallPS2,
             };
             sec.Load(reader, sub.Size);
             RecordIDs.Add(sub.ID, Records.Count);
@@ -682,13 +792,16 @@ namespace Twinsanity
         public override void Save(BinaryWriter writer)
         {
             if (size == 0)
+            {
                 return;
+            }
+
             writer.Write(Magic);
             writer.Write(Records.Count);
             writer.Write(ContentSize);
 
-            var sec_off = Records.Count * 12 + 12;
-            foreach (var i in Records)
+            int sec_off = (Records.Count * 12) + 12;
+            foreach (TwinsItem i in Records)
             {
                 writer.Write(sec_off);
                 writer.Write(i.Size);
@@ -696,7 +809,7 @@ namespace Twinsanity
                 sec_off += i.Size;
             }
 
-            foreach (var i in Records)
+            foreach (TwinsItem i in Records)
             {
                 i.Save(writer);
             }
@@ -706,17 +819,17 @@ namespace Twinsanity
 
         protected override int GetSize()
         {
-            if (size < 0xC)
-                return size;
-            else
-                return (Records.Count + 1) * 12 + ContentSize + ExtraData.Length;
+            return size < 0xC ? size : ((Records.Count + 1) * 12) + ContentSize + ExtraData.Length;
         }
 
         private int GetContentSize()
         {
             int c_size = 0;
-            foreach (var i in Records)
+            foreach (TwinsItem i in Records)
+            {
                 c_size += i.Size;
+            }
+
             return c_size;
         }
 
@@ -740,7 +853,10 @@ namespace Twinsanity
         public bool TryAddItem(uint id, TwinsItem item)
         {
             if (RecordIDs.ContainsKey(id))
+            {
                 return false;
+            }
+
             RecordIDs.Add(id, Records.Count);
             Records.Add(item);
             return true;
@@ -748,17 +864,21 @@ namespace Twinsanity
 
         public void RemoveItem(uint id)
         {
-            var index = RecordIDs[id];
-            RecordIDs.Remove(id);
+            int index = RecordIDs[id];
+            _ = RecordIDs.Remove(id);
             Records.RemoveAt(index);
-            var new_recs = new Dictionary<uint, int>(RecordIDs);
+            Dictionary<uint, int> new_recs = new Dictionary<uint, int>(RecordIDs);
             RecordIDs.Clear();
-            foreach (var i in new_recs)
+            foreach (KeyValuePair<uint, int> i in new_recs)
             {
                 if (i.Value >= index)
+                {
                     RecordIDs.Add(i.Key, i.Value - 1);
+                }
                 else
+                {
                     RecordIDs.Add(i.Key, i.Value);
+                }
             }
         }
 
@@ -769,8 +889,13 @@ namespace Twinsanity
 
         public static TwinsSection CreateGraphicsSection()
         {
-            TwinsSection section = new TwinsSection() { ID = 11, Magic = magic, size = 12 };
-            section.Type = SectionType.Graphics;
+            TwinsSection section = new TwinsSection
+            {
+                ID = 11,
+                Magic = magic,
+                size = 12,
+                Type = SectionType.Graphics
+            };
             section.CreateSection(SectionType.Texture, 0);
             section.CreateSection(SectionType.Material, 1);
             section.CreateSection(SectionType.Model, 2);
@@ -784,10 +909,37 @@ namespace Twinsanity
             return section;
         }
 
+        public static TwinsSection CreateGraphicsXSection()
+        {
+            TwinsSection section = new TwinsSection
+            {
+                ID = 11,
+                Magic = magic,
+                size = 12,
+                Type = SectionType.Graphics
+            };
+            section.CreateSection(SectionType.TextureX, 0);
+            section.CreateSection(SectionType.Material, 1);
+            section.CreateSection(SectionType.ModelX, 2);
+            section.CreateSection(SectionType.RigidModel, 3);
+            section.CreateSection(SectionType.SkinX, 4);
+            section.CreateSection(SectionType.BlendSkinX, 5);
+            section.CreateSection(SectionType.Mesh, 6);
+            section.CreateSection(SectionType.LodModel, 7);
+            section.CreateSection(SectionType.Skydome, 8);
+            section.size = section.GetSize();
+            return section;
+        }
+
         public static TwinsSection CreateCodeSection()
         {
-            TwinsSection section = new TwinsSection() { ID = 10, Magic = magic, size = 12 };
-            section.Type = SectionType.Graphics;
+            TwinsSection section = new TwinsSection
+            {
+                ID = 10,
+                Magic = magic,
+                size = 12,
+                Type = SectionType.Graphics
+            };
             section.CreateSection(SectionType.Object, 0);
             section.CreateSection(SectionType.Script, 1);
             section.CreateSection(SectionType.Animation, 2);
@@ -805,10 +957,41 @@ namespace Twinsanity
             return section;
         }
 
+        public static TwinsSection CreateCodeXSection()
+        {
+            TwinsSection section = new TwinsSection
+            {
+                ID = 10,
+                Magic = magic,
+                size = 12,
+                Type = SectionType.Graphics
+            };
+            section.CreateSection(SectionType.Object, 0);
+            section.CreateSection(SectionType.ScriptX, 1);
+            section.CreateSection(SectionType.Animation, 2);
+            section.CreateSection(SectionType.OGI, 3);
+            section.CreateSection(SectionType.CustomAgentX, 4);
+            section.CreateSection(SectionType.Unknown, 5);
+            section.CreateSection(SectionType.Xbox_SE, 6);
+            section.CreateSection(SectionType.Xbox_SE_Eng, 7);
+            section.CreateSection(SectionType.Xbox_SE_Fre, 8);
+            section.CreateSection(SectionType.Xbox_SE_Ger, 9);
+            section.CreateSection(SectionType.Xbox_SE_Spa, 10);
+            section.CreateSection(SectionType.Xbox_SE_Ita, 11);
+            section.CreateSection(SectionType.Xbox_SE_Jpn, 12);
+            section.size = section.GetSize();
+            return section;
+        }
+
         public static TwinsSection CreateCodeDemoSection()
         {
-            TwinsSection section = new TwinsSection() { ID = 10, Magic = magic, size = 12 };
-            section.Type = SectionType.Graphics;
+            TwinsSection section = new TwinsSection
+            {
+                ID = 10,
+                Magic = magic,
+                size = 12,
+                Type = SectionType.Graphics
+            };
             section.CreateSection(SectionType.Object, 0);
             section.CreateSection(SectionType.Script, 1);
             section.CreateSection(SectionType.Animation, 2);

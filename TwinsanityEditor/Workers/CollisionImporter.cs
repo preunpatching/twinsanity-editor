@@ -1,15 +1,15 @@
-﻿using System.Windows.Forms;
+﻿using System;
 using System.Collections.Generic;
-using Twinsanity;
 using System.IO;
-using System;
+using System.Windows.Forms;
+using Twinsanity;
 
 namespace TwinsanityEditor
 {
     public partial class CollisionImporter : Form
     {
-        private ColDataController controller;
-        private List<ColModel> models = new List<ColModel>();
+        private readonly ColDataController controller;
+        private readonly List<ColModel> models = new List<ColModel>();
         private Dictionary<int, int> vertGroups;
 
         private int vertexCount, triCount, groupCount;
@@ -23,9 +23,12 @@ namespace TwinsanityEditor
 
         private void comboBox1_TextChanged(object sender, EventArgs e)
         {
-            if (listBox1.SelectedIndex == -1) return;
-            int s;
-            if (int.TryParse(comboBox1.Text.Split(' ')[0], out s))
+            if (listBox1.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            if (int.TryParse(comboBox1.Text.Split(' ')[0], out int s))
             {
                 ColModel model = models[listBox1.SelectedIndex];
                 model.surface = s;
@@ -35,16 +38,24 @@ namespace TwinsanityEditor
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (listBox1.SelectedIndex == -1) return;
+            if (listBox1.SelectedIndex == -1)
+            {
+                return;
+            }
+
             vertexCount -= models[listBox1.SelectedIndex].vtx.Count;
             triCount -= models[listBox1.SelectedIndex].tris.Count;
             groupCount -= models[listBox1.SelectedIndex].groups.Count;
             models.RemoveAt(listBox1.SelectedIndex);
             listBox1.Items.RemoveAt(listBox1.SelectedIndex);
             if (listBox1.Items.Count == 0)
+            {
                 button3.Enabled = label4.Enabled = false;
+            }
             else
+            {
                 UpdateMainLabel();
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -55,10 +66,9 @@ namespace TwinsanityEditor
                 for (int i = 0; i < ofd.FileNames.Length; ++i)
                 {
                     vertGroups = new Dictionary<int, int>();
-                    int grp = 0;
                     ColModel model = new ColModel { vtx = new List<Pos>(), groups = new List<ColData.GroupInfo>(), triIndices = new List<List<ColData.ColTri>>() };
                     StreamReader reader = new StreamReader(ofd.FileNames[i]);
-                    while(!reader.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
                         string[] str = reader.ReadLine().Split(' ');
                         switch (str[0])
@@ -70,6 +80,7 @@ namespace TwinsanityEditor
                                 int v1 = int.Parse(str[1].Split('/')[0]) - 1;
                                 int v2 = int.Parse(str[2].Split('/')[0]) - 1;
                                 int v3 = int.Parse(str[3].Split('/')[0]) - 1;
+                                int grp;
                                 if (vertGroups.TryGetValue(v1, out grp) || vertGroups.TryGetValue(v2, out grp) || vertGroups.TryGetValue(v3, out grp))
                                 {
                                     if (model.groups[grp].Size >= numericUpDown1.Value)
@@ -80,11 +91,19 @@ namespace TwinsanityEditor
                                         model.triIndices.Add(new List<ColData.ColTri>());
                                     }
                                     if (!vertGroups.ContainsKey(v1))
+                                    {
                                         vertGroups.Add(v1, grp);
+                                    }
+
                                     if (!vertGroups.ContainsKey(v2))
+                                    {
                                         vertGroups.Add(v2, grp);
+                                    }
+
                                     if (!vertGroups.ContainsKey(v3))
+                                    {
                                         vertGroups.Add(v3, grp);
+                                    }
                                 }
                                 else
                                 {
@@ -104,8 +123,11 @@ namespace TwinsanityEditor
                     CheckMergeGroups(ref model);
                     GenerateGroupOff(ref model);
                     if (model.groups.Count == 0)
+                    {
                         continue;
-                    listBox1.Items.Add(ofd.FileNames[i]);
+                    }
+
+                    _ = listBox1.Items.Add(ofd.FileNames[i]);
                     models.Add(model);
                     vertexCount += model.vtx.Count;
                     triCount += model.tris.Count;
@@ -129,10 +151,13 @@ namespace TwinsanityEditor
                 controller.Data.Vertices.AddRange(models[i].vtx);
                 for (int j = 0; j < models[i].tris.Count; ++j)
                 {
-                    controller.Data.Tris.Add(new ColData.ColTri { Vert1 = models[i].tris[j].Vert1 + vertex_off,
+                    controller.Data.Tris.Add(new ColData.ColTri
+                    {
+                        Vert1 = models[i].tris[j].Vert1 + vertex_off,
                         Vert2 = models[i].tris[j].Vert2 + vertex_off,
                         Vert3 = models[i].tris[j].Vert3 + vertex_off,
-                        Surface = models[i].surface });
+                        Surface = models[i].surface
+                    });
                 }
                 vertex_off += models[i].vtx.Count;
                 for (int j = 0; j < models[i].groups.Count; ++j)
@@ -145,12 +170,15 @@ namespace TwinsanityEditor
                 }
                 poly_off += models[i].tris.Count;
             }
-            ColData.Trigger[] triggers = new ColData.Trigger[controller.Data.Groups.Count * 2 - 1];
+            ColData.Trigger[] triggers = new ColData.Trigger[(controller.Data.Groups.Count * 2) - 1];
             TreeView TriggerTree = new TreeView();
-            TriggerTree.Nodes.Add("E", "0");
+            _ = TriggerTree.Nodes.Add("E", "0");
             int x = (int)Math.Truncate(Math.Log(controller.Data.Groups.Count, 2));
             for (int i = 0; i < x; ++i)
+            {
                 ExpandLevel(TriggerTree.Nodes[0]);
+            }
+
             ExpandEngings(TriggerTree, (uint)(controller.Data.Groups.Count - Math.Pow(2, x)));
             int temp = 1;
             CalcIDs(TriggerTree.Nodes[0], ref temp);
@@ -163,8 +191,8 @@ namespace TwinsanityEditor
 
         private void DoubleExpand(TreeNode Node)
         {
-            Node.Nodes.Add("E", "Node");
-            Node.Nodes.Add("E", "Node");
+            _ = Node.Nodes.Add("E", "Node");
+            _ = Node.Nodes.Add("E", "Node");
         }
 
         private void ExpandLevel(TreeNode Root)
@@ -204,7 +232,7 @@ namespace TwinsanityEditor
             }
             else if (Node.Name == "E")
             {
-                Node.Nodes.Add("Ptr", temp.ToString());
+                _ = Node.Nodes.Add("Ptr", temp.ToString());
                 temp += 1;
             }
         }
@@ -246,30 +274,12 @@ namespace TwinsanityEditor
                 for (int i = (int)Groups[-Triggers[index].Flag1 - 1].Offset; i < Groups[-Triggers[index].Flag1 - 1].Offset + Groups[-Triggers[index].Flag1 - 1].Size; ++i)
                 {
                     Pos a = Vertexes[Indexes[i].Vert1], b = Vertexes[Indexes[i].Vert2], c = Vertexes[Indexes[i].Vert3];
-                    if (x1 == 0)
-                        x1 = Math.Min(a.X, Math.Min(b.X, c.X)) - pad;
-                    else
-                        x1 = Math.Min(x1, Math.Min(a.X, Math.Min(b.X, c.X))) - pad;
-                    if (y1 == 0)
-                        y1 = Math.Min(a.Y, Math.Min(b.Y, c.Y)) - pad;
-                    else
-                        y1 = Math.Min(y1, Math.Min(a.Y, Math.Min(b.Y, c.Y))) - pad;
-                    if (z1 == 0)
-                        z1 = Math.Min(a.Z, Math.Min(b.Z, c.Z)) - pad;
-                    else
-                        z1 = Math.Min(z1, Math.Min(a.Z, Math.Min(b.Z, c.Z))) - pad;
-                    if (x2 == 0)
-                        x2 = Math.Max(a.X, Math.Max(b.X, c.X)) + pad;
-                    else
-                        x2 = Math.Max(x2, Math.Max(a.X, Math.Max(b.X, c.X))) + pad;
-                    if (y2 == 0)
-                        y2 = Math.Max(a.Y, Math.Max(b.Y, c.Y)) + pad;
-                    else
-                        y2 = Math.Max(y2, Math.Max(a.Y, Math.Max(b.Y, c.Y))) + pad;
-                    if (z2 == 0)
-                        z2 = Math.Max(a.Z, Math.Max(b.Z, c.Z));
-                    else
-                        z2 = Math.Max(z2, Math.Max(a.Z, Math.Max(b.Z, c.Z))) + pad;
+                    x1 = x1 == 0 ? Math.Min(a.X, Math.Min(b.X, c.X)) - pad : Math.Min(x1, Math.Min(a.X, Math.Min(b.X, c.X))) - pad;
+                    y1 = y1 == 0 ? Math.Min(a.Y, Math.Min(b.Y, c.Y)) - pad : Math.Min(y1, Math.Min(a.Y, Math.Min(b.Y, c.Y))) - pad;
+                    z1 = z1 == 0 ? Math.Min(a.Z, Math.Min(b.Z, c.Z)) - pad : Math.Min(z1, Math.Min(a.Z, Math.Min(b.Z, c.Z))) - pad;
+                    x2 = x2 == 0 ? Math.Max(a.X, Math.Max(b.X, c.X)) + pad : Math.Max(x2, Math.Max(a.X, Math.Max(b.X, c.X))) + pad;
+                    y2 = y2 == 0 ? Math.Max(a.Y, Math.Max(b.Y, c.Y)) + pad : Math.Max(y2, Math.Max(a.Y, Math.Max(b.Y, c.Y))) + pad;
+                    z2 = z2 == 0 ? Math.Max(a.Z, Math.Max(b.Z, c.Z)) : Math.Max(z2, Math.Max(a.Z, Math.Max(b.Z, c.Z))) + pad;
                 }
                 Triggers[index].X1 = x1;
                 Triggers[index].Y1 = y1;
@@ -291,12 +301,14 @@ namespace TwinsanityEditor
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (!(groupBox1.Enabled = button2.Enabled = (listBox1.SelectedIndex != -1))) return;
+            if (!(groupBox1.Enabled = button2.Enabled = listBox1.SelectedIndex != -1))
+            {
+                return;
+            }
 
-            if (models[listBox1.SelectedIndex].surface >= comboBox1.Items.Count)
-                comboBox1.Text = models[listBox1.SelectedIndex].surface.ToString();
-            else
-                comboBox1.Text = comboBox1.GetItemText(models[listBox1.SelectedIndex].surface);
+            comboBox1.Text = models[listBox1.SelectedIndex].surface >= comboBox1.Items.Count
+                ? models[listBox1.SelectedIndex].surface.ToString()
+                : comboBox1.GetItemText(models[listBox1.SelectedIndex].surface);
             label3.Text = $"Vertex Count: {models[listBox1.SelectedIndex].vtx.Count} Triangle Count: {models[listBox1.SelectedIndex].tris.Count}"
                 + Environment.NewLine + $"Group Count: {models[listBox1.SelectedIndex].groups.Count}";
             UpdateMainLabel();
@@ -312,10 +324,14 @@ namespace TwinsanityEditor
 
         private void DiscardGroup(int grp)
         {
-            var dic = new Dictionary<int, int>(vertGroups);
-            foreach (var i in dic)
+            Dictionary<int, int> dic = new Dictionary<int, int>(vertGroups);
+            foreach (KeyValuePair<int, int> i in dic)
+            {
                 if (i.Value == grp)
-                    vertGroups.Remove(i.Key);
+                {
+                    _ = vertGroups.Remove(i.Key);
+                }
+            }
         }
 
         private void GenerateGroupOff(ref ColModel model)
@@ -338,23 +354,31 @@ namespace TwinsanityEditor
             HashSet<int> groups_to_delete = new HashSet<int>();
             for (int i = 0; i < model.groups.Count; ++i)
             {
-                if (groups_to_delete.Contains(i)) continue;
+                if (groups_to_delete.Contains(i))
+                {
+                    continue;
+                }
+
                 HashSet<int> verts = new HashSet<int>();
                 for (int j = 0; j < model.triIndices[i].Count; ++j)
                 {
-                    verts.Add(model.triIndices[i][j].Vert1);
-                    verts.Add(model.triIndices[i][j].Vert2);
-                    verts.Add(model.triIndices[i][j].Vert3);
+                    _ = verts.Add(model.triIndices[i][j].Vert1);
+                    _ = verts.Add(model.triIndices[i][j].Vert2);
+                    _ = verts.Add(model.triIndices[i][j].Vert3);
                 }
                 for (int j = i + 1; j < model.groups.Count; ++j)
                 {
-                    if ((model.triIndices[i].Count + model.triIndices[j].Count) > numericUpDown1.Value) continue;
+                    if ((model.triIndices[i].Count + model.triIndices[j].Count) > numericUpDown1.Value)
+                    {
+                        continue;
+                    }
+
                     for (int k = 0; k < model.triIndices[j].Count; ++k)
                     {
                         if (verts.Contains(model.triIndices[j][k].Vert1) || verts.Contains(model.triIndices[j][k].Vert3) || verts.Contains(model.triIndices[j][k].Vert3))
                         {
                             model.triIndices[i].AddRange(model.triIndices[j]);
-                            groups_to_delete.Add(j);
+                            _ = groups_to_delete.Add(j);
                             break;
                         }
                     }

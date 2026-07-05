@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Twinsanity;
 
@@ -38,14 +31,14 @@ namespace TwinsanityEditor
                 Close();
                 return;
             }
-            var p = item.Data.Parent;
+            TwinsSection p = item.Data.Parent;
             if (p.ContainsItem(DataID))
             {
-                MessageBox.Show("New ID already exists.");
+                _ = MessageBox.Show("New ID already exists.");
                 return;
             }
-            var index = p.RecordIDs[item.Data.ID];
-            p.RecordIDs.Remove(item.Data.ID);
+            int index = p.RecordIDs[item.Data.ID];
+            _ = p.RecordIDs.Remove(item.Data.ID);
             p.RecordIDs.Add(DataID, index);
             item.Data.ID = DataID;
             item.UpdateText();
@@ -56,7 +49,11 @@ namespace TwinsanityEditor
 
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
         {
-            if (ignore) return;
+            if (ignore)
+            {
+                return;
+            }
+
             ignore = true;
             DataID = (uint)numericUpDown2.Value;
             textBox1.Text = $"{DataID:X8}";
@@ -65,7 +62,11 @@ namespace TwinsanityEditor
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            if (ignore) return;
+            if (ignore)
+            {
+                return;
+            }
+
             if (uint.TryParse(textBox1.Text, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out uint x))
             {
                 ignore = true;

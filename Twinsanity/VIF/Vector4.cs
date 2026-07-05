@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Twinsanity.VIF
 {
@@ -39,7 +35,7 @@ namespace Twinsanity.VIF
             return 0x10;
         }
 
-        public double Length => Math.Sqrt(X * X + Y * Y + Z * Z);
+        public double Length => Math.Sqrt((X * X) + (Y * Y) + (Z * Z));
 
         public void Read(BinaryReader reader, int length)
         {
@@ -51,7 +47,7 @@ namespace Twinsanity.VIF
 
         public Vector4 Multiply(float value)
         {
-            var resVec = new Vector4
+            Vector4 resVec = new Vector4
             {
                 X = X * value,
                 Y = Y * value,
@@ -82,66 +78,66 @@ namespace Twinsanity.VIF
             writer.Write(Z);
             writer.Write(W);
         }
-        public void SetBinaryX(UInt32 src)
+        public void SetBinaryX(uint src)
         {
             X = BitConverter.ToSingle(BitConverter.GetBytes(src), 0);
         }
-        public void SetBinaryY(UInt32 src)
+        public void SetBinaryY(uint src)
         {
             Y = BitConverter.ToSingle(BitConverter.GetBytes(src), 0);
         }
-        public void SetBinaryZ(UInt32 src)
+        public void SetBinaryZ(uint src)
         {
             Z = BitConverter.ToSingle(BitConverter.GetBytes(src), 0);
         }
-        public void SetBinaryW(UInt32 src)
+        public void SetBinaryW(uint src)
         {
             W = BitConverter.ToSingle(BitConverter.GetBytes(src), 0);
         }
-        public UInt32 GetBinaryX()
+        public uint GetBinaryX()
         {
             return BitConverter.ToUInt32(BitConverter.GetBytes(X), 0);
         }
-        public UInt32 GetBinaryY()
+        public uint GetBinaryY()
         {
             return BitConverter.ToUInt32(BitConverter.GetBytes(Y), 0);
         }
-        public UInt32 GetBinaryZ()
+        public uint GetBinaryZ()
         {
             return BitConverter.ToUInt32(BitConverter.GetBytes(Z), 0);
         }
-        public UInt32 GetBinaryW()
+        public uint GetBinaryW()
         {
             return BitConverter.ToUInt32(BitConverter.GetBytes(W), 0);
         }
-        public override String ToString()
+        public override string ToString()
         {
             return $"({X:0.00000}; {Y:0.00000}; {Z:0.00000}; {W:0.00000})";
         }
-        public String ToIntString()
+        public string ToIntString()
         {
-            var x_int = (int)GetBinaryX();
-            var y_int = (int)GetBinaryY();
-            var z_int = (int)GetBinaryZ();
-            var w_int = (int)GetBinaryW();
+            int x_int = (int)GetBinaryX();
+            int y_int = (int)GetBinaryY();
+            int z_int = (int)GetBinaryZ();
+            int w_int = (int)GetBinaryW();
             return $"({x_int}; {y_int}; {z_int}; {w_int})";
         }
-        public String ToIntString(float factor_x, float factor_y, float factor_z)
+        public string ToIntString(float factor_x, float factor_y, float factor_z)
         {
-            var x_int = (int)GetBinaryX();
-            var y_int = (int)GetBinaryY();
-            var z_int = (int)GetBinaryZ();
-            var w_int = (int)GetBinaryW();
+            int x_int = (int)GetBinaryX();
+            int y_int = (int)GetBinaryY();
+            int z_int = (int)GetBinaryZ();
+            int w_int = (int)GetBinaryW();
             return $"({x_int * factor_x}; {y_int * factor_y}; {z_int * factor_z}; {w_int})";
         }
         public Color GetColor()
         {
-            var c = new Color
+            Color c = new Color
             {
-                R = (Byte)(X * 255),
-                G = (Byte)(Y * 255),
-                B = (Byte)(Z * 255),
-                A = (Byte)(W * 255),
+                R = (byte)(X * 255),
+                G = (byte)(Y * 255),
+                B = (byte)(Z * 255),
+                A = (byte)(W * 255),
             };
             return c;
         }

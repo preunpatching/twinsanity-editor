@@ -1,9 +1,9 @@
+using OpenTK.Graphics.OpenGL;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using System;
 using Twinsanity;
-using OpenTK.Graphics.OpenGL;
-using System.Collections.Generic;
 
 namespace TwinsanityEditor
 {
@@ -24,21 +24,14 @@ namespace TwinsanityEditor
         {
             set
             {
-                if (SelectedTexture == null)
-                {
-                    if (SelectedTextureX == null)
-                        lblTextureIndex.Text = (value + 1).ToString() + "/" + TexturesP.Count;
-                    else
-                        lblTextureIndex.Text = (value + 1).ToString() + "/" + TexturesX.Count;
-                }
-                else
-                    lblTextureIndex.Text = (value + 1).ToString() + "/" + Textures.Count;
+                lblTextureIndex.Text = SelectedTexture == null
+                    ? SelectedTextureX == null ? (value + 1).ToString() + "/" + TexturesP.Count : (value + 1).ToString() + "/" + TexturesX.Count
+                    : (value + 1).ToString() + "/" + Textures.Count;
+
                 texInd = value;
             }
-            get
-            {
-                return texInd;
-            }
+
+            get => texInd;
         }
         public List<Texture> Textures = new List<Texture>();
         public List<TextureX> TexturesX = new List<TextureX>();
@@ -81,7 +74,7 @@ namespace TwinsanityEditor
                     for (int i = 0; i < SelectedTextureP.RawData.Length; i++)
                     {
                         GL.Color4(SelectedTextureP.RawData[i]);
-                        GL.Vertex2(i % (SelectedTextureP.Width), i / (SelectedTextureP.Width));
+                        GL.Vertex2(i % SelectedTextureP.Width, i / SelectedTextureP.Width);
                     }
                     GL.End();
                 }
@@ -90,7 +83,7 @@ namespace TwinsanityEditor
                     for (int i = 0; i < SelectedTextureX.RawData.Length; i++)
                     {
                         GL.Color4(SelectedTextureX.RawData[i]);
-                        GL.Vertex2(i % (SelectedTextureX.Width), i / (SelectedTextureX.Width));
+                        GL.Vertex2(i % SelectedTextureX.Width, i / SelectedTextureX.Width);
                     }
                     GL.End();
                 }
@@ -100,21 +93,21 @@ namespace TwinsanityEditor
                 for (int i = 0; i < SelectedTexture.RawData.Length; i++)
                 {
                     GL.Color4(SelectedTexture.RawData[i]);
-                    GL.Vertex2(i % (SelectedTexture.Width), i / (SelectedTexture.Width));
+                    GL.Vertex2(i % SelectedTexture.Width, i / SelectedTexture.Width);
                 }
                 GL.End();
                 if (SelectedTexture.MipLevels > 0)
                 {
-                    var widthOffset = SelectedTexture.Width;
-                    for (var i = 0; i < SelectedTexture.MipLevels; ++i)
+                    int widthOffset = SelectedTexture.Width;
+                    for (int i = 0; i < SelectedTexture.MipLevels; ++i)
                     {
-                        var mip = SelectedTexture.GetMips(i);
-                        var mipWidth = (SelectedTexture.Width / (1 << (i + 1)));
+                        Color[] mip = SelectedTexture.GetMips(i);
+                        int mipWidth = SelectedTexture.Width / (1 << (i + 1));
                         GL.Begin(PrimitiveType.Points);
                         for (int j = 0; j < mip.Length; ++j)
                         {
                             GL.Color4(mip[j]);
-                            GL.Vertex2(widthOffset + j % mipWidth, j / mipWidth);
+                            GL.Vertex2(widthOffset + (j % mipWidth), j / mipWidth);
                         }
                         GL.End();
                         widthOffset += mipWidth;
@@ -136,14 +129,20 @@ namespace TwinsanityEditor
                     {
                         Bitmap BMP = new Bitmap(Convert.ToInt32(SelectedTextureP.Width), Convert.ToInt32(SelectedTextureP.Height));
                         for (int i = 0; i < SelectedTextureP.RawData.Length; i++)
-                            BMP.SetPixel((i % SelectedTextureP.Width), (i / SelectedTextureP.Width), SelectedTextureP.RawData[i]);
+                        {
+                            BMP.SetPixel(i % SelectedTextureP.Width, i / SelectedTextureP.Width, SelectedTextureP.RawData[i]);
+                        }
+
                         BMP.Save(SavePNG.FileName, System.Drawing.Imaging.ImageFormat.Png);
                     }
                     else
                     {
                         Bitmap BMP = new Bitmap(Convert.ToInt32(SelectedTextureX.Width), Convert.ToInt32(SelectedTextureX.Height));
                         for (int i = 0; i < SelectedTextureX.RawData.Length; i++)
-                            BMP.SetPixel((i % SelectedTextureX.Width), (i / SelectedTextureX.Width), SelectedTextureX.RawData[i]);
+                        {
+                            BMP.SetPixel(i % SelectedTextureX.Width, i / SelectedTextureX.Width, SelectedTextureX.RawData[i]);
+                        }
+
                         BMP.Save(SavePNG.FileName, System.Drawing.Imaging.ImageFormat.Png);
                     }
                 }
@@ -151,20 +150,26 @@ namespace TwinsanityEditor
                 {
                     Bitmap BMP = new Bitmap(Convert.ToInt32(SelectedTexture.Width), Convert.ToInt32(SelectedTexture.Height));
                     for (int i = 0; i < SelectedTexture.RawData.Length; i++)
-                        BMP.SetPixel((i % SelectedTexture.Width), (i / SelectedTexture.Width), SelectedTexture.RawData[i]);
+                    {
+                        BMP.SetPixel(i % SelectedTexture.Width, i / SelectedTexture.Width, SelectedTexture.RawData[i]);
+                    }
+
                     BMP.Save(SavePNG.FileName, System.Drawing.Imaging.ImageFormat.Png);
                     if (cbSaveMips.Checked)
                     {
                         if (SelectedTexture.MipLevels > 0)
                         {
-                            for (var i = 0; i < SelectedTexture.MipLevels; ++i)
+                            for (int i = 0; i < SelectedTexture.MipLevels; ++i)
                             {
-                                var mip = SelectedTexture.GetMips(i);
-                                var mipWidth = (SelectedTexture.Width / (1 << (i + 1)));
-                                var mipHeight = (SelectedTexture.Height / (1 << (i + 1)));
+                                Color[] mip = SelectedTexture.GetMips(i);
+                                int mipWidth = SelectedTexture.Width / (1 << (i + 1));
+                                int mipHeight = SelectedTexture.Height / (1 << (i + 1));
                                 Bitmap mipBmp = new Bitmap(Convert.ToInt32(mipWidth), Convert.ToInt32(mipHeight));
                                 for (int j = 0; j < mip.Length; j++)
-                                    mipBmp.SetPixel((j % mipWidth), (j / mipWidth), mip[j]);
+                                {
+                                    mipBmp.SetPixel(j % mipWidth, j / mipWidth, mip[j]);
+                                }
+
                                 mipBmp.Save(SavePNG.FileName.Substring(0, SavePNG.FileName.Length - 4) + "_mip_" + (i + 1).ToString() + ".png", System.Drawing.Imaging.ImageFormat.Png);
                             }
                         }
@@ -208,21 +213,11 @@ namespace TwinsanityEditor
 
         public void UpdateTextureLabel()
         {
-            if (SelectedTexture == null)
-            {
-                if (SelectedTextureX == null)
-                {
-                    lblTextureIndex.Text = (TextureIndex + 1).ToString() + "/" + TexturesP.Count;
-                }
-                else
-                {
-                    lblTextureIndex.Text = (TextureIndex + 1).ToString() + "/" + TexturesX.Count;
-                }
-            }
-            else
-            {
-                lblTextureIndex.Text = (TextureIndex + 1).ToString() + "/" + Textures.Count;
-            }
+            lblTextureIndex.Text = SelectedTexture == null
+                ? SelectedTextureX == null
+                    ? (TextureIndex + 1).ToString() + "/" + TexturesP.Count
+                    : (TextureIndex + 1).ToString() + "/" + TexturesX.Count
+                : (TextureIndex + 1).ToString() + "/" + Textures.Count;
         }
 
         private void btnNextTexture_Click(object sender, EventArgs e)
@@ -260,7 +255,11 @@ namespace TwinsanityEditor
 
         private void btnImport_Click(object sender, EventArgs e)
         {
-            if (SelectedTexture == null) return;
+            if (SelectedTexture == null)
+            {
+                return;
+            }
+
             if (LoadPNG.ShowDialog() == DialogResult.OK)
             {
                 Bitmap temp = new Bitmap(LoadPNG.FileName);
@@ -286,8 +285,6 @@ namespace TwinsanityEditor
                 col++;
                 if (col == 4)
                 {
-                    col = 0;
-                    row++;
                 }
                 SelectedTexture.UpdateImageData();
                 Refresh();

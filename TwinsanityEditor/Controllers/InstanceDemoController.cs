@@ -1,5 +1,4 @@
 ﻿using Twinsanity;
-using System;
 
 namespace TwinsanityEditor
 {
@@ -18,10 +17,7 @@ namespace TwinsanityEditor
             string obj_name = MainFile.GetObjectName(Data.ObjectID);
             obj_name = Utils.TextUtils.TruncateObjectName(obj_name, Data.ObjectID, "*", "");
 
-            if (obj_name != string.Empty)
-                return $"{obj_name} Instance [ID {Data.ID}]";
-            else
-                return $"Instance [ID {Data.ID}]";
+            return obj_name != string.Empty ? $"{obj_name} Instance [ID {Data.ID}]" : $"Instance [ID {Data.ID}]";
         }
 
         protected override void GenText()
@@ -33,14 +29,7 @@ namespace TwinsanityEditor
             TextPrev[0] = $"ID: {Data.ID}";
             TextPrev[1] = $"Size: {Data.Size}";
             TextPrev[2] = $"Object ID {Data.ObjectID} - {(obj_name != string.Empty ? obj_name : string.Empty)}";
-            if (Data.ScriptID == -1)
-            {
-                TextPrev[3] = $"Script ID None";
-            }
-            else
-            {
-                TextPrev[3] = $"Script ID {Data.ScriptID}";
-            }
+            TextPrev[3] = Data.ScriptID == -1 ? $"Script ID None" : $"Script ID {Data.ScriptID}";
             TextPrev[4] = $"Position ({Data.Pos.X}, {Data.Pos.Y}, {Data.Pos.Z}, {Data.Pos.W})";
             TextPrev[5] = $"Rotation ({Data.RotX} | {Data.RotY} | {Data.RotZ})";
 

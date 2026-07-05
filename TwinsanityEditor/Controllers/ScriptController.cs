@@ -7,7 +7,7 @@ namespace TwinsanityEditor
     {
         public new Script Data { get; set; }
 
-        public ScriptController(MainForm topform, Script item) : base (topform, item)
+        public ScriptController(MainForm topform, Script item) : base(topform, item)
         {
             Data = item;
             AddMenu("Open editor", Menu_OpenEditor);
@@ -20,9 +20,11 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            List<string> text = new List<string>();
-            text.Add($"ID: {Data.ID} {(Data.Name != null ? $" Name: {Data.Name}" : string.Empty)}");
-            text.Add($"Size: {Data.Size}");
+            List<string> text = new List<string>
+            {
+                $"ID: {Data.ID} {(Data.Name != null ? $" Name: {Data.Name}" : string.Empty)}",
+                $"Size: {Data.Size}"
+            };
             if (Data?.Header != null)
             {
                 text.Add($"Participants: {Data.Header.pairs.Count}");

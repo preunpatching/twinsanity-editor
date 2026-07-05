@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace Twinsanity.VIF
 {
@@ -16,24 +11,24 @@ namespace Twinsanity.VIF
             G = 255;
             B = 255;
         }
-        public Color(Byte R, Byte G, Byte B)
+        public Color(byte R, byte G, byte B)
         {
             A = 255;
             this.R = R;
             this.G = G;
             this.B = B;
         }
-        public Color(Byte R, Byte G, Byte B, Byte A)
+        public Color(byte R, byte G, byte B, byte A)
         {
             this.A = A;
             this.R = R;
             this.G = G;
             this.B = B;
         }
-        public Byte A { get; set; }
-        public Byte R { get; set; }
-        public Byte G { get; set; }
-        public Byte B { get; set; }
+        public byte A { get; set; }
+        public byte R { get; set; }
+        public byte G { get; set; }
+        public byte B { get; set; }
         public int GetLength()
         {
             return 4;
@@ -56,55 +51,57 @@ namespace Twinsanity.VIF
         }
         public Vector4 GetVector()
         {
-            Vector4 vec = new Vector4();
-            vec.X = R / 255.0f;
-            vec.Y = G / 255.0f;
-            vec.Z = B / 255.0f;
-            vec.W = A / 255.0f;
+            Vector4 vec = new Vector4
+            {
+                X = R / 255.0f,
+                Y = G / 255.0f,
+                Z = B / 255.0f,
+                W = A / 255.0f
+            };
             return vec;
         }
 
-        public UInt32 ToARGB()
+        public uint ToARGB()
         {
-            return (UInt32)((A << 24) | (R << 16) | (G << 8) | (B));
+            return (uint)((A << 24) | (R << 16) | (G << 8) | B);
         }
-        public void FromABGR(UInt32 val)
+        public void FromABGR(uint val)
         {
-            A = (Byte)((val >> 24) & 0xFF);
-            B = (Byte)((val >> 16) & 0xFF);
-            G = (Byte)((val >> 8) & 0xFF);
-            R = (Byte)((val >> 0) & 0xFF);
+            A = (byte)((val >> 24) & 0xFF);
+            B = (byte)((val >> 16) & 0xFF);
+            G = (byte)((val >> 8) & 0xFF);
+            R = (byte)((val >> 0) & 0xFF);
         }
         public void ScaleAlphaUp()
         {
-            A = (Byte)(A << 1);
-            R = (Byte)(R << 1);
-            G = (Byte)(G << 1);
-            B = (Byte)(B << 1);
+            A = (byte)(A << 1);
+            R = (byte)(R << 1);
+            G = (byte)(G << 1);
+            B = (byte)(B << 1);
 
         }
         public void ScaleAlphaDown()
         {
-            A = (Byte)(A >> 1);
-            R = (Byte)(R >> 1);
-            G = (Byte)(G >> 1);
-            B = (Byte)(B >> 1);
+            A = (byte)(A >> 1);
+            R = (byte)(R >> 1);
+            G = (byte)(G >> 1);
+            B = (byte)(B >> 1);
         }
-        public UInt32 ToABGR()
+        public uint ToABGR()
         {
-            Byte a = A;
-            Byte b = B;
-            Byte g = G;
-            Byte r = R;
-            return (UInt32)((a << 24) | (b << 16) | (g << 8) | (r << 0));
+            byte a = A;
+            byte b = B;
+            byte g = G;
+            byte r = R;
+            return (uint)((a << 24) | (b << 16) | (g << 8) | (r << 0));
         }
 
-        public override String ToString()
+        public override string ToString()
         {
             return $"{A} {R} {G} {B}";
         }
 
-        public override Boolean Equals(Object obj)
+        public override bool Equals(object obj)
         {
             if (obj is Color)
             {
@@ -123,9 +120,9 @@ namespace Twinsanity.VIF
                 return false;
             }
         }
-        public override Int32 GetHashCode()
+        public override int GetHashCode()
         {
-            return (Int32)ToARGB();
+            return (int)ToARGB();
         }
     }
 }

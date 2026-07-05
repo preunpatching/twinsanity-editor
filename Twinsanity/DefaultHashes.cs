@@ -78,10 +78,7 @@ namespace Twinsanity
                     break;
             }
 
-            if (targetDict.ContainsKey(ID))
-                return targetDict[ID];
-            else
-                return ID.ToString("X8");
+            return targetDict.ContainsKey(ID) ? targetDict[ID] : ID.ToString("X8");
         }
         public static string SkyToName(Skydome sky)
         {
@@ -94,12 +91,9 @@ namespace Twinsanity
 
         public static string TexToName(uint ID, uint Hash)
         {
-            if (Hash_Textures.ContainsKey(ID))
-                return Hash_Textures[ID];
-            else if (Hash_DupeTextures.ContainsKey((ID, Hash)))
-                return Hash_DupeTextures[(ID, Hash)];
-            else
-                return $"{ID:X8}_{Hash:X8}";
+            return Hash_Textures.ContainsKey(ID)
+                ? Hash_Textures[ID]
+                : Hash_DupeTextures.ContainsKey((ID, Hash)) ? Hash_DupeTextures[(ID, Hash)] : $"{ID:X8}_{Hash:X8}";
         }
 
         public static Dictionary<uint, string> Hash_SkyDomes = new Dictionary<uint, string>()

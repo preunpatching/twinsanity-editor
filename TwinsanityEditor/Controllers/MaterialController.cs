@@ -7,7 +7,7 @@ namespace TwinsanityEditor
     {
         public new Material Data { get; set; }
 
-        public MaterialController(MainForm topform, Material item) : base (topform, item)
+        public MaterialController(MainForm topform, Material item) : base(topform, item)
         {
             Data = item;
         }
@@ -19,7 +19,7 @@ namespace TwinsanityEditor
 
         protected override void GenText()
         {
-            var text = new List<string>
+            List<string> text = new List<string>
             {
                 string.Format("ID: {0:X8}", Data.ID),
                 $"Size: {Data.Size}",
@@ -27,7 +27,7 @@ namespace TwinsanityEditor
                 $"DMA Slot?: {Data.Unknown}",
                 $"Shaders: {Data.Shaders.Count}"
             };
-            foreach (var shd in Data.Shaders)
+            foreach (TwinsShader shd in Data.Shaders)
             {
                 text.Add($"Shader Type {shd.ShaderType}");
                 text.Add($"\tBound texture: {shd.TextureId:X}");

@@ -1,15 +1,13 @@
-﻿using OpenTK;
-using System;
+﻿using System;
 using System.Windows.Forms;
-using TwinsanityEditor.Utils;
 using Twinsanity;
 
 namespace TwinsanityEditor
 {
     public partial class ChunkLinksEditor : Form
     {
-        private ChunkLinksController controller;
-        ChunkLinks.ChunkLink link;
+        private readonly ChunkLinksController controller;
+        private ChunkLinks.ChunkLink link;
 
         private int pos_i, areap_i, u1_i, u2_i;
         private bool ignore_value_change;
@@ -49,16 +47,19 @@ namespace TwinsanityEditor
         private void PopulateList()
         {
             listBox1.Items.Clear();
-            foreach (var i in controller.Data.Links)
+            foreach (ChunkLinks.ChunkLink i in controller.Data.Links)
             {
-                listBox1.Items.Add(i.Path);
+                _ = listBox1.Items.Add(i.Path);
             }
         }
 
         private void listBox1_SelectedIndexChanged(object sender, System.EventArgs e)
         {
             if (listBox1.SelectedIndex == -1)
+            {
                 return;
+            }
+
             ignore_value_change = true;
 
             link = controller.Data.Links[listBox1.SelectedIndex];
@@ -190,7 +191,10 @@ namespace TwinsanityEditor
         private void button1_Click(object sender, EventArgs e)
         {
             if (pos_i <= 0)
+            {
                 return;
+            }
+
             label21.Text = $"{pos_i--} / 4";
             GetLoadWallPos();
         }
@@ -198,8 +202,11 @@ namespace TwinsanityEditor
         private void button2_Click(object sender, EventArgs e)
         {
             if (pos_i >= 3)
+            {
                 return;
-            label21.Text = $"{++pos_i+1} / 4";
+            }
+
+            label21.Text = $"{++pos_i + 1} / 4";
             GetLoadWallPos();
         }
 
@@ -207,7 +214,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 numericUpDown21.Value = (decimal)Link.LoadArea[areap_i].X;
                 numericUpDown28.Value = (decimal)Link.LoadArea[areap_i].Y;
                 numericUpDown23.Value = (decimal)Link.LoadArea[areap_i].Z;
@@ -218,7 +225,10 @@ namespace TwinsanityEditor
         private void button4_Click(object sender, EventArgs e)
         {
             if (areap_i <= 0)
+            {
                 return;
+            }
+
             label22.Text = $"{areap_i--} / 8";
             GetLoadAreaPos();
         }
@@ -226,7 +236,10 @@ namespace TwinsanityEditor
         private void button6_Click(object sender, EventArgs e)
         {
             if (u1_i <= 0)
+            {
                 return;
+            }
+
             label27.Text = $"{u1_i--} / 6";
             GetAreaMatrix1Pos();
         }
@@ -234,7 +247,10 @@ namespace TwinsanityEditor
         private void button5_Click(object sender, EventArgs e)
         {
             if (u1_i >= 5)
+            {
                 return;
+            }
+
             label27.Text = $"{++u1_i + 1} / 6";
             GetAreaMatrix1Pos();
         }
@@ -242,7 +258,10 @@ namespace TwinsanityEditor
         private void button8_Click(object sender, EventArgs e)
         {
             if (u2_i <= 0)
+            {
                 return;
+            }
+
             label32.Text = $"{u2_i--} / 6";
             GetAreaMatrix2Pos();
         }
@@ -250,7 +269,10 @@ namespace TwinsanityEditor
         private void button7_Click(object sender, EventArgs e)
         {
             if (u2_i >= 5)
+            {
                 return;
+            }
+
             label32.Text = $"{++u2_i + 1} / 6";
             GetAreaMatrix2Pos();
         }
@@ -263,7 +285,10 @@ namespace TwinsanityEditor
         private void button3_Click(object sender, EventArgs e)
         {
             if (areap_i >= 7)
+            {
                 return;
+            }
+
             label22.Text = $"{++areap_i + 1} / 8";
             GetLoadAreaPos();
         }
@@ -272,7 +297,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 numericUpDown29.Value = (decimal)Link.AreaMatrix[u1_i].X;
                 numericUpDown32.Value = (decimal)Link.AreaMatrix[u1_i].Y;
                 numericUpDown31.Value = (decimal)Link.AreaMatrix[u1_i].Z;
@@ -287,7 +312,7 @@ namespace TwinsanityEditor
 
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            listBox1.Items.Add("<new link>");
+            _ = listBox1.Items.Add("<new link>");
             ChunkLinks.ChunkLink link = new ChunkLinks.ChunkLink(0, "<new link>", 0x80102);
             controller.Data.Links.Add(link);
             controller.UpdateText();
@@ -295,21 +320,35 @@ namespace TwinsanityEditor
 
         private void removeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var sel_i = listBox1.SelectedIndex;
+            int sel_i = listBox1.SelectedIndex;
             if (sel_i == -1)
+            {
                 return;
+            }
+
             controller.Data.Links.RemoveAt(sel_i);
             listBox1.Items.RemoveAt(sel_i);
-            if (sel_i >= listBox1.Items.Count) sel_i = listBox1.Items.Count - 1;
+            if (sel_i >= listBox1.Items.Count)
+            {
+                sel_i = listBox1.Items.Count - 1;
+            }
+
             listBox1.SelectedIndex = sel_i;
             if (listBox1.Items.Count == 0)
+            {
                 groupBox1.Enabled = groupBox2.Enabled = groupBox3.Enabled = groupBox6.Enabled = groupBox9.Enabled = groupBox8.Enabled = groupBox7.Enabled = false;
+            }
+
             controller.UpdateText();
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             link.Path = textBox1.Text;
             controller.Data.Links[listBox1.SelectedIndex] = link;
             listBox1.Items[listBox1.SelectedIndex] = textBox1.Text;
@@ -318,30 +357,47 @@ namespace TwinsanityEditor
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             link.Type = comboBox1.SelectedIndex;
             controller.Data.Links[listBox1.SelectedIndex] = link;
             if (groupBox9.Enabled = groupBox8.Enabled = groupBox7.Enabled = link.Type == 1 || link.Type == 3)
             {
-                if (link.TreeRoot == null) link.TreeRoot = new ChunkLinks.ChunkLink.LinkTree();
+                if (link.TreeRoot == null)
+                {
+                    link.TreeRoot = new ChunkLinks.ChunkLink.LinkTree();
+                }
+
                 GetLoadAreaPos();
                 GetAreaMatrix1Pos();
                 GetAreaMatrix2Pos();
             }
             else
             {
-                if (link.TreeRoot != null) link.TreeRoot = null;
+                if (link.TreeRoot != null)
+                {
+                    link.TreeRoot = null;
+                }
             }
             controller.UpdateText();
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
-            uint o;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             //if (uint.TryParse(textBox2.Text, System.Globalization.NumberStyles.HexNumber, null, out o))
-            if (uint.TryParse(textBox2.Text, System.Globalization.NumberStyles.Integer, null, out o))
+            if (uint.TryParse(textBox2.Text, System.Globalization.NumberStyles.Integer, null, out uint o))
+            {
                 link.Flags = o;
+            }
+
             controller.Data.Links[listBox1.SelectedIndex] = link;
             if (groupBox6.Enabled = (link.Flags & 0x80000) != 0)
             {
@@ -382,7 +438,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.LoadArea[areap_i];
                 pos.Z = (float)numericUpDown23.Value;
                 Link.LoadArea[areap_i] = pos;
@@ -393,7 +449,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.LoadArea[areap_i];
                 pos.Y = (float)numericUpDown28.Value;
                 Link.LoadArea[areap_i] = pos;
@@ -404,7 +460,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.LoadArea[areap_i];
                 pos.X = (float)numericUpDown21.Value;
                 Link.LoadArea[areap_i] = pos;
@@ -415,7 +471,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.AreaMatrix[u1_i];
                 pos.X = (float)numericUpDown29.Value;
                 Link.AreaMatrix[u1_i] = pos;
@@ -426,7 +482,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.AreaMatrix[u1_i];
                 pos.Y = (float)numericUpDown32.Value;
                 Link.AreaMatrix[u1_i] = pos;
@@ -437,7 +493,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.AreaMatrix[u1_i];
                 pos.Z = (float)numericUpDown31.Value;
                 Link.AreaMatrix[u1_i] = pos;
@@ -448,7 +504,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.AreaMatrix[u1_i];
                 pos.W = (float)numericUpDown30.Value;
                 Link.AreaMatrix[u1_i] = pos;
@@ -459,7 +515,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.UnknownMatrix[u2_i];
                 pos.X = (float)numericUpDown33.Value;
                 Link.UnknownMatrix[u2_i] = pos;
@@ -470,7 +526,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.UnknownMatrix[u2_i];
                 pos.Y = (float)numericUpDown36.Value;
                 Link.UnknownMatrix[u2_i] = pos;
@@ -481,7 +537,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.UnknownMatrix[u2_i];
                 pos.Z = (float)numericUpDown35.Value;
                 Link.UnknownMatrix[u2_i] = pos;
@@ -499,7 +555,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.LoadArea[areap_i];
                 pos.W = (float)numericUpDown22.Value;
                 Link.LoadArea[areap_i] = pos;
@@ -510,7 +566,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 Pos pos = Link.UnknownMatrix[u2_i];
                 pos.W = (float)numericUpDown34.Value;
                 Link.UnknownMatrix[u2_i] = pos;
@@ -519,13 +575,22 @@ namespace TwinsanityEditor
 
         private void checkBoxTFlag0_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             uint mask = 1 << 0;
             if (checkBoxTFlag0.Checked)
+            {
                 link.Flags |= mask;
+            }
             else
+            {
                 link.Flags &= ~mask;
+            }
+
             textBox2.Text = link.Flags.ToString();
             ignore_value_change = false;
             controller.UpdateText();
@@ -533,13 +598,22 @@ namespace TwinsanityEditor
 
         private void checkBoxTFlag1_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             uint mask = 1 << 1;
             if (checkBoxTFlag1.Checked)
+            {
                 link.Flags |= mask;
+            }
             else
+            {
                 link.Flags &= ~mask;
+            }
+
             textBox2.Text = link.Flags.ToString();
             ignore_value_change = false;
             controller.UpdateText();
@@ -547,13 +621,22 @@ namespace TwinsanityEditor
 
         private void checkBoxTFlag2_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             uint mask = 1 << 7;
             if (checkBoxTFlag2.Checked)
+            {
                 link.Flags |= mask;
+            }
             else
+            {
                 link.Flags &= ~mask;
+            }
+
             textBox2.Text = link.Flags.ToString();
             ignore_value_change = false;
             controller.UpdateText();
@@ -561,13 +644,22 @@ namespace TwinsanityEditor
 
         private void checkBoxTFlag3_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             uint mask = 1 << 8;
             if (checkBoxTFlag3.Checked)
+            {
                 link.Flags |= mask;
+            }
             else
+            {
                 link.Flags &= ~mask;
+            }
+
             textBox2.Text = link.Flags.ToString();
             ignore_value_change = false;
             controller.UpdateText();
@@ -575,13 +667,22 @@ namespace TwinsanityEditor
 
         private void checkBoxTFlag4_CheckedChanged(object sender, EventArgs e)
         {
-            if (ignore_value_change) return;
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             ignore_value_change = true;
             uint mask = 1 << 19;
             if (checkBoxTFlag4.Checked)
+            {
                 link.Flags |= mask;
+            }
             else
+            {
                 link.Flags &= ~mask;
+            }
+
             textBox2.Text = link.Flags.ToString();
             ignore_value_change = false;
             controller.UpdateText();
@@ -595,7 +696,7 @@ namespace TwinsanityEditor
         {
             if (link.TreeRoot != null)
             {
-                ChunkLinks.ChunkLink.LinkTree Link = (ChunkLinks.ChunkLink.LinkTree)link.TreeRoot;
+                ChunkLinks.ChunkLink.LinkTree Link = link.TreeRoot;
                 numericUpDown33.Value = (decimal)Link.UnknownMatrix[u2_i].X;
                 numericUpDown36.Value = (decimal)Link.UnknownMatrix[u2_i].Y;
                 numericUpDown35.Value = (decimal)Link.UnknownMatrix[u2_i].Z;
@@ -605,8 +706,11 @@ namespace TwinsanityEditor
 
         private void UpdateObjectMatrix()
         {
-            if (ignore_value_change) return;
-            
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             link.ObjectMatrix[3].W = (float)numericUpDown4.Value;
 
             link.ObjectMatrix[3].X = (float)numericUpDown1.Value;
@@ -643,8 +747,11 @@ namespace TwinsanityEditor
 
         private void UpdateChunkMatrix()
         {
-            if (ignore_value_change) return;
-            
+            if (ignore_value_change)
+            {
+                return;
+            }
+
             link.ChunkMatrix[3].W = (float)numericUpDown20.Value;
 
             link.ChunkMatrix[3].X = (float)numericUpDown42.Value;

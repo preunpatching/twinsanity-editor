@@ -10,9 +10,9 @@ namespace TwinsanityEditor
         {
             Vector3 u = Vert2 - Vert1;
             Vector3 v = Vert3 - Vert1;
-            float nx = u.Y * v.Z - u.Z * v.Y;
-            float ny = u.Z * v.X - u.X * v.Z;
-            float nz = u.X * v.Y - u.Y * v.X;
+            float nx = (u.Y * v.Z) - (u.Z * v.Y);
+            float ny = (u.Z * v.X) - (u.X * v.Z);
+            float nz = (u.X * v.Y) - (u.Y * v.X);
             return new Vector3(nx, ny, nz);
         }
 
@@ -28,7 +28,7 @@ namespace TwinsanityEditor
 
         public static float Lerp(float firstFloat, float secondFloat, float by)
         {
-            return firstFloat * (1 - by) + secondFloat * by;
+            return (firstFloat * (1 - by)) + (secondFloat * by);
         }
 
         public static Vector3 Lerp(Vector3 firstVector, Vector3 secondVector, float by)
@@ -54,7 +54,9 @@ namespace TwinsanityEditor
             float t = 1.0f - (q.X * q.X) - (q.Y * q.Y) - (q.Z * q.Z);
             float w = 0.0f;
             if (t >= 0.0f)
+            {
                 w = -Convert.ToSingle(System.Math.Sqrt(t));
+            }
 
             return new Quaternion(q.Xyz, w);
         }

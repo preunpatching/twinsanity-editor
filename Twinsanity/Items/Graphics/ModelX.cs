@@ -1,5 +1,5 @@
-﻿using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Twinsanity
 {
@@ -9,13 +9,13 @@ namespace Twinsanity
 
         public override void Load(BinaryReader reader, int size)
         {
-            var count = reader.ReadInt32();
+            int count = reader.ReadInt32();
             SubModels.Clear();
             for (int i = 0; i < count; i++)
             {
                 SubModel sub = new SubModel();
                 int VertexCount = reader.ReadInt32();
-                uint DataSize = reader.ReadUInt32(); // vertex count * 0x1C
+                _ = reader.ReadUInt32(); // vertex count * 0x1C
                 uint GroupCount = reader.ReadUInt32();
                 sub.GroupList = new List<uint>();
                 for (int c = 0; c < GroupCount; c++)
@@ -26,20 +26,23 @@ namespace Twinsanity
                 sub.VData = new List<VertexData>();
                 for (int c = 0; c < VertexCount; c++)
                 {
-                    VertexData v = new VertexData();
-                    v.X = reader.ReadSingle();
-                    v.Y = reader.ReadSingle();
-                    v.Z = reader.ReadSingle();
-                    v.PackedNormals = reader.ReadUInt32();
-                    v.R = reader.ReadByte();
-                    v.G = reader.ReadByte();
-                    v.B = reader.ReadByte();
-                    v.A = reader.ReadByte();
-                    v.UV_X = reader.ReadSingle();
-                    v.UV_Y = reader.ReadSingle();
+                    VertexData v = new VertexData
+                    {
+                        X = reader.ReadSingle(),
+                        Y = reader.ReadSingle(),
+                        Z = reader.ReadSingle(),
+                        PackedNormals = reader.ReadUInt32(),
+                        R = reader.ReadByte(),
+                        G = reader.ReadByte(),
+                        B = reader.ReadByte(),
+                        A = reader.ReadByte(),
+                        UV_X = reader.ReadSingle(),
+                        UV_Y = reader.ReadSingle()
+                    };
                     sub.VData.Add(v);
                 }
-                uint Zero = reader.ReadUInt32(); // confirmed always zero
+
+                _ = reader.ReadUInt32(); // confirmed always zero
 
                 SubModels.Add(sub);
             }
@@ -205,7 +208,7 @@ namespace Twinsanity
                         ply.WriteLine("property list uchar int vertex_indices");
                     }
                     ply.WriteLine("end_header");
-                    foreach (var s in SubModels)
+                    foreach (SubModel s in SubModels)
                     {
                         for (int i = 0; i < s.VData.Count; i++)
                         {
@@ -219,7 +222,7 @@ namespace Twinsanity
                         }
                     }
                     vertexcount = 0;
-                    foreach (var s in SubModels) //polys
+                    foreach (SubModel s in SubModels) //polys
                     {
                         for (int g = 0; g < s.GroupList.Count; g++)
                         {
@@ -242,7 +245,7 @@ namespace Twinsanity
                 using (StreamWriter obj = new StreamWriter(stream))
                 {
                     obj.WriteLine("# Vertices");
-                    foreach (var s in SubModels)
+                    foreach (SubModel s in SubModels)
                     {
                         for (int i = 0; i < s.VData.Count; i++)
                         {
@@ -255,7 +258,7 @@ namespace Twinsanity
                             obj.WriteLine(Line);
                         }
                     }
-                    foreach (var s in SubModels)
+                    foreach (SubModel s in SubModels)
                     {
                         for (int i = 0; i < s.VData.Count; i++)
                         {

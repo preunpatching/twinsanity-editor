@@ -15,12 +15,12 @@ namespace TwinsanityEditor
         private static readonly int reserved_layers = 7;
 
         private bool show_col_nodes, show_triggers, show_cams, wire_col, sm2_links, obj_models, collisions, show_scenery;
-        private FileController file;
-        private ChunkLinks links;
-        private SceneryData scenery;
-        private List<VertexBufferData> sceneryObjects = new List<VertexBufferData>();
+        private readonly FileController file;
+        private readonly ChunkLinks links;
+        private readonly SceneryData scenery;
+        private readonly List<VertexBufferData> sceneryObjects = new List<VertexBufferData>();
 
-        private List<DefaultEnums.ObjectID> WoodCrates = new List<DefaultEnums.ObjectID>()
+        private readonly List<DefaultEnums.ObjectID> WoodCrates = new List<DefaultEnums.ObjectID>()
         {
             DefaultEnums.ObjectID.AKUAKUCRATE, DefaultEnums.ObjectID.AMMOCRATESMALL, DefaultEnums.ObjectID.BASICCRATE, DefaultEnums.ObjectID.CHECKPOINTCRATE, DefaultEnums.ObjectID.EXTRALIFECRATE, DefaultEnums.ObjectID.EXTRALIFECRATECORTEX, DefaultEnums.ObjectID.EXTRALIFECRATENINA,
             DefaultEnums.ObjectID.LEVELCRATE, DefaultEnums.ObjectID.MULTIPLEHITCRATE, DefaultEnums.ObjectID.SURPRISECRATE, DefaultEnums.ObjectID.WOODENSPRINGCRATE
@@ -45,7 +45,11 @@ namespace TwinsanityEditor
                 InitVBO(reserved_layers);
             }
             uint link_section = 5;
-            if (file.DataAux != null && file.DataAux.Type == TwinsFile.FileType.MonkeyBallSM) link_section = 6;
+            if (file.DataAux != null && file.DataAux.Type == TwinsFile.FileType.MonkeyBallSM)
+            {
+                link_section = 6;
+            }
+
             if (file.DataAux != null && file.DataAux.ContainsItem(link_section))
             {
                 links = file.DataAux.GetItem<ChunkLinks>(link_section);
@@ -59,7 +63,11 @@ namespace TwinsanityEditor
                 }
             }
             uint col_section = 9;
-            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM) col_section = 10;
+            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM)
+            {
+                col_section = 10;
+            }
+
             if (file.Data.ContainsItem(col_section))
             {
                 if (file.Data.GetItem<ColData>(col_section).Size >= 12)
@@ -159,7 +167,11 @@ namespace TwinsanityEditor
 
 
             uint mb_add = 0;
-            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM) mb_add = 1;
+            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM)
+            {
+                mb_add = 1;
+            }
+
             for (uint i = mb_add; i <= mb_add + 7; ++i)
             {
                 if (file.Data.ContainsItem(i))
@@ -172,7 +184,7 @@ namespace TwinsanityEditor
                             if (file.SelectedItem != pos)
                             {
                                 GL.PointSize(5);
-                                cur_color = colors[colors.Length - i * 2 - 2];
+                                cur_color = colors[colors.Length - (i * 2) - 2];
                             }
                             else
                             {
@@ -198,7 +210,7 @@ namespace TwinsanityEditor
                             {
                                 GL.PointSize(5);
                                 GL.LineWidth(1);
-                                cur_color = colors[colors.Length - i * 2 - 2];
+                                cur_color = colors[colors.Length - (i * 2) - 2];
                             }
                             else
                             {
@@ -222,7 +234,7 @@ namespace TwinsanityEditor
                             if (file.SelectedItem != pos)
                             {
                                 GL.PointSize(5);
-                                cur_color = colors[colors.Length - i * 2 - 1];
+                                cur_color = colors[colors.Length - (i * 2) - 1];
                             }
                             else
                             {
@@ -244,10 +256,7 @@ namespace TwinsanityEditor
                             for (int k = 0; k < pth.Positions.Count; ++k)
                             {
                                 DrawAxes(-pth.Positions[k].X, pth.Positions[k].Y, pth.Positions[k].Z, 0.5f);
-                                if (file.SelectedItem != pth || file.SelectedItemArg != k)
-                                    cur_color = colors[colors.Length - i * 2 - 1];
-                                else
-                                    cur_color = Color.White;
+                                cur_color = file.SelectedItem != pth || file.SelectedItemArg != k ? colors[colors.Length - (i * 2) - 1] : Color.White;
                                 RenderString3D($"{pth.ID}:{k}", cur_color, -pth.Positions[k].X, pth.Positions[k].Y, pth.Positions[k].Z, ref identity_mat, 0.5F);
                             }
                             if (file.SelectedItem != pth)
@@ -264,9 +273,14 @@ namespace TwinsanityEditor
                             for (int k = 0; k < pth.Positions.Count; ++k)
                             {
                                 if (file.SelectedItem != pth || file.SelectedItemArg != k)
-                                    GL.Color3(colors[colors.Length - i * 2 - 1]);
+                                {
+                                    GL.Color3(colors[colors.Length - (i * 2) - 1]);
+                                }
                                 else
+                                {
                                     GL.Color3(Color.White);
+                                }
+
                                 GL.Vertex3(-pth.Positions[k].X, pth.Positions[k].Y, pth.Positions[k].Z);
                             }
                             GL.End();
@@ -283,10 +297,7 @@ namespace TwinsanityEditor
                                 rot_ins *= Matrix3.CreateRotationX(ins.RotX / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi);
                                 rot_ins *= Matrix3.CreateRotationY(-ins.RotY / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi);
                                 rot_ins *= Matrix3.CreateRotationZ(-ins.RotZ / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi);
-                                if (file.SelectedItem == ins)
-                                    cur_color = Color.White;
-                                else
-                                    cur_color = colors[colors.Length - i * 2 - 1];
+                                cur_color = file.SelectedItem == ins ? Color.White : colors[colors.Length - (i * 2) - 1];
                                 RenderString3D(ins.ID.ToString(), cur_color, -ins.Pos.X, ins.Pos.Y, ins.Pos.Z, ref rot_ins);
                             }
                         }
@@ -298,10 +309,7 @@ namespace TwinsanityEditor
                                 rot_ins *= Matrix3.CreateRotationX(ins.RotX / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi);
                                 rot_ins *= Matrix3.CreateRotationY(-ins.RotY / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi);
                                 rot_ins *= Matrix3.CreateRotationZ(-ins.RotZ / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi);
-                                if (file.SelectedItem == ins)
-                                    cur_color = Color.White;
-                                else
-                                    cur_color = colors[colors.Length - i * 2 - 1];
+                                cur_color = file.SelectedItem == ins ? Color.White : colors[colors.Length - (i * 2) - 1];
                                 RenderString3D(ins.ID.ToString(), cur_color, -ins.Pos.X, ins.Pos.Y, ins.Pos.Z, ref rot_ins);
                             }
                         }
@@ -313,10 +321,7 @@ namespace TwinsanityEditor
                                 rot_ins *= Matrix3.CreateRotationX(ins.RotX / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi);
                                 rot_ins *= Matrix3.CreateRotationY(-ins.RotY / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi);
                                 rot_ins *= Matrix3.CreateRotationZ(-ins.RotZ / (float)(ushort.MaxValue + 1) * MathHelper.TwoPi);
-                                if (file.SelectedItem == ins)
-                                    cur_color = Color.White;
-                                else
-                                    cur_color = colors[colors.Length - i * 2 - 1];
+                                cur_color = file.SelectedItem == ins ? Color.White : colors[colors.Length - (i * 2) - 1];
                                 RenderString3D(ins.ID.ToString(), cur_color, -ins.Pos.X, ins.Pos.Y, ins.Pos.Z, ref rot_ins);
                             }
                         }
@@ -333,7 +338,7 @@ namespace TwinsanityEditor
                             GL.MultMatrix(ref new_mat);
 
 
-                            cur_color = file.SelectedItem == trg ? Color.White : colors[colors.Length - i * 2 - 1];
+                            cur_color = file.SelectedItem == trg ? Color.White : colors[colors.Length - (i * 2) - 1];
                             GL.DepthMask(false);
                             GL.Enable(EnableCap.Lighting);
                             GL.Color4(cur_color.R, cur_color.G, cur_color.B, (byte)95);
@@ -394,7 +399,7 @@ namespace TwinsanityEditor
                             GL.Begin(PrimitiveType.Lines);
                             if (file.Data.Type != TwinsFile.FileType.MonkeyBallRM)
                             {
-                                foreach (var id in trg.Instances)
+                                foreach (ushort id in trg.Instances)
                                 {
                                     Pos inst = file.GetInstancePos(trg.Parent.Parent.ID, id);
                                     GL.Vertex3(-trg.Coords[1].X, trg.Coords[1].Y, trg.Coords[1].Z);
@@ -421,7 +426,7 @@ namespace TwinsanityEditor
                                 Matrix4 new_mat = Matrix4.CreateFromQuaternion(quat);
                                 GL.MultMatrix(ref new_mat);
 
-                                cur_color = file.SelectedItem == cam ? Color.White : colors[colors.Length - i * 2 - 2];
+                                cur_color = file.SelectedItem == cam ? Color.White : colors[colors.Length - (i * 2) - 2];
                                 GL.DepthMask(false);
                                 GL.Enable(EnableCap.Lighting);
                                 GL.Color4(cur_color.R, cur_color.G, cur_color.B, (byte)95);
@@ -490,7 +495,7 @@ namespace TwinsanityEditor
                                 {
 
                                     GL.LineWidth(1);
-                                    cur_color = colors[colors.Length - i * 2 - 2];
+                                    cur_color = colors[colors.Length - (i * 2) - 2];
                                     GL.Color3(cur_color);
                                     if (camera is Camera.Camera_Path CameraPolyline)
                                     {
@@ -612,7 +617,7 @@ namespace TwinsanityEditor
                 }
             }
 
-            uint partSection = file.Data.Type == TwinsFile.FileType.MonkeyBallRM ? (uint)9 : (uint)8;
+            uint partSection = file.Data.Type == TwinsFile.FileType.MonkeyBallRM ? 9 : (uint)8;
             if (file.Data.GetItem<ParticleData>(partSection).Size > 12) //particle positions
             {
                 ParticleData partData = file.Data.GetItem<ParticleData>(partSection);
@@ -639,7 +644,7 @@ namespace TwinsanityEditor
             {
                 GL.LineWidth(2);
                 GL.DepthMask(false);
-                foreach (var l in links.Links)
+                foreach (ChunkLinks.ChunkLink l in links.Links)
                 {
                     Color cur_color = colors[(links.Links.IndexOf(l) + 2) % colors.Length];
                     GL.PushMatrix();
@@ -693,10 +698,10 @@ namespace TwinsanityEditor
                                     case 4: GL.Color4(Color.Magenta); break;
                                     case 5: GL.Color4(Color.Cyan); break;
                                 }
-                                int i1 = i >= 4 ? 1 - (i - 4) : (0 + 2 * i) % 8;
-                                int i2 = i >= 4 ? i1 + 2 : (1 + 2 * i) % 8;
-                                int i3 = i >= 4 ? i2 + 2 : (2 + 2 * i) % 8;
-                                int i4 = i >= 4 ? i3 + 2 : (3 + 2 * i) % 8;
+                                int i1 = i >= 4 ? 1 - (i - 4) : (0 + (2 * i)) % 8;
+                                int i2 = i >= 4 ? i1 + 2 : (1 + (2 * i)) % 8;
+                                int i3 = i >= 4 ? i2 + 2 : (2 + (2 * i)) % 8;
+                                int i4 = i >= 4 ? i3 + 2 : (3 + (2 * i)) % 8;
                                 Vector3 mid_vec = new Vector3(tree.LoadArea[i1].X + tree.LoadArea[i2].X + tree.LoadArea[i3].X + tree.LoadArea[i4].X,
                                     tree.LoadArea[i1].Y + tree.LoadArea[i2].Y + tree.LoadArea[i3].Y + tree.LoadArea[i4].Y,
                                     tree.LoadArea[i1].Z + tree.LoadArea[i2].Z + tree.LoadArea[i3].Z + tree.LoadArea[i4].Z) / 4;
@@ -790,7 +795,9 @@ namespace TwinsanityEditor
                                 tree = tree.Next;
                             }
                             else
+                            {
                                 break;
+                            }
                         }
                     }
                     GL.PopMatrix();
@@ -893,10 +900,14 @@ namespace TwinsanityEditor
                         //int targetLOD = LODcount == 1 ? 0 : 1;
                         modelID = special_sec.Data.GetItem<LodModel>(leaf.Models[m].ModelID).LODModelIDs[0];
                     }
-                    if (modelID == 0xDDDDDDDD) continue;
+                    if (modelID == 0xDDDDDDDD)
+                    {
+                        continue;
+                    }
+
                     mesh = mesh_sec.GetItem<ModelController>(model_sec.GetItem<RigidModelController>(modelID).Data.MeshID);
 
-                    var rigid = model_sec.GetItem<RigidModelController>(modelID).Data;
+                    RigidModel rigid = model_sec.GetItem<RigidModelController>(modelID).Data;
                     mesh.LoadMeshData();
 
                     Matrix4 modelMatrix = Matrix4.Identity;
@@ -941,7 +952,7 @@ namespace TwinsanityEditor
                             mesh.Vertices[v][k].Pos = new Vector3(vertexPos.X, vertexPos.Y, vertexPos.Z);
                         }
 
-                        foreach (var p in mesh.Vertices[v])
+                        foreach (Vertex p in mesh.Vertices[v])
                         {
                             min_x = Math.Min(min_x, p.Pos.X);
                             min_y = Math.Min(min_y, p.Pos.Y);
@@ -982,10 +993,14 @@ namespace TwinsanityEditor
                         //int targetLOD = LODcount == 1 ? 0 : 1;
                         modelID = special_sec.Data.GetItem<LodModel>(leaf.Models[m].ModelID).LODModelIDs[0];
                     }
-                    if (modelID == 0xDDDDDDDD) continue;
+                    if (modelID == 0xDDDDDDDD)
+                    {
+                        continue;
+                    }
+
                     mesh = mesh_sec.GetItem<ModelXController>(model_sec.GetItem<RigidModelController>(modelID).Data.MeshID);
 
-                    var rigid = model_sec.GetItem<RigidModelController>(modelID).Data;
+                    RigidModel rigid = model_sec.GetItem<RigidModelController>(modelID).Data;
                     mesh.LoadMeshData();
 
                     Matrix4 modelMatrix = Matrix4.Identity;
@@ -1030,7 +1045,7 @@ namespace TwinsanityEditor
                             mesh.Vertices[v][k].Pos = new Vector3(vertexPos.X, vertexPos.Y, vertexPos.Z);
                         }
 
-                        foreach (var p in mesh.Vertices[v])
+                        foreach (Vertex p in mesh.Vertices[v])
                         {
                             min_x = Math.Min(min_x, p.Pos.X);
                             min_y = Math.Min(min_y, p.Pos.Y);
@@ -1080,9 +1095,14 @@ namespace TwinsanityEditor
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, sceneryObjects[id].ID);
             if (sceneryObjects[id].Vtx.Length > sceneryObjects[id].LastSize)
+            {
                 GL.BufferData(BufferTarget.ArrayBuffer, Vertex.SizeOf * sceneryObjects[id].Vtx.Length, sceneryObjects[id].Vtx, BufferUsageHint.StaticDraw);
+            }
             else
+            {
                 GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)0, Vertex.SizeOf * sceneryObjects[id].Vtx.Length, sceneryObjects[id].Vtx);
+            }
+
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             sceneryObjects[id].LastSize = sceneryObjects[id].Vtx.Length;
         }
@@ -1090,13 +1110,17 @@ namespace TwinsanityEditor
         public void LoadColTree()
         {
             uint col_section = 9;
-            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM) col_section = 10;
+            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM)
+            {
+                col_section = 10;
+            }
+
             ColData data = file.Data.GetItem<ColData>(col_section);
             List<Vertex> vertices = new List<Vertex>(data.Vertices.Count);
             vtx[0].VtxInd = new uint[data.Tris.Count * 3];
             for (int i = 0; i < data.Vertices.Count; ++i)
             {
-                var v = data.Vertices[i].ToVec3();
+                Vector3 v = data.Vertices[i].ToVec3();
                 v.X = -v.X;
                 vertices.Add(new Vertex(v));
             }
@@ -1121,11 +1145,11 @@ namespace TwinsanityEditor
                     vertices.Add(vertices[v3]);
                     v3 = vertices.Count - 1;
                 }
-                vtx[0].VtxInd[i * 3 + 0] = (uint)v1;
-                vtx[0].VtxInd[i * 3 + 1] = (uint)v2;
-                vtx[0].VtxInd[i * 3 + 2] = (uint)v3;
+                vtx[0].VtxInd[(i * 3) + 0] = (uint)v1;
+                vtx[0].VtxInd[(i * 3) + 1] = (uint)v2;
+                vtx[0].VtxInd[(i * 3) + 2] = (uint)v3;
                 Vector3 normal = VectorFuncs.CalcNormal(vertices[v1].Pos, vertices[v2].Pos, vertices[v3].Pos);
-                var v = vertices[v1];
+                Vertex v = vertices[v1];
                 v.Nor += normal;
                 v.Col = col;
                 vertices[v1] = v;
@@ -1148,15 +1172,24 @@ namespace TwinsanityEditor
             bool[] record_exists = new bool[9];
             int inst_count = 0;
             uint mb_add = 0;
-            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM) mb_add = 1;
+            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM)
+            {
+                mb_add = 1;
+            }
+
             for (uint i = mb_add; i <= mb_add + 7; ++i)
             {
                 record_exists[i] = file.Data.ContainsItem(i);
                 if (record_exists[i])
                 {
                     if (file.Data.GetItem<TwinsSection>(i).ContainsItem(6))
+                    {
                         inst_count += file.Data.GetItem<TwinsSection>(i).GetItem<TwinsSection>(6).Records.Count;
-                    else record_exists[i] = false;
+                    }
+                    else
+                    {
+                        record_exists[i] = false;
+                    }
                 }
             }
             if (vtx[1].Vtx == null || vtx[1].Vtx.Length != 22 * inst_count)
@@ -1166,19 +1199,23 @@ namespace TwinsanityEditor
                 vtx[1].Vtx = new Vertex[22 * inst_count];
                 for (int i = 0; i < inst_count; ++i)
                 {
-                    vtx[1].VtxCounts[i * 7 + 0] = 2;
-                    vtx[1].VtxCounts[i * 7 + 1] = 2;
-                    vtx[1].VtxCounts[i * 7 + 2] = 2;
-                    vtx[1].VtxCounts[i * 7 + 3] = 8;
-                    vtx[1].VtxCounts[i * 7 + 4] = 4;
-                    vtx[1].VtxCounts[i * 7 + 5] = 2;
-                    vtx[1].VtxCounts[i * 7 + 6] = 2;
+                    vtx[1].VtxCounts[(i * 7) + 0] = 2;
+                    vtx[1].VtxCounts[(i * 7) + 1] = 2;
+                    vtx[1].VtxCounts[(i * 7) + 2] = 2;
+                    vtx[1].VtxCounts[(i * 7) + 3] = 8;
+                    vtx[1].VtxCounts[(i * 7) + 4] = 4;
+                    vtx[1].VtxCounts[(i * 7) + 5] = 2;
+                    vtx[1].VtxCounts[(i * 7) + 6] = 2;
                 }
             }
             int l = 0, m = 0, cur_instance = 0;
             for (uint i = mb_add; i <= mb_add + 7; ++i)
             {
-                if (!record_exists[i]) continue;
+                if (!record_exists[i])
+                {
+                    continue;
+                }
+
                 if (file.Data.GetItem<TwinsSection>(i).ContainsItem(6))
                 {
                     if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM)
@@ -1201,26 +1238,26 @@ namespace TwinsanityEditor
                             vtx[1].Vtx[m++] = new Vertex(new Vector3(0, 0, indicator_size * 0.75f) + pos_ins, Color.Blue);
                             vtx[1].Vtx[m++] = new Vertex(new Vector3(0, 0, -indicator_size * 0.375f) + pos_ins, Color.Blue);
                             vtx[1].VtxOffs[l++] = m;
-                            Color cur_color = (file.SelectedItem == ins) ? Color.White : colors[colors.Length - i * 2 - 1];
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
+                            Color cur_color = (file.SelectedItem == ins) ? Color.White : colors[colors.Length - (i * 2) - 1];
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
                             vtx[1].VtxOffs[l++] = m;
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
                             vtx[1].VtxOffs[l++] = m;
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
                             vtx[1].VtxOffs[l++] = m;
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
                             min_x = Math.Min(min_x, pos_ins.X);
                             min_y = Math.Min(min_y, pos_ins.Y);
                             min_z = Math.Min(min_z, pos_ins.Z);
@@ -1250,26 +1287,26 @@ namespace TwinsanityEditor
                             vtx[1].Vtx[m++] = new Vertex(new Vector3(0, 0, indicator_size * 0.75f) + pos_ins, Color.Blue);
                             vtx[1].Vtx[m++] = new Vertex(new Vector3(0, 0, -indicator_size * 0.375f) + pos_ins, Color.Blue);
                             vtx[1].VtxOffs[l++] = m;
-                            Color cur_color = (file.SelectedItem == ins) ? Color.White : colors[colors.Length - i * 2 - 1];
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
+                            Color cur_color = (file.SelectedItem == ins) ? Color.White : colors[colors.Length - (i * 2) - 1];
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
                             vtx[1].VtxOffs[l++] = m;
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
                             vtx[1].VtxOffs[l++] = m;
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
                             vtx[1].VtxOffs[l++] = m;
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
                             min_x = Math.Min(min_x, pos_ins.X);
                             min_y = Math.Min(min_y, pos_ins.Y);
                             min_z = Math.Min(min_z, pos_ins.Z);
@@ -1303,21 +1340,11 @@ namespace TwinsanityEditor
                                     {
                                         if (gameObject.OGIs.Count > 0 && gameObject.OGIs[0] != 65535)
                                         {
-                                            if (ins.UnkI323[0] != 0)
-                                            {
-                                                if (gameObject.OGIs.Count > ins.UnkI323[0] && gameObject.OGIs[(int)ins.UnkI323[0]] != 65535)
-                                                {
-                                                    TargetGI = gameObject.OGIs[(int)ins.UnkI323[0]];
-                                                }
-                                                else
-                                                {
-                                                    TargetGI = gameObject.OGIs[0];
-                                                }
-                                            }
-                                            else
-                                            {
-                                                TargetGI = gameObject.OGIs[0];
-                                            }
+                                            TargetGI = ins.UnkI323[0] != 0
+                                                ? gameObject.OGIs.Count > ins.UnkI323[0] && gameObject.OGIs[(int)ins.UnkI323[0]] != 65535
+                                                    ? gameObject.OGIs[(int)ins.UnkI323[0]]
+                                                    : gameObject.OGIs[0]
+                                                : gameObject.OGIs[0];
                                         }
                                     }
                                 }
@@ -1358,7 +1385,7 @@ namespace TwinsanityEditor
                                             }
                                             if (GI.ModelIDs.Count > 0)
                                             {
-                                                foreach (var pair in GI.ModelIDs)
+                                                foreach (KeyValuePair<int, GraphicsInfo.ModelLink> pair in GI.ModelIDs)
                                                 {
                                                     ModelList.Add(pair.Value.ModelID);
                                                     Matrix4 tempRot = Matrix4.Identity;
@@ -1439,9 +1466,11 @@ namespace TwinsanityEditor
                                                             modelCont.Vertices[v][p].Pos = new Vector3(targetPos.X, targetPos.Y, targetPos.Z);
                                                         }
 
-                                                        vtx[reserved_layers + cur_instance] = new VertexBufferData();
-                                                        vtx[reserved_layers + cur_instance].Vtx = modelCont.Vertices[v];
-                                                        vtx[reserved_layers + cur_instance].VtxInd = modelCont.Indices[v];
+                                                        vtx[reserved_layers + cur_instance] = new VertexBufferData
+                                                        {
+                                                            Vtx = modelCont.Vertices[v],
+                                                            VtxInd = modelCont.Indices[v]
+                                                        };
                                                         modelCont.Vertices[v] = vbuffer;
                                                         Utils.TextUtils.LoadTexture(rigid.MaterialIDs, file, vtx[reserved_layers + cur_instance], v);
                                                         UpdateVBO(reserved_layers + cur_instance);
@@ -1494,9 +1523,11 @@ namespace TwinsanityEditor
                                                 modelCont.Vertices[v][p].Pos = new Vector3(targetPos.X, targetPos.Y, targetPos.Z);
                                             }
 
-                                            vtx[reserved_layers + cur_instance] = new VertexBufferData();
-                                            vtx[reserved_layers + cur_instance].Vtx = modelCont.Vertices[v];
-                                            vtx[reserved_layers + cur_instance].VtxInd = modelCont.Indices[v];
+                                            vtx[reserved_layers + cur_instance] = new VertexBufferData
+                                            {
+                                                Vtx = modelCont.Vertices[v],
+                                                VtxInd = modelCont.Indices[v]
+                                            };
                                             Utils.TextUtils.LoadTexture(modelCont.Data.SubModels.Select((subModel) =>
                                             {
                                                 return subModel.MaterialID;
@@ -1542,9 +1573,11 @@ namespace TwinsanityEditor
                                                 modelCont.Vertices[v][p].Pos = new Vector3(targetPos.X, targetPos.Y, targetPos.Z);
                                             }
 
-                                            vtx[reserved_layers + cur_instance] = new VertexBufferData();
-                                            vtx[reserved_layers + cur_instance].Vtx = modelCont.Vertices[v];
-                                            vtx[reserved_layers + cur_instance].VtxInd = modelCont.Indices[v];
+                                            vtx[reserved_layers + cur_instance] = new VertexBufferData
+                                            {
+                                                Vtx = modelCont.Vertices[v],
+                                                VtxInd = modelCont.Indices[v]
+                                            };
                                             Utils.TextUtils.LoadTexture(modelCont.Data.Models.Select((subModel) =>
                                             {
                                                 return subModel.MaterialID;
@@ -1578,26 +1611,26 @@ namespace TwinsanityEditor
                             vtx[1].Vtx[m++] = new Vertex(new Vector3(0, 0, indicator_size * 0.75f) + pos_ins, Color.Blue);
                             vtx[1].Vtx[m++] = new Vertex(new Vector3(0, 0, -indicator_size * 0.375f) + pos_ins, Color.Blue);
                             vtx[1].VtxOffs[l++] = m;
-                            Color cur_color = (file.SelectedItem == ins) ? Color.White : colors[colors.Length - i * 2 - 1];
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
+                            Color cur_color = (file.SelectedItem == ins) ? Color.White : colors[colors.Length - (i * 2) - 1];
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
                             vtx[1].VtxOffs[l++] = m;
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, -indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
                             vtx[1].VtxOffs[l++] = m;
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(-indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
                             vtx[1].VtxOffs[l++] = m;
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins + pos_ins, cur_color);
-                            vtx[1].Vtx[m++] = new Vertex(new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, +indicator_size) * rot_ins) + pos_ins, cur_color);
+                            vtx[1].Vtx[m++] = new Vertex((new Vector3(+indicator_size, +indicator_size + 0.5f, -indicator_size) * rot_ins) + pos_ins, cur_color);
                             min_x = Math.Min(min_x, pos_ins.X);
                             min_y = Math.Min(min_y, pos_ins.Y);
                             min_z = Math.Min(min_z, pos_ins.Z);
@@ -1631,21 +1664,11 @@ namespace TwinsanityEditor
                                     {
                                         if (gameObject.OGIs.Count > 0 && gameObject.OGIs[0] != 65535)
                                         {
-                                            if (ins.UnkI323[0] != 0)
-                                            {
-                                                if (gameObject.OGIs.Count > ins.UnkI323[0] && gameObject.OGIs[(int)ins.UnkI323[0]] != 65535)
-                                                {
-                                                    TargetGI = gameObject.OGIs[(int)ins.UnkI323[0]];
-                                                }
-                                                else
-                                                {
-                                                    TargetGI = gameObject.OGIs[0];
-                                                }
-                                            }
-                                            else
-                                            {
-                                                TargetGI = gameObject.OGIs[0];
-                                            }
+                                            TargetGI = ins.UnkI323[0] != 0
+                                                ? gameObject.OGIs.Count > ins.UnkI323[0] && gameObject.OGIs[(int)ins.UnkI323[0]] != 65535
+                                                    ? gameObject.OGIs[(int)ins.UnkI323[0]]
+                                                    : gameObject.OGIs[0]
+                                                : gameObject.OGIs[0];
                                         }
                                     }
                                 }
@@ -1686,7 +1709,7 @@ namespace TwinsanityEditor
                                             }
                                             if (GI.ModelIDs.Count > 0)
                                             {
-                                                foreach (var pair in GI.ModelIDs)
+                                                foreach (KeyValuePair<int, GraphicsInfo.ModelLink> pair in GI.ModelIDs)
                                                 {
                                                     ModelList.Add(pair.Value.ModelID);
                                                     Matrix4 tempRot = Matrix4.Identity;
@@ -1767,9 +1790,11 @@ namespace TwinsanityEditor
                                                             modelCont.Vertices[v][p].Pos = new Vector3(targetPos.X, targetPos.Y, targetPos.Z);
                                                         }
 
-                                                        vtx[reserved_layers + cur_instance] = new VertexBufferData();
-                                                        vtx[reserved_layers + cur_instance].Vtx = modelCont.Vertices[v];
-                                                        vtx[reserved_layers + cur_instance].VtxInd = modelCont.Indices[v];
+                                                        vtx[reserved_layers + cur_instance] = new VertexBufferData
+                                                        {
+                                                            Vtx = modelCont.Vertices[v],
+                                                            VtxInd = modelCont.Indices[v]
+                                                        };
                                                         modelCont.Vertices[v] = vbuffer;
                                                         Utils.TextUtils.LoadTexture(rigid.MaterialIDs, file, vtx[reserved_layers + cur_instance], v);
                                                         UpdateVBO(reserved_layers + cur_instance);
@@ -1819,9 +1844,11 @@ namespace TwinsanityEditor
                                                             targetPos += pos_ins_4;
                                                             modelCont.Vertices[mv][v].Pos = new Vector3(targetPos.X, targetPos.Y, targetPos.Z);
                                                         }
-                                                        vtx[reserved_layers + cur_instance] = new VertexBufferData();
-                                                        vtx[reserved_layers + cur_instance].Vtx = modelCont.Vertices[mv];
-                                                        vtx[reserved_layers + cur_instance].VtxInd = modelCont.Indices[mv];
+                                                        vtx[reserved_layers + cur_instance] = new VertexBufferData
+                                                        {
+                                                            Vtx = modelCont.Vertices[mv],
+                                                            VtxInd = modelCont.Indices[mv]
+                                                        };
                                                         Utils.TextUtils.LoadTexture(rigidModelCont.Data.MaterialIDs, file, vtx[reserved_layers + cur_instance], mv);
                                                         modelCont.Vertices[mv] = vbuffer;
                                                         UpdateVBO(reserved_layers + cur_instance);
@@ -1874,9 +1901,11 @@ namespace TwinsanityEditor
                                                 modelCont.Vertices[v][p].Pos = new Vector3(targetPos.X, targetPos.Y, targetPos.Z);
                                             }
 
-                                            vtx[reserved_layers + cur_instance] = new VertexBufferData();
-                                            vtx[reserved_layers + cur_instance].Vtx = modelCont.Vertices[v];
-                                            vtx[reserved_layers + cur_instance].VtxInd = modelCont.Indices[v];
+                                            vtx[reserved_layers + cur_instance] = new VertexBufferData
+                                            {
+                                                Vtx = modelCont.Vertices[v],
+                                                VtxInd = modelCont.Indices[v]
+                                            };
                                             Utils.TextUtils.LoadTexture(modelCont.Data.SubModels.Select((subModel) =>
                                             {
                                                 return subModel.MaterialID;
@@ -1921,9 +1950,11 @@ namespace TwinsanityEditor
                                                 modelCont.Vertices[v][p].Pos = new Vector3(targetPos.X, targetPos.Y, targetPos.Z);
                                             }
 
-                                            vtx[reserved_layers + cur_instance] = new VertexBufferData();
-                                            vtx[reserved_layers + cur_instance].Vtx = modelCont.Vertices[v];
-                                            vtx[reserved_layers + cur_instance].VtxInd = modelCont.Indices[v];
+                                            vtx[reserved_layers + cur_instance] = new VertexBufferData
+                                            {
+                                                Vtx = modelCont.Vertices[v],
+                                                VtxInd = modelCont.Indices[v]
+                                            };
                                             Utils.TextUtils.LoadTexture(modelCont.Data.SubModels.Select((subModel) =>
                                             {
                                                 return subModel.MaterialID;
@@ -1969,9 +2000,11 @@ namespace TwinsanityEditor
                                                 modelCont.Vertices[v][p].Pos = new Vector3(targetPos.X, targetPos.Y, targetPos.Z);
                                             }
 
-                                            vtx[reserved_layers + cur_instance] = new VertexBufferData();
-                                            vtx[reserved_layers + cur_instance].Vtx = modelCont.Vertices[v];
-                                            vtx[reserved_layers + cur_instance].VtxInd = modelCont.Indices[v];
+                                            vtx[reserved_layers + cur_instance] = new VertexBufferData
+                                            {
+                                                Vtx = modelCont.Vertices[v],
+                                                VtxInd = modelCont.Indices[v]
+                                            };
                                             Utils.TextUtils.LoadTexture(modelCont.Data.Models.Select((subModel) =>
                                             {
                                                 return subModel.MaterialID;
@@ -2016,9 +2049,11 @@ namespace TwinsanityEditor
                                                 modelCont.Vertices[v][p].Pos = new Vector3(targetPos.X, targetPos.Y, targetPos.Z);
                                             }
 
-                                            vtx[reserved_layers + cur_instance] = new VertexBufferData();
-                                            vtx[reserved_layers + cur_instance].Vtx = modelCont.Vertices[v];
-                                            vtx[reserved_layers + cur_instance].VtxInd = modelCont.Indices[v];
+                                            vtx[reserved_layers + cur_instance] = new VertexBufferData
+                                            {
+                                                Vtx = modelCont.Vertices[v],
+                                                VtxInd = modelCont.Indices[v]
+                                            };
                                             Utils.TextUtils.LoadTexture(modelCont.Data.SubModels.Select((subModel) =>
                                             {
                                                 return subModel.MaterialID;
@@ -2042,20 +2077,24 @@ namespace TwinsanityEditor
         {
             float min_x = float.MaxValue, min_y = float.MaxValue, min_z = float.MaxValue, max_x = float.MinValue, max_y = float.MinValue, max_z = float.MinValue;
             uint col_section = 9;
-            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM) col_section = 10;
+            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM)
+            {
+                col_section = 10;
+            }
+
             ColData data = file.Data.GetItem<ColData>(col_section);
             vtx[2].Vtx = new Vertex[data.Triggers.Count * 16];
             vtx[2].VtxCounts = new int[4 * data.Triggers.Count];
             vtx[2].VtxOffs = new int[4 * data.Triggers.Count];
             for (int i = 0; i < data.Triggers.Count; ++i)
             {
-                vtx[2].VtxCounts[i * 4 + 0] = 8;
-                vtx[2].VtxCounts[i * 4 + 1] = 4;
-                vtx[2].VtxCounts[i * 4 + 2] = 2;
-                vtx[2].VtxCounts[i * 4 + 3] = 2;
+                vtx[2].VtxCounts[(i * 4) + 0] = 8;
+                vtx[2].VtxCounts[(i * 4) + 1] = 4;
+                vtx[2].VtxCounts[(i * 4) + 2] = 2;
+                vtx[2].VtxCounts[(i * 4) + 3] = 2;
             }
             int l = 0, m = 0;
-            foreach (var i in data.Triggers)
+            foreach (ColData.Trigger i in data.Triggers)
             {
                 Color cur_color = (i.Flag1 == i.Flag2 && i.Flag1 < 0) ? Color.Cyan : Color.Red;
                 vtx[2].VtxOffs[l++] = m;
@@ -2095,7 +2134,11 @@ namespace TwinsanityEditor
             bool[] record_exists = new bool[9];
             int posi_count = 0;
             uint mb_add = 0;
-            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM) mb_add = 1;
+            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM)
+            {
+                mb_add = 1;
+            }
+
             for (uint i = mb_add; i <= mb_add + 7; ++i)
             {
                 record_exists[i] = file.Data.ContainsItem(i);
@@ -2107,28 +2150,34 @@ namespace TwinsanityEditor
                         record_exists[i] = true;
                     }
                     else
+                    {
                         record_exists[i] = false;
+                    }
                 }
             }
-            if (vtx[3] == null || vtx.Count != (circle_res * 3 + 6) * posi_count)
+            if (vtx[3] == null || vtx.Count != ((circle_res * 3) + 6) * posi_count)
             {
                 vtx[3].VtxCounts = new int[6 * posi_count];
                 vtx[3].VtxOffs = new int[6 * posi_count];
-                vtx[3].Vtx = new Vertex[(circle_res * 3 + 6) * posi_count];
+                vtx[3].Vtx = new Vertex[((circle_res * 3) + 6) * posi_count];
                 for (int i = 0; i < posi_count; ++i)
                 {
-                    vtx[3].VtxCounts[i * 6 + 0] = 2;
-                    vtx[3].VtxCounts[i * 6 + 1] = 2;
-                    vtx[3].VtxCounts[i * 6 + 2] = 2;
-                    vtx[3].VtxCounts[i * 6 + 3] = circle_res;
-                    vtx[3].VtxCounts[i * 6 + 4] = circle_res;
-                    vtx[3].VtxCounts[i * 6 + 5] = circle_res;
+                    vtx[3].VtxCounts[(i * 6) + 0] = 2;
+                    vtx[3].VtxCounts[(i * 6) + 1] = 2;
+                    vtx[3].VtxCounts[(i * 6) + 2] = 2;
+                    vtx[3].VtxCounts[(i * 6) + 3] = circle_res;
+                    vtx[3].VtxCounts[(i * 6) + 4] = circle_res;
+                    vtx[3].VtxCounts[(i * 6) + 5] = circle_res;
                 }
             }
             int l = 0, m = 0;
             for (uint i = mb_add; i <= mb_add + 7; ++i)
             {
-                if (!record_exists[i]) continue;
+                if (!record_exists[i])
+                {
+                    continue;
+                }
+
                 if (file.Data.GetItem<TwinsSection>(i).ContainsItem(3))
                 {
                     foreach (Position pos in file.Data.GetItem<TwinsSection>(i).GetItem<TwinsSection>(3).Records)
@@ -2144,7 +2193,7 @@ namespace TwinsanityEditor
                         vtx[3].VtxOffs[l++] = m;
                         vtx[3].Vtx[m++] = new Vertex(new Vector3(0, 0, indicator_size * 0.75f * 0.5f) + pos_pos, Color.Blue);
                         vtx[3].Vtx[m++] = new Vertex(new Vector3(0, 0, -indicator_size * 0.375f * 0.5f) + pos_pos, Color.Blue);
-                        Color cur_color = (file.SelectedItem == pos) ? Color.White : colors[colors.Length - i * 2 - 1];
+                        Color cur_color = (file.SelectedItem == pos) ? Color.White : colors[colors.Length - (i * 2) - 1];
                         vtx[3].VtxOffs[l++] = m;
                         for (int j = 0; j < circle_res; ++j)
                         {
@@ -2185,7 +2234,11 @@ namespace TwinsanityEditor
             bool[] record_exists = new bool[9];
             int posi_count = 0;
             uint mb_add = 0;
-            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM) mb_add = 1;
+            if (file.Data.Type == TwinsFile.FileType.MonkeyBallRM)
+            {
+                mb_add = 1;
+            }
+
             for (uint i = mb_add; i <= mb_add + 7; ++i)
             {
                 record_exists[i] = file.Data.ContainsItem(i);
@@ -2197,33 +2250,39 @@ namespace TwinsanityEditor
                         record_exists[i] = true;
                     }
                     else
+                    {
                         record_exists[i] = false;
+                    }
                 }
             }
-            if (vtx[4] == null || vtx.Count != (circle_res * 3 + 6) * posi_count)
+            if (vtx[4] == null || vtx.Count != ((circle_res * 3) + 6) * posi_count)
             {
                 vtx[4].VtxCounts = new int[6 * posi_count];
                 vtx[4].VtxOffs = new int[6 * posi_count];
-                vtx[4].Vtx = new Vertex[(circle_res * 3 + 6) * posi_count];
+                vtx[4].Vtx = new Vertex[((circle_res * 3) + 6) * posi_count];
                 for (int i = 0; i < posi_count; ++i)
                 {
-                    vtx[4].VtxCounts[i * 6 + 0] = 2;
-                    vtx[4].VtxCounts[i * 6 + 1] = 2;
-                    vtx[4].VtxCounts[i * 6 + 2] = 2;
-                    vtx[4].VtxCounts[i * 6 + 3] = circle_res;
-                    vtx[4].VtxCounts[i * 6 + 4] = circle_res;
-                    vtx[4].VtxCounts[i * 6 + 5] = circle_res;
+                    vtx[4].VtxCounts[(i * 6) + 0] = 2;
+                    vtx[4].VtxCounts[(i * 6) + 1] = 2;
+                    vtx[4].VtxCounts[(i * 6) + 2] = 2;
+                    vtx[4].VtxCounts[(i * 6) + 3] = circle_res;
+                    vtx[4].VtxCounts[(i * 6) + 4] = circle_res;
+                    vtx[4].VtxCounts[(i * 6) + 5] = circle_res;
                 }
             }
             int l = 0, m = 0;
             for (uint i = mb_add; i <= mb_add + 7; ++i)
             {
-                if (!record_exists[i]) continue;
+                if (!record_exists[i])
+                {
+                    continue;
+                }
+
                 if (file.Data.GetItem<TwinsSection>(i).ContainsItem(1))
                 {
                     foreach (AIPosition pos in file.Data.GetItem<TwinsSection>(i).GetItem<TwinsSection>(1).Records)
                     {
-                        var ind_size = indicator_size * pos.Pos.W;
+                        float ind_size = indicator_size * pos.Pos.W;
                         Vector3 pos_pos = pos.Pos.ToVec3();
                         pos_pos.X = -pos_pos.X;
                         vtx[4].VtxOffs[l++] = m;
@@ -2235,7 +2294,7 @@ namespace TwinsanityEditor
                         vtx[4].VtxOffs[l++] = m;
                         vtx[4].Vtx[m++] = new Vertex(new Vector3(0, 0, ind_size * 0.75f * 0.5f) + pos_pos, Color.Blue);
                         vtx[4].Vtx[m++] = new Vertex(new Vector3(0, 0, -ind_size * 0.375f * 0.5f) + pos_pos, Color.Blue);
-                        Color cur_color = (file.SelectedItem == pos) ? Color.White : colors[colors.Length - i * 2 - 2];
+                        Color cur_color = (file.SelectedItem == pos) ? Color.White : colors[colors.Length - (i * 2) - 2];
                         vtx[4].VtxOffs[l++] = m;
                         for (int j = 0; j < circle_res; ++j)
                         {
@@ -2273,10 +2332,8 @@ namespace TwinsanityEditor
         public void LoadParticles()
         {
             float min_x = float.MaxValue, min_y = float.MaxValue, min_z = float.MaxValue, max_x = float.MinValue, max_y = float.MinValue, max_z = float.MinValue;
-            bool record_exists = false;
-            uint posi_count = 0;
             int vID = 5;
-            record_exists = file.Data.ContainsItem(8);
+            bool record_exists = file.Data.ContainsItem(8);
             if (!record_exists)
             {
                 vtx[vID].VtxCounts = new int[0];
@@ -2284,9 +2341,9 @@ namespace TwinsanityEditor
                 vtx[vID].Vtx = new Vertex[0];
                 return;
             }
-            uint partSection = file.Data.Type == TwinsFile.FileType.MonkeyBallRM ? (uint)9 : (uint)8;
+            uint partSection = file.Data.Type == TwinsFile.FileType.MonkeyBallRM ? 9 : (uint)8;
             ParticleData partData = file.Data.GetItem<ParticleData>(partSection);
-            posi_count = (uint)partData.ParticleInstances.Count;
+            uint posi_count = (uint)partData.ParticleInstances.Count;
             if (posi_count <= 0)
             {
                 vtx[vID].VtxCounts = new int[0];
@@ -2294,19 +2351,19 @@ namespace TwinsanityEditor
                 vtx[vID].Vtx = new Vertex[0];
                 return;
             }
-            if (vtx[vID] == null || vtx.Count != (circle_res * 3 + 6) * posi_count)
+            if (vtx[vID] == null || vtx.Count != ((circle_res * 3) + 6) * posi_count)
             {
                 vtx[vID].VtxCounts = new int[6 * posi_count];
                 vtx[vID].VtxOffs = new int[6 * posi_count];
-                vtx[vID].Vtx = new Vertex[(circle_res * 3 + 6) * posi_count];
+                vtx[vID].Vtx = new Vertex[((circle_res * 3) + 6) * posi_count];
                 for (int i = 0; i < posi_count; ++i)
                 {
-                    vtx[vID].VtxCounts[i * 6 + 0] = 2;
-                    vtx[vID].VtxCounts[i * 6 + 1] = 2;
-                    vtx[vID].VtxCounts[i * 6 + 2] = 2;
-                    vtx[vID].VtxCounts[i * 6 + 3] = circle_res;
-                    vtx[vID].VtxCounts[i * 6 + 4] = circle_res;
-                    vtx[vID].VtxCounts[i * 6 + 5] = circle_res;
+                    vtx[vID].VtxCounts[(i * 6) + 0] = 2;
+                    vtx[vID].VtxCounts[(i * 6) + 1] = 2;
+                    vtx[vID].VtxCounts[(i * 6) + 2] = 2;
+                    vtx[vID].VtxCounts[(i * 6) + 3] = circle_res;
+                    vtx[vID].VtxCounts[(i * 6) + 4] = circle_res;
+                    vtx[vID].VtxCounts[(i * 6) + 5] = circle_res;
                 }
             }
             int l = 0, m = 0;
@@ -2319,14 +2376,14 @@ namespace TwinsanityEditor
                 Vector3 pos_pos = partData.ParticleInstances[i].Position.ToVec3();
                 pos_pos.X = -pos_pos.X;
                 vtx[vID].VtxOffs[l++] = m;
-                vtx[vID].Vtx[m++] = new Vertex(new Vector3(-indicator_size * 0.75f * 0.5f, 0, 0) * rot_ins + pos_pos, Color.Red);
-                vtx[vID].Vtx[m++] = new Vertex(new Vector3(+indicator_size * 0.375f * 0.5f, 0, 0) * rot_ins + pos_pos, Color.Red);
+                vtx[vID].Vtx[m++] = new Vertex((new Vector3(-indicator_size * 0.75f * 0.5f, 0, 0) * rot_ins) + pos_pos, Color.Red);
+                vtx[vID].Vtx[m++] = new Vertex((new Vector3(+indicator_size * 0.375f * 0.5f, 0, 0) * rot_ins) + pos_pos, Color.Red);
                 vtx[vID].VtxOffs[l++] = m;
-                vtx[vID].Vtx[m++] = new Vertex(new Vector3(0, indicator_size * 0.75f * 0.5f, 0) * rot_ins + pos_pos, Color.Green);
-                vtx[vID].Vtx[m++] = new Vertex(new Vector3(0, -indicator_size * 0.375f * 0.5f, 0) * rot_ins + pos_pos, Color.Green);
+                vtx[vID].Vtx[m++] = new Vertex((new Vector3(0, indicator_size * 0.75f * 0.5f, 0) * rot_ins) + pos_pos, Color.Green);
+                vtx[vID].Vtx[m++] = new Vertex((new Vector3(0, -indicator_size * 0.375f * 0.5f, 0) * rot_ins) + pos_pos, Color.Green);
                 vtx[vID].VtxOffs[l++] = m;
-                vtx[vID].Vtx[m++] = new Vertex(new Vector3(0, 0, indicator_size * 0.75f * 0.5f) * rot_ins + pos_pos, Color.Blue);
-                vtx[vID].Vtx[m++] = new Vertex(new Vector3(0, 0, -indicator_size * 0.375f * 0.5f) * rot_ins + pos_pos, Color.Blue);
+                vtx[vID].Vtx[m++] = new Vertex((new Vector3(0, 0, indicator_size * 0.75f * 0.5f) * rot_ins) + pos_pos, Color.Blue);
+                vtx[vID].Vtx[m++] = new Vertex((new Vector3(0, 0, -indicator_size * 0.375f * 0.5f) * rot_ins) + pos_pos, Color.Blue);
                 Color cur_color = Color.Pink;
                 vtx[vID].VtxOffs[l++] = m;
                 for (int j = 0; j < circle_res; ++j)

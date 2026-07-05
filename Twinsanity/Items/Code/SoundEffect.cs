@@ -25,11 +25,7 @@ namespace Twinsanity
 
         public virtual ushort Freq
         {
-            get => GetFreq(FreqFac); 
-            set
-            {
-                FreqFac = GetFreqFac(value);
-            }
+            get => GetFreq(FreqFac); set => FreqFac = GetFreqFac(value);
         }
 
         public override void Save(BinaryWriter writer)
@@ -100,7 +96,7 @@ namespace Twinsanity
                     return 0x2;
                 case 10000:
                     return 0x3;
-                case  11025:
+                case 11025:
                     return 0x4;
                 case 16000:
                     return 0x5;
@@ -129,7 +125,7 @@ namespace Twinsanity
             destination.SoundSize = source.SoundSize;
             destination.SoundOffset = (uint)destinationWriter.BaseStream.Length;
 
-            var soundArray = new byte[source.SoundSize];
+            byte[] soundArray = new byte[source.SoundSize];
             Array.Copy(sourceExtraData, source.SoundOffset, soundArray, 0, source.SoundSize);
             destinationWriter.Write(soundArray);
         }
